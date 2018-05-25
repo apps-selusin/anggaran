@@ -28,6 +28,8 @@ spl_autoload_register("ew_AutoLoad");
 function &DbHelper($dbid = "") {
 	if ($dbid == "jbsfina" || $dbid === 1) // jbsfina
 		$dbclass = "cjbsfina_db";
+	elseif ($dbid == "jbsakad" || $dbid === 2) // jbsakad
+		$dbclass = "cjbsakad_db";
 	else // DB
 		$dbclass = "cdb_anggaran_db";
 	$dbhelper = new $dbclass();

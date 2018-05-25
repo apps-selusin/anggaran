@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<configuration date="2018/05/21" author="e.World Technology Ltd.">
-  <project id="{EA1CE07B-E03E-4EC9-BC42-48D490D73F97}" file="C:\YIM\JIBAS\xampp\htdocs\jibas\anggaran\prj_anggaran.pmp" name="prj_anggaran" product="PHPMaker" version="14.0" datetime="2018/05/21 02:51:58" languagefolder="phplang" userlevel="-2,&quot;Anonymous&quot;,0;">
+<configuration date="2018/05/26" author="e.World Technology Ltd.">
+  <project id="{EA1CE07B-E03E-4EC9-BC42-48D490D73F97}" file="C:\YIM\JIBAS\xampp\htdocs\jibas\anggaran\prj_anggaran.pmp" name="prj_anggaran" product="PHPMaker" version="14.0" datetime="2018/05/26 02:15:25" languagefolder="phplang" userlevel="-2,&quot;Anonymous&quot;,0;" relatedid="{CE2BFCDC-32CE-41CA-ABF9-868662EE06FE}">
     <table id="t01_penerimaan" name="t01_penerimaan" caption="Penerimaan" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
     <table id="cf01_home_php" name="cf01_home.php" caption="Beranda" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
-    <table id="datapenerimaan" name="datapenerimaan" caption="Data Penerimaan" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
+    <table id="departemen" name="departemen" caption="departemen" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
   </project>
 </configuration>

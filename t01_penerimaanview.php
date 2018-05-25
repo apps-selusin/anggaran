@@ -343,6 +343,7 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 		$this->id->SetVisibility();
 		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
 			$this->id->Visible = FALSE;
+		$this->Departemen->SetVisibility();
 		$this->HeadDetail->SetVisibility();
 		$this->NomorHead->SetVisibility();
 		$this->SubTotalFlag->SetVisibility();
@@ -616,6 +617,7 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Departemen->setDbValue($row['Departemen']);
 		$this->HeadDetail->setDbValue($row['HeadDetail']);
 		$this->NomorHead->setDbValue($row['NomorHead']);
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
@@ -633,6 +635,7 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 	function NewRow() {
 		$row = array();
 		$row['id'] = NULL;
+		$row['Departemen'] = NULL;
 		$row['HeadDetail'] = NULL;
 		$row['NomorHead'] = NULL;
 		$row['SubTotalFlag'] = NULL;
@@ -653,6 +656,7 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Departemen->DbValue = $row['Departemen'];
 		$this->HeadDetail->DbValue = $row['HeadDetail'];
 		$this->NomorHead->DbValue = $row['NomorHead'];
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
@@ -695,6 +699,7 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 
 		// Common render codes for all row types
 		// id
+		// Departemen
 		// HeadDetail
 		// NomorHead
 		// SubTotalFlag
@@ -712,6 +717,30 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Departemen
+		if (strval($this->Departemen->CurrentValue) <> "") {
+			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+		$sWhereWrk = "";
+		$this->Departemen->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+		$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
+			}
+		} else {
+			$this->Departemen->ViewValue = NULL;
+		}
+		$this->Departemen->ViewCustomAttributes = "";
 
 		// HeadDetail
 		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
@@ -761,6 +790,11 @@ class ct01_penerimaan_view extends ct01_penerimaan {
 			$this->id->LinkCustomAttributes = "";
 			$this->id->HrefValue = "";
 			$this->id->TooltipValue = "";
+
+			// Departemen
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
+			$this->Departemen->TooltipValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -973,8 +1007,10 @@ ft01_penerimaanview.Form_CustomValidate =
 ft01_penerimaanview.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft01_penerimaanview.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
+ft01_penerimaanview.Lists["x_Departemen"].Data = "<?php echo $t01_penerimaan_view->Departemen->LookupFilterQuery(FALSE, "view") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -1006,6 +1042,17 @@ $t01_penerimaan_view->ShowMessage();
 <span id="el_t01_penerimaan_id">
 <span<?php echo $t01_penerimaan->id->ViewAttributes() ?>>
 <?php echo $t01_penerimaan->id->ViewValue ?></span>
+</span>
+</td>
+	</tr>
+<?php } ?>
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+	<tr id="r_Departemen">
+		<td class="col-sm-2"><span id="elh_t01_penerimaan_Departemen"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></span></td>
+		<td data-name="Departemen"<?php echo $t01_penerimaan->Departemen->CellAttributes() ?>>
+<span id="el_t01_penerimaan_Departemen">
+<span<?php echo $t01_penerimaan->Departemen->ViewAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->ViewValue ?></span>
 </span>
 </td>
 	</tr>

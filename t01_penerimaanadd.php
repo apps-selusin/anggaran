@@ -286,6 +286,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		// Create form object
 		$objForm = new cFormObj();
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
+		$this->Departemen->SetVisibility();
 		$this->HeadDetail->SetVisibility();
 		$this->NomorHead->SetVisibility();
 		$this->SubTotalFlag->SetVisibility();
@@ -500,6 +501,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 	function LoadDefaultValues() {
 		$this->id->CurrentValue = NULL;
 		$this->id->OldValue = $this->id->CurrentValue;
+		$this->Departemen->CurrentValue = "-";
 		$this->HeadDetail->CurrentValue = "H";
 		$this->NomorHead->CurrentValue = NULL;
 		$this->NomorHead->OldValue = $this->NomorHead->CurrentValue;
@@ -523,6 +525,9 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 
 		// Load from form
 		global $objForm;
+		if (!$this->Departemen->FldIsDetailKey) {
+			$this->Departemen->setFormValue($objForm->GetValue("x_Departemen"));
+		}
 		if (!$this->HeadDetail->FldIsDetailKey) {
 			$this->HeadDetail->setFormValue($objForm->GetValue("x_HeadDetail"));
 		}
@@ -561,6 +566,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 	// Restore form values
 	function RestoreFormValues() {
 		global $objForm;
+		$this->Departemen->CurrentValue = $this->Departemen->FormValue;
 		$this->HeadDetail->CurrentValue = $this->HeadDetail->FormValue;
 		$this->NomorHead->CurrentValue = $this->NomorHead->FormValue;
 		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
@@ -608,6 +614,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Departemen->setDbValue($row['Departemen']);
 		$this->HeadDetail->setDbValue($row['HeadDetail']);
 		$this->NomorHead->setDbValue($row['NomorHead']);
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
@@ -626,6 +633,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		$this->LoadDefaultValues();
 		$row = array();
 		$row['id'] = $this->id->CurrentValue;
+		$row['Departemen'] = $this->Departemen->CurrentValue;
 		$row['HeadDetail'] = $this->HeadDetail->CurrentValue;
 		$row['NomorHead'] = $this->NomorHead->CurrentValue;
 		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
@@ -646,6 +654,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Departemen->DbValue = $row['Departemen'];
 		$this->HeadDetail->DbValue = $row['HeadDetail'];
 		$this->NomorHead->DbValue = $row['NomorHead'];
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
@@ -704,6 +713,7 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 
 		// Common render codes for all row types
 		// id
+		// Departemen
 		// HeadDetail
 		// NomorHead
 		// SubTotalFlag
@@ -721,6 +731,30 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Departemen
+		if (strval($this->Departemen->CurrentValue) <> "") {
+			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+		$sWhereWrk = "";
+		$this->Departemen->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+		$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
+			}
+		} else {
+			$this->Departemen->ViewValue = NULL;
+		}
+		$this->Departemen->ViewCustomAttributes = "";
 
 		// HeadDetail
 		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
@@ -765,6 +799,11 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		// Total
 		$this->Total->ViewValue = $this->Total->CurrentValue;
 		$this->Total->ViewCustomAttributes = "";
+
+			// Departemen
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
+			$this->Departemen->TooltipValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -821,6 +860,26 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 			$this->Total->HrefValue = "";
 			$this->Total->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
+
+			// Departemen
+			$this->Departemen->EditAttrs["class"] = "form-control";
+			$this->Departemen->EditCustomAttributes = "";
+			if (trim(strval($this->Departemen->CurrentValue)) == "") {
+				$sFilterWrk = "0=1";
+			} else {
+				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+			}
+			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
+			$sWhereWrk = "";
+			$this->Departemen->LookupFilters = array();
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+			if ($rswrk) $rswrk->Close();
+			$this->Departemen->EditValue = $arwrk;
 
 			// HeadDetail
 			$this->HeadDetail->EditAttrs["class"] = "form-control";
@@ -892,8 +951,12 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) $this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
 
 			// Add refer script
-			// HeadDetail
+			// Departemen
 
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
+
+			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
 			$this->HeadDetail->HrefValue = "";
 
@@ -1033,6 +1096,9 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		}
 		$rsnew = array();
 
+		// Departemen
+		$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", strval($this->Departemen->CurrentValue) == "");
+
 		// HeadDetail
 		$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", strval($this->HeadDetail->CurrentValue) == "");
 
@@ -1111,6 +1177,19 @@ class ct01_penerimaan_add extends ct01_penerimaan {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
+		case "x_Departemen":
+			$sSqlWrk = "";
+			$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+			$sWhereWrk = "";
+			$fld->LookupFilters = array();
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
+			$sSqlWrk = "";
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `departemen` ASC";
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
 		}
 	}
 
@@ -1313,8 +1392,10 @@ ft01_penerimaanadd.Form_CustomValidate =
 ft01_penerimaanadd.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft01_penerimaanadd.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
+ft01_penerimaanadd.Lists["x_Departemen"].Data = "<?php echo $t01_penerimaan_add->Departemen->LookupFilterQuery(FALSE, "add") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -1332,12 +1413,24 @@ $t01_penerimaan_add->ShowMessage();
 <input type="hidden" name="a_add" id="a_add" value="A">
 <input type="hidden" name="modal" value="<?php echo intval($t01_penerimaan_add->IsModal) ?>">
 <div class="ewAddDiv"><!-- page* -->
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+	<div id="r_Departemen" class="form-group">
+		<label id="elh_t01_penerimaan_Departemen" for="x_Departemen" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></label>
+		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Departemen->CellAttributes() ?>>
+<span id="el_t01_penerimaan_Departemen">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x_Departemen" name="x_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x_Departemen") ?>
+</select>
+</span>
+<?php echo $t01_penerimaan->Departemen->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
 <?php if ($t01_penerimaan->HeadDetail->Visible) { // HeadDetail ?>
 	<div id="r_HeadDetail" class="form-group">
 		<label id="elh_t01_penerimaan_HeadDetail" for="x_HeadDetail" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->HeadDetail->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->HeadDetail->CellAttributes() ?>>
 <span id="el_t01_penerimaan_HeadDetail">
-<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x_HeadDetail" id="x_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x_HeadDetail" id="x_HeadDetail" size="1" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->HeadDetail->CustomMsg ?></div></div>
 	</div>
@@ -1347,7 +1440,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_NomorHead" for="x_NomorHead" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->NomorHead->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->NomorHead->CellAttributes() ?>>
 <span id="el_t01_penerimaan_NomorHead">
-<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x_NomorHead" id="x_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x_NomorHead" id="x_NomorHead" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->NomorHead->CustomMsg ?></div></div>
 	</div>
@@ -1357,7 +1450,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_SubTotalFlag" for="x_SubTotalFlag" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->SubTotalFlag->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->SubTotalFlag->CellAttributes() ?>>
 <span id="el_t01_penerimaan_SubTotalFlag">
-<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x_SubTotalFlag" id="x_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x_SubTotalFlag" id="x_SubTotalFlag" size="1" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->SubTotalFlag->CustomMsg ?></div></div>
 	</div>
@@ -1367,7 +1460,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Urutan" for="x_Urutan" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Urutan->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Urutan->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Urutan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x_Urutan" id="x_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x_Urutan" id="x_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Urutan->CustomMsg ?></div></div>
 	</div>
@@ -1377,7 +1470,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Nomor" for="x_Nomor" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Nomor->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Nomor->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Nomor">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x_Nomor" id="x_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x_Nomor" id="x_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Nomor->CustomMsg ?></div></div>
 	</div>
@@ -1387,7 +1480,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Pos" for="x_Pos" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Pos->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Pos->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Pos">
-<input type="text" data-table="t01_penerimaan" data-field="x_Pos" name="x_Pos" id="x_Pos" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Pos->EditValue ?>"<?php echo $t01_penerimaan->Pos->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Pos" name="x_Pos" id="x_Pos" size="15" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Pos->EditValue ?>"<?php echo $t01_penerimaan->Pos->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Pos->CustomMsg ?></div></div>
 	</div>
@@ -1397,7 +1490,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Nominal" for="x_Nominal" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Nominal->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Nominal->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Nominal">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x_Nominal" id="x_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x_Nominal" id="x_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Nominal->CustomMsg ?></div></div>
 	</div>
@@ -1407,7 +1500,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_JumlahSiswa" for="x_JumlahSiswa" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->JumlahSiswa->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->JumlahSiswa->CellAttributes() ?>>
 <span id="el_t01_penerimaan_JumlahSiswa">
-<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x_JumlahSiswa" id="x_JumlahSiswa" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x_JumlahSiswa" id="x_JumlahSiswa" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->JumlahSiswa->CustomMsg ?></div></div>
 	</div>
@@ -1417,7 +1510,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Bulan" for="x_Bulan" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Bulan->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Bulan->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Bulan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x_Bulan" id="x_Bulan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x_Bulan" id="x_Bulan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Bulan->CustomMsg ?></div></div>
 	</div>
@@ -1427,7 +1520,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Jumlah" for="x_Jumlah" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Jumlah->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Jumlah->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Jumlah">
-<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x_Jumlah" id="x_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x_Jumlah" id="x_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Jumlah->CustomMsg ?></div></div>
 	</div>
@@ -1437,7 +1530,7 @@ $t01_penerimaan_add->ShowMessage();
 		<label id="elh_t01_penerimaan_Total" for="x_Total" class="<?php echo $t01_penerimaan_add->LeftColumnClass ?>"><?php echo $t01_penerimaan->Total->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="<?php echo $t01_penerimaan_add->RightColumnClass ?>"><div<?php echo $t01_penerimaan->Total->CellAttributes() ?>>
 <span id="el_t01_penerimaan_Total">
-<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x_Total" id="x_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x_Total" id="x_Total" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
 </span>
 <?php echo $t01_penerimaan->Total->CustomMsg ?></div></div>
 	</div>

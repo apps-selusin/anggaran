@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<configuration date="2018/05/25" author="e.World Technology Ltd.">
+  <project id="{CE2BFCDC-32CE-41CA-ABF9-868662EE06FE}" file="C:\YIM\JIBAS\xampp\htdocs\jibas\anggaran\prj_anggaran.prp" name="prj_anggaran" product="PHPReportMaker" version="11.0" datetime="2018/05/25 23:41:42" languagefolder="phprptlang" userlevel="-2,&quot;Anonymous&quot;,0;">
+    <table id="t01_penerimaan" name="t01_penerimaan" caption="t 01 penerimaan" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
+    <table id="r01_penerimaan" name="r01_penerimaan" caption="Laporan Data Penerimaan" userlevel="-2,&quot;Anonymous&quot;,0;" priv="1" />
+  </project>
+</configuration>

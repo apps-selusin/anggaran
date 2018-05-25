@@ -280,9 +280,7 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 	function Page_Init() {
 		global $gsExport, $gsCustomExport, $gsExportFile, $UserProfile, $Language, $Security, $objForm;
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
+		$this->Departemen->SetVisibility();
 		$this->HeadDetail->SetVisibility();
 		$this->NomorHead->SetVisibility();
 		$this->SubTotalFlag->SetVisibility();
@@ -474,6 +472,7 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Departemen->setDbValue($row['Departemen']);
 		$this->HeadDetail->setDbValue($row['HeadDetail']);
 		$this->NomorHead->setDbValue($row['NomorHead']);
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
@@ -491,6 +490,7 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 	function NewRow() {
 		$row = array();
 		$row['id'] = NULL;
+		$row['Departemen'] = NULL;
 		$row['HeadDetail'] = NULL;
 		$row['NomorHead'] = NULL;
 		$row['SubTotalFlag'] = NULL;
@@ -511,6 +511,7 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Departemen->DbValue = $row['Departemen'];
 		$this->HeadDetail->DbValue = $row['HeadDetail'];
 		$this->NomorHead->DbValue = $row['NomorHead'];
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
@@ -547,6 +548,7 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 
 		// Common render codes for all row types
 		// id
+		// Departemen
 		// HeadDetail
 		// NomorHead
 		// SubTotalFlag
@@ -564,6 +566,30 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Departemen
+		if (strval($this->Departemen->CurrentValue) <> "") {
+			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+		$sWhereWrk = "";
+		$this->Departemen->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+		$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
+			}
+		} else {
+			$this->Departemen->ViewValue = NULL;
+		}
+		$this->Departemen->ViewCustomAttributes = "";
 
 		// HeadDetail
 		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
@@ -609,10 +635,10 @@ class ct01_penerimaan_delete extends ct01_penerimaan {
 		$this->Total->ViewValue = $this->Total->CurrentValue;
 		$this->Total->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
+			// Departemen
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
+			$this->Departemen->TooltipValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -875,8 +901,10 @@ ft01_penerimaandelete.Form_CustomValidate =
 ft01_penerimaandelete.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft01_penerimaandelete.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
+ft01_penerimaandelete.Lists["x_Departemen"].Data = "<?php echo $t01_penerimaan_delete->Departemen->LookupFilterQuery(FALSE, "delete") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -901,8 +929,8 @@ $t01_penerimaan_delete->ShowMessage();
 <table class="table ewTable">
 	<thead>
 	<tr class="ewTableHeader">
-<?php if ($t01_penerimaan->id->Visible) { // id ?>
-		<th class="<?php echo $t01_penerimaan->id->HeaderCellClass() ?>"><span id="elh_t01_penerimaan_id" class="t01_penerimaan_id"><?php echo $t01_penerimaan->id->FldCaption() ?></span></th>
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+		<th class="<?php echo $t01_penerimaan->Departemen->HeaderCellClass() ?>"><span id="elh_t01_penerimaan_Departemen" class="t01_penerimaan_Departemen"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></span></th>
 <?php } ?>
 <?php if ($t01_penerimaan->HeadDetail->Visible) { // HeadDetail ?>
 		<th class="<?php echo $t01_penerimaan->HeadDetail->HeaderCellClass() ?>"><span id="elh_t01_penerimaan_HeadDetail" class="t01_penerimaan_HeadDetail"><?php echo $t01_penerimaan->HeadDetail->FldCaption() ?></span></th>
@@ -958,11 +986,11 @@ while (!$t01_penerimaan_delete->Recordset->EOF) {
 	$t01_penerimaan_delete->RenderRow();
 ?>
 	<tr<?php echo $t01_penerimaan->RowAttributes() ?>>
-<?php if ($t01_penerimaan->id->Visible) { // id ?>
-		<td<?php echo $t01_penerimaan->id->CellAttributes() ?>>
-<span id="el<?php echo $t01_penerimaan_delete->RowCnt ?>_t01_penerimaan_id" class="t01_penerimaan_id">
-<span<?php echo $t01_penerimaan->id->ViewAttributes() ?>>
-<?php echo $t01_penerimaan->id->ListViewValue() ?></span>
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+		<td<?php echo $t01_penerimaan->Departemen->CellAttributes() ?>>
+<span id="el<?php echo $t01_penerimaan_delete->RowCnt ?>_t01_penerimaan_Departemen" class="t01_penerimaan_Departemen">
+<span<?php echo $t01_penerimaan->Departemen->ViewAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->ListViewValue() ?></span>
 </span>
 </td>
 <?php } ?>

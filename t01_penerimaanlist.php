@@ -374,9 +374,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
+		$this->Departemen->SetVisibility();
 		$this->HeadDetail->SetVisibility();
 		$this->NomorHead->SetVisibility();
 		$this->SubTotalFlag->SetVisibility();
@@ -558,9 +556,9 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 				if ($this->CurrentAction == "cancel")
 					$this->ClearInlineMode();
 
-				// Switch to inline edit mode
-				if ($this->CurrentAction == "edit")
-					$this->InlineEditMode();
+				// Switch to grid edit mode
+				if ($this->CurrentAction == "gridedit")
+					$this->GridEditMode();
 
 				// Switch to inline add mode
 				if ($this->CurrentAction == "add" || $this->CurrentAction == "copy")
@@ -569,9 +567,19 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 				if (@$_POST["a_list"] <> "") {
 					$this->CurrentAction = $_POST["a_list"]; // Get action
 
-					// Inline Update
-					if (($this->CurrentAction == "update" || $this->CurrentAction == "overwrite") && @$_SESSION[EW_SESSION_INLINE_MODE] == "edit")
-						$this->InlineUpdate();
+					// Grid Update
+					if (($this->CurrentAction == "gridupdate" || $this->CurrentAction == "gridoverwrite") && @$_SESSION[EW_SESSION_INLINE_MODE] == "gridedit") {
+						if ($this->ValidateGridForm()) {
+							$bGridUpdate = $this->GridUpdate();
+						} else {
+							$bGridUpdate = FALSE;
+							$this->setFailureMessage($gsFormError);
+						}
+						if (!$bGridUpdate) {
+							$this->EventCancelled = TRUE;
+							$this->CurrentAction = "gridedit"; // Stay in Grid Edit mode
+						}
+					}
 
 					// Insert Inline
 					if ($this->CurrentAction == "insert" && @$_SESSION[EW_SESSION_INLINE_MODE] == "add")
@@ -602,14 +610,24 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 					$option->HideAllOptions();
 			}
 
-			// Get default search criteria
-			ew_AddFilter($this->DefaultSearchWhere, $this->BasicSearchWhere(TRUE));
+			// Show grid delete link for grid add / grid edit
+			if ($this->AllowAddDeleteRow) {
+				if ($this->CurrentAction == "gridadd" || $this->CurrentAction == "gridedit") {
+					$item = $this->ListOptions->GetItem("griddelete");
+					if ($item) $item->Visible = TRUE;
+				}
+			}
 
-			// Get basic search values
-			$this->LoadBasicSearchValues();
+			// Get default search criteria
+			ew_AddFilter($this->DefaultSearchWhere, $this->AdvancedSearchWhere(TRUE));
+
+			// Get and validate search values for advanced search
+			$this->LoadSearchValues(); // Get search values
 
 			// Process filter list
 			$this->ProcessFilterList();
+			if (!$this->ValidateSearch())
+				$this->setFailureMessage($gsSearchError);
 
 			// Restore search parms from Session if not searching / reset / export
 			if (($this->Export <> "" || $this->Command <> "search" && $this->Command <> "reset" && $this->Command <> "resetall") && $this->Command <> "json" && $this->CheckSearchParms())
@@ -621,9 +639,9 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			// Set up sorting order
 			$this->SetupSortOrder();
 
-			// Get basic search criteria
+			// Get search criteria for advanced search
 			if ($gsSearchError == "")
-				$sSrchBasic = $this->BasicSearchWhere();
+				$sSrchAdvanced = $this->AdvancedSearchWhere();
 		}
 
 		// Restore display records
@@ -640,10 +658,10 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		// Load search default if no existing search criteria
 		if (!$this->CheckSearchParms()) {
 
-			// Load basic search from default
-			$this->BasicSearch->LoadDefault();
-			if ($this->BasicSearch->Keyword != "")
-				$sSrchBasic = $this->BasicSearchWhere();
+			// Load advanced search from default
+			if ($this->LoadAdvancedSearchDefault()) {
+				$sSrchAdvanced = $this->AdvancedSearchWhere();
+			}
 		}
 
 		// Build search criteria
@@ -666,6 +684,10 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$sFilter = "";
 		ew_AddFilter($sFilter, $this->DbDetailFilter);
 		ew_AddFilter($sFilter, $this->SearchWhere);
+		if ($sFilter == "") {
+			$sFilter = "0=101";
+			$this->SearchWhere = $sFilter;
+		}
 
 		// Set up filter
 		if ($this->Command == "json") {
@@ -693,7 +715,6 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 
 	// Exit inline mode
 	function ClearInlineMode() {
-		$this->setKey("id", ""); // Clear inline edit key
 		$this->Nominal->FormValue = ""; // Clear form value
 		$this->Jumlah->FormValue = ""; // Clear form value
 		$this->Total->FormValue = ""; // Clear form value
@@ -702,79 +723,15 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$_SESSION[EW_SESSION_INLINE_MODE] = ""; // Clear inline mode
 	}
 
-	// Switch to Inline Edit mode
-	function InlineEditMode() {
-		global $Security, $Language;
-		$bInlineEdit = TRUE;
-		if (isset($_GET["id"])) {
-			$this->id->setQueryStringValue($_GET["id"]);
-		} else {
-			$bInlineEdit = FALSE;
-		}
-		if ($bInlineEdit) {
-			if ($this->LoadRow()) {
-				$this->setKey("id", $this->id->CurrentValue); // Set up inline edit key
-				$_SESSION[EW_SESSION_INLINE_MODE] = "edit"; // Enable inline edit
-			}
-		}
-	}
-
-	// Perform update to Inline Edit record
-	function InlineUpdate() {
-		global $Language, $objForm, $gsFormError;
-		$objForm->Index = 1;
-		$this->LoadFormValues(); // Get form values
-
-		// Validate form
-		$bInlineUpdate = TRUE;
-		if (!$this->ValidateForm()) {
-			$bInlineUpdate = FALSE; // Form error, reset action
-			$this->setFailureMessage($gsFormError);
-		} else {
-			$bInlineUpdate = FALSE;
-			$rowkey = strval($objForm->GetValue($this->FormKeyName));
-			if ($this->SetupKeyValues($rowkey)) { // Set up key values
-				if ($this->CheckInlineEditKey()) { // Check key
-					$this->SendEmail = TRUE; // Send email on update success
-					$bInlineUpdate = $this->EditRow(); // Update record
-				} else {
-					$bInlineUpdate = FALSE;
-				}
-			}
-		}
-		if ($bInlineUpdate) { // Update success
-			if ($this->getSuccessMessage() == "")
-				$this->setSuccessMessage($Language->Phrase("UpdateSuccess")); // Set up success message
-			$this->ClearInlineMode(); // Clear inline edit mode
-		} else {
-			if ($this->getFailureMessage() == "")
-				$this->setFailureMessage($Language->Phrase("UpdateFailed")); // Set update failed message
-			$this->EventCancelled = TRUE; // Cancel event
-			$this->CurrentAction = "edit"; // Stay in edit mode
-		}
-	}
-
-	// Check Inline Edit key
-	function CheckInlineEditKey() {
-
-		//CheckInlineEditKey = True
-		if (strval($this->getKey("id")) <> strval($this->id->CurrentValue))
-			return FALSE;
-		return TRUE;
+	// Switch to Grid Edit mode
+	function GridEditMode() {
+		$_SESSION[EW_SESSION_INLINE_MODE] = "gridedit"; // Enable grid edit
 	}
 
 	// Switch to Inline Add mode
 	function InlineAddMode() {
 		global $Security, $Language;
-		if ($this->CurrentAction == "copy") {
-			if (@$_GET["id"] <> "") {
-				$this->id->setQueryStringValue($_GET["id"]);
-				$this->setKey("id", $this->id->CurrentValue); // Set up key
-			} else {
-				$this->setKey("id", ""); // Clear key
-				$this->CurrentAction = "add";
-			}
-		}
+		$this->CurrentAction = "add";
 		$_SESSION[EW_SESSION_INLINE_MODE] = "add"; // Enable inline add
 	}
 
@@ -801,6 +758,108 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			$this->EventCancelled = TRUE; // Set event cancelled
 			$this->CurrentAction = "add"; // Stay in add mode
 		}
+	}
+
+	// Perform update to grid
+	function GridUpdate() {
+		global $Language, $objForm, $gsFormError;
+		$bGridUpdate = TRUE;
+
+		// Get old recordset
+		$this->CurrentFilter = $this->BuildKeyFilter();
+		if ($this->CurrentFilter == "")
+			$this->CurrentFilter = "0=1";
+		$sSql = $this->SQL();
+		$conn = &$this->Connection();
+		if ($rs = $conn->Execute($sSql)) {
+			$rsold = $rs->GetRows();
+			$rs->Close();
+		}
+
+		// Call Grid Updating event
+		if (!$this->Grid_Updating($rsold)) {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->Phrase("GridEditCancelled")); // Set grid edit cancelled message
+			return FALSE;
+		}
+
+		// Begin transaction
+		$conn->BeginTrans();
+		$sKey = "";
+
+		// Update row index and get row key
+		$objForm->Index = -1;
+		$rowcnt = strval($objForm->GetValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Update all rows based on key
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+			$objForm->Index = $rowindex;
+			$rowkey = strval($objForm->GetValue($this->FormKeyName));
+			$rowaction = strval($objForm->GetValue($this->FormActionName));
+
+			// Load all values and keys
+			if ($rowaction <> "insertdelete") { // Skip insert then deleted rows
+				$this->LoadFormValues(); // Get form values
+				if ($rowaction == "" || $rowaction == "edit" || $rowaction == "delete") {
+					$bGridUpdate = $this->SetupKeyValues($rowkey); // Set up key values
+				} else {
+					$bGridUpdate = TRUE;
+				}
+
+				// Skip empty row
+				if ($rowaction == "insert" && $this->EmptyRow()) {
+
+					// No action required
+				// Validate form and insert/update/delete record
+
+				} elseif ($bGridUpdate) {
+					if ($rowaction == "delete") {
+						$this->CurrentFilter = $this->KeyFilter();
+						$bGridUpdate = $this->DeleteRows(); // Delete this row
+					} else if (!$this->ValidateForm()) {
+						$bGridUpdate = FALSE; // Form error, reset action
+						$this->setFailureMessage($gsFormError);
+					} else {
+						if ($rowaction == "insert") {
+							$bGridUpdate = $this->AddRow(); // Insert this row
+						} else {
+							if ($rowkey <> "") {
+								$this->SendEmail = FALSE; // Do not send email on update success
+								$bGridUpdate = $this->EditRow(); // Update this row
+							}
+						} // End update
+					}
+				}
+				if ($bGridUpdate) {
+					if ($sKey <> "") $sKey .= ", ";
+					$sKey .= $rowkey;
+				} else {
+					break;
+				}
+			}
+		}
+		if ($bGridUpdate) {
+			$conn->CommitTrans(); // Commit transaction
+
+			// Get new recordset
+			if ($rs = $conn->Execute($sSql)) {
+				$rsnew = $rs->GetRows();
+				$rs->Close();
+			}
+
+			// Call Grid_Updated event
+			$this->Grid_Updated($rsold, $rsnew);
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->Phrase("UpdateSuccess")); // Set up update success message
+			$this->ClearInlineMode(); // Clear inline edit mode
+		} else {
+			$conn->RollbackTrans(); // Rollback transaction
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->Phrase("UpdateFailed")); // Set update failed message
+		}
+		return $bGridUpdate;
 	}
 
 	// Build filter for all keys
@@ -841,6 +900,104 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		return TRUE;
 	}
 
+	// Check if empty row
+	function EmptyRow() {
+		global $objForm;
+		if ($objForm->HasValue("x_Departemen") && $objForm->HasValue("o_Departemen") && $this->Departemen->CurrentValue <> $this->Departemen->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_HeadDetail") && $objForm->HasValue("o_HeadDetail") && $this->HeadDetail->CurrentValue <> $this->HeadDetail->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_NomorHead") && $objForm->HasValue("o_NomorHead") && $this->NomorHead->CurrentValue <> $this->NomorHead->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_SubTotalFlag") && $objForm->HasValue("o_SubTotalFlag") && $this->SubTotalFlag->CurrentValue <> $this->SubTotalFlag->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Urutan") && $objForm->HasValue("o_Urutan") && $this->Urutan->CurrentValue <> $this->Urutan->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Nomor") && $objForm->HasValue("o_Nomor") && $this->Nomor->CurrentValue <> $this->Nomor->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Pos") && $objForm->HasValue("o_Pos") && $this->Pos->CurrentValue <> $this->Pos->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Nominal") && $objForm->HasValue("o_Nominal") && $this->Nominal->CurrentValue <> $this->Nominal->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_JumlahSiswa") && $objForm->HasValue("o_JumlahSiswa") && $this->JumlahSiswa->CurrentValue <> $this->JumlahSiswa->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Bulan") && $objForm->HasValue("o_Bulan") && $this->Bulan->CurrentValue <> $this->Bulan->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Jumlah") && $objForm->HasValue("o_Jumlah") && $this->Jumlah->CurrentValue <> $this->Jumlah->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Total") && $objForm->HasValue("o_Total") && $this->Total->CurrentValue <> $this->Total->OldValue)
+			return FALSE;
+		return TRUE;
+	}
+
+	// Validate grid form
+	function ValidateGridForm() {
+		global $objForm;
+
+		// Get row count
+		$objForm->Index = -1;
+		$rowcnt = strval($objForm->GetValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+
+		// Validate all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$objForm->Index = $rowindex;
+			$rowaction = strval($objForm->GetValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->LoadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->EmptyRow()) {
+
+					// Ignore
+				} else if (!$this->ValidateForm()) {
+					return FALSE;
+				}
+			}
+		}
+		return TRUE;
+	}
+
+	// Get all form values of the grid
+	function GetGridFormValues() {
+		global $objForm;
+
+		// Get row count
+		$objForm->Index = -1;
+		$rowcnt = strval($objForm->GetValue($this->FormKeyCountName));
+		if ($rowcnt == "" || !is_numeric($rowcnt))
+			$rowcnt = 0;
+		$rows = array();
+
+		// Loop through all records
+		for ($rowindex = 1; $rowindex <= $rowcnt; $rowindex++) {
+
+			// Load current row values
+			$objForm->Index = $rowindex;
+			$rowaction = strval($objForm->GetValue($this->FormActionName));
+			if ($rowaction <> "delete" && $rowaction <> "insertdelete") {
+				$this->LoadFormValues(); // Get form values
+				if ($rowaction == "insert" && $this->EmptyRow()) {
+
+					// Ignore
+				} else {
+					$rows[] = $this->GetFieldValues("FormValue"); // Return row as array
+				}
+			}
+		}
+		return $rows; // Return as array of array
+	}
+
+	// Restore form values for current row
+	function RestoreCurrentRowFormValues($idx) {
+		global $objForm;
+
+		// Get row based on current index
+		$objForm->Index = $idx;
+		$this->LoadFormValues(); // Load form values
+	}
+
 	// Get list of filters
 	function GetFilterList() {
 		global $UserProfile;
@@ -849,6 +1006,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$sFilterList = "";
 		$sSavedFilterList = "";
 		$sFilterList = ew_Concat($sFilterList, $this->id->AdvancedSearch->ToJson(), ","); // Field id
+		$sFilterList = ew_Concat($sFilterList, $this->Departemen->AdvancedSearch->ToJson(), ","); // Field Departemen
 		$sFilterList = ew_Concat($sFilterList, $this->HeadDetail->AdvancedSearch->ToJson(), ","); // Field HeadDetail
 		$sFilterList = ew_Concat($sFilterList, $this->NomorHead->AdvancedSearch->ToJson(), ","); // Field NomorHead
 		$sFilterList = ew_Concat($sFilterList, $this->SubTotalFlag->AdvancedSearch->ToJson(), ","); // Field SubTotalFlag
@@ -860,10 +1018,6 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$sFilterList = ew_Concat($sFilterList, $this->Bulan->AdvancedSearch->ToJson(), ","); // Field Bulan
 		$sFilterList = ew_Concat($sFilterList, $this->Jumlah->AdvancedSearch->ToJson(), ","); // Field Jumlah
 		$sFilterList = ew_Concat($sFilterList, $this->Total->AdvancedSearch->ToJson(), ","); // Field Total
-		if ($this->BasicSearch->Keyword <> "") {
-			$sWrk = "\"" . EW_TABLE_BASIC_SEARCH . "\":\"" . ew_JsEncode2($this->BasicSearch->Keyword) . "\",\"" . EW_TABLE_BASIC_SEARCH_TYPE . "\":\"" . ew_JsEncode2($this->BasicSearch->Type) . "\"";
-			$sFilterList = ew_Concat($sFilterList, $sWrk, ",");
-		}
 		$sFilterList = preg_replace('/,$/', "", $sFilterList);
 
 		// Return filter list in json
@@ -911,6 +1065,14 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$this->id->AdvancedSearch->SearchValue2 = @$filter["y_id"];
 		$this->id->AdvancedSearch->SearchOperator2 = @$filter["w_id"];
 		$this->id->AdvancedSearch->Save();
+
+		// Field Departemen
+		$this->Departemen->AdvancedSearch->SearchValue = @$filter["x_Departemen"];
+		$this->Departemen->AdvancedSearch->SearchOperator = @$filter["z_Departemen"];
+		$this->Departemen->AdvancedSearch->SearchCondition = @$filter["v_Departemen"];
+		$this->Departemen->AdvancedSearch->SearchValue2 = @$filter["y_Departemen"];
+		$this->Departemen->AdvancedSearch->SearchOperator2 = @$filter["w_Departemen"];
+		$this->Departemen->AdvancedSearch->Save();
 
 		// Field HeadDetail
 		$this->HeadDetail->AdvancedSearch->SearchValue = @$filter["x_HeadDetail"];
@@ -999,122 +1161,119 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$this->Total->AdvancedSearch->SearchValue2 = @$filter["y_Total"];
 		$this->Total->AdvancedSearch->SearchOperator2 = @$filter["w_Total"];
 		$this->Total->AdvancedSearch->Save();
-		$this->BasicSearch->setKeyword(@$filter[EW_TABLE_BASIC_SEARCH]);
-		$this->BasicSearch->setType(@$filter[EW_TABLE_BASIC_SEARCH_TYPE]);
 	}
 
-	// Return basic search SQL
-	function BasicSearchSQL($arKeywords, $type) {
+	// Advanced search WHERE clause based on QueryString
+	function AdvancedSearchWhere($Default = FALSE) {
+		global $Security;
 		$sWhere = "";
-		$this->BuildBasicSearchSQL($sWhere, $this->HeadDetail, $arKeywords, $type);
-		$this->BuildBasicSearchSQL($sWhere, $this->SubTotalFlag, $arKeywords, $type);
-		$this->BuildBasicSearchSQL($sWhere, $this->Nomor, $arKeywords, $type);
-		$this->BuildBasicSearchSQL($sWhere, $this->Pos, $arKeywords, $type);
+		$this->BuildSearchSql($sWhere, $this->id, $Default, FALSE); // id
+		$this->BuildSearchSql($sWhere, $this->Departemen, $Default, FALSE); // Departemen
+		$this->BuildSearchSql($sWhere, $this->HeadDetail, $Default, FALSE); // HeadDetail
+		$this->BuildSearchSql($sWhere, $this->NomorHead, $Default, FALSE); // NomorHead
+		$this->BuildSearchSql($sWhere, $this->SubTotalFlag, $Default, FALSE); // SubTotalFlag
+		$this->BuildSearchSql($sWhere, $this->Urutan, $Default, FALSE); // Urutan
+		$this->BuildSearchSql($sWhere, $this->Nomor, $Default, FALSE); // Nomor
+		$this->BuildSearchSql($sWhere, $this->Pos, $Default, FALSE); // Pos
+		$this->BuildSearchSql($sWhere, $this->Nominal, $Default, FALSE); // Nominal
+		$this->BuildSearchSql($sWhere, $this->JumlahSiswa, $Default, FALSE); // JumlahSiswa
+		$this->BuildSearchSql($sWhere, $this->Bulan, $Default, FALSE); // Bulan
+		$this->BuildSearchSql($sWhere, $this->Jumlah, $Default, FALSE); // Jumlah
+		$this->BuildSearchSql($sWhere, $this->Total, $Default, FALSE); // Total
+
+		// Set up search parm
+		if (!$Default && $sWhere <> "" && in_array($this->Command, array("", "reset", "resetall"))) {
+			$this->Command = "search";
+		}
+		if (!$Default && $this->Command == "search") {
+			$this->id->AdvancedSearch->Save(); // id
+			$this->Departemen->AdvancedSearch->Save(); // Departemen
+			$this->HeadDetail->AdvancedSearch->Save(); // HeadDetail
+			$this->NomorHead->AdvancedSearch->Save(); // NomorHead
+			$this->SubTotalFlag->AdvancedSearch->Save(); // SubTotalFlag
+			$this->Urutan->AdvancedSearch->Save(); // Urutan
+			$this->Nomor->AdvancedSearch->Save(); // Nomor
+			$this->Pos->AdvancedSearch->Save(); // Pos
+			$this->Nominal->AdvancedSearch->Save(); // Nominal
+			$this->JumlahSiswa->AdvancedSearch->Save(); // JumlahSiswa
+			$this->Bulan->AdvancedSearch->Save(); // Bulan
+			$this->Jumlah->AdvancedSearch->Save(); // Jumlah
+			$this->Total->AdvancedSearch->Save(); // Total
+		}
 		return $sWhere;
 	}
 
-	// Build basic search SQL
-	function BuildBasicSearchSQL(&$Where, &$Fld, $arKeywords, $type) {
-		global $EW_BASIC_SEARCH_IGNORE_PATTERN;
-		$sDefCond = ($type == "OR") ? "OR" : "AND";
-		$arSQL = array(); // Array for SQL parts
-		$arCond = array(); // Array for search conditions
-		$cnt = count($arKeywords);
-		$j = 0; // Number of SQL parts
-		for ($i = 0; $i < $cnt; $i++) {
-			$Keyword = $arKeywords[$i];
-			$Keyword = trim($Keyword);
-			if ($EW_BASIC_SEARCH_IGNORE_PATTERN <> "") {
-				$Keyword = preg_replace($EW_BASIC_SEARCH_IGNORE_PATTERN, "\\", $Keyword);
-				$ar = explode("\\", $Keyword);
-			} else {
-				$ar = array($Keyword);
-			}
-			foreach ($ar as $Keyword) {
-				if ($Keyword <> "") {
-					$sWrk = "";
-					if ($Keyword == "OR" && $type == "") {
-						if ($j > 0)
-							$arCond[$j-1] = "OR";
-					} elseif ($Keyword == EW_NULL_VALUE) {
-						$sWrk = $Fld->FldExpression . " IS NULL";
-					} elseif ($Keyword == EW_NOT_NULL_VALUE) {
-						$sWrk = $Fld->FldExpression . " IS NOT NULL";
-					} elseif ($Fld->FldIsVirtual) {
-						$sWrk = $Fld->FldVirtualExpression . ew_Like(ew_QuotedValue("%" . $Keyword . "%", EW_DATATYPE_STRING, $this->DBID), $this->DBID);
-					} elseif ($Fld->FldDataType != EW_DATATYPE_NUMBER || is_numeric($Keyword)) {
-						$sWrk = $Fld->FldBasicSearchExpression . ew_Like(ew_QuotedValue("%" . $Keyword . "%", EW_DATATYPE_STRING, $this->DBID), $this->DBID);
-					}
-					if ($sWrk <> "") {
-						$arSQL[$j] = $sWrk;
-						$arCond[$j] = $sDefCond;
-						$j += 1;
-					}
-				}
-			}
+	// Build search SQL
+	function BuildSearchSql(&$Where, &$Fld, $Default, $MultiValue) {
+		$FldParm = $Fld->FldParm();
+		$FldVal = ($Default) ? $Fld->AdvancedSearch->SearchValueDefault : $Fld->AdvancedSearch->SearchValue; // @$_GET["x_$FldParm"]
+		$FldOpr = ($Default) ? $Fld->AdvancedSearch->SearchOperatorDefault : $Fld->AdvancedSearch->SearchOperator; // @$_GET["z_$FldParm"]
+		$FldCond = ($Default) ? $Fld->AdvancedSearch->SearchConditionDefault : $Fld->AdvancedSearch->SearchCondition; // @$_GET["v_$FldParm"]
+		$FldVal2 = ($Default) ? $Fld->AdvancedSearch->SearchValue2Default : $Fld->AdvancedSearch->SearchValue2; // @$_GET["y_$FldParm"]
+		$FldOpr2 = ($Default) ? $Fld->AdvancedSearch->SearchOperator2Default : $Fld->AdvancedSearch->SearchOperator2; // @$_GET["w_$FldParm"]
+		$sWrk = "";
+		if (is_array($FldVal)) $FldVal = implode(",", $FldVal);
+		if (is_array($FldVal2)) $FldVal2 = implode(",", $FldVal2);
+		$FldOpr = strtoupper(trim($FldOpr));
+		if ($FldOpr == "") $FldOpr = "=";
+		$FldOpr2 = strtoupper(trim($FldOpr2));
+		if ($FldOpr2 == "") $FldOpr2 = "=";
+		if (EW_SEARCH_MULTI_VALUE_OPTION == 1)
+			$MultiValue = FALSE;
+		if ($MultiValue) {
+			$sWrk1 = ($FldVal <> "") ? ew_GetMultiSearchSql($Fld, $FldOpr, $FldVal, $this->DBID) : ""; // Field value 1
+			$sWrk2 = ($FldVal2 <> "") ? ew_GetMultiSearchSql($Fld, $FldOpr2, $FldVal2, $this->DBID) : ""; // Field value 2
+			$sWrk = $sWrk1; // Build final SQL
+			if ($sWrk2 <> "")
+				$sWrk = ($sWrk <> "") ? "($sWrk) $FldCond ($sWrk2)" : $sWrk2;
+		} else {
+			$FldVal = $this->ConvertSearchValue($Fld, $FldVal);
+			$FldVal2 = $this->ConvertSearchValue($Fld, $FldVal2);
+			$sWrk = ew_GetSearchSql($Fld, $FldVal, $FldOpr, $FldCond, $FldVal2, $FldOpr2, $this->DBID);
 		}
-		$cnt = count($arSQL);
-		$bQuoted = FALSE;
-		$sSql = "";
-		if ($cnt > 0) {
-			for ($i = 0; $i < $cnt-1; $i++) {
-				if ($arCond[$i] == "OR") {
-					if (!$bQuoted) $sSql .= "(";
-					$bQuoted = TRUE;
-				}
-				$sSql .= $arSQL[$i];
-				if ($bQuoted && $arCond[$i] <> "OR") {
-					$sSql .= ")";
-					$bQuoted = FALSE;
-				}
-				$sSql .= " " . $arCond[$i] . " ";
-			}
-			$sSql .= $arSQL[$cnt-1];
-			if ($bQuoted)
-				$sSql .= ")";
-		}
-		if ($sSql <> "") {
-			if ($Where <> "") $Where .= " OR ";
-			$Where .= "(" . $sSql . ")";
-		}
+		ew_AddFilter($Where, $sWrk);
 	}
 
-	// Return basic search WHERE clause based on search keyword and type
-	function BasicSearchWhere($Default = FALSE) {
-		global $Security;
-		$sSearchStr = "";
-		$sSearchKeyword = ($Default) ? $this->BasicSearch->KeywordDefault : $this->BasicSearch->Keyword;
-		$sSearchType = ($Default) ? $this->BasicSearch->TypeDefault : $this->BasicSearch->Type;
-
-		// Get search SQL
-		if ($sSearchKeyword <> "") {
-			$ar = $this->BasicSearch->KeywordList($Default);
-
-			// Search keyword in any fields
-			if (($sSearchType == "OR" || $sSearchType == "AND") && $this->BasicSearch->BasicSearchAnyFields) {
-				foreach ($ar as $sKeyword) {
-					if ($sKeyword <> "") {
-						if ($sSearchStr <> "") $sSearchStr .= " " . $sSearchType . " ";
-						$sSearchStr .= "(" . $this->BasicSearchSQL(array($sKeyword), $sSearchType) . ")";
-					}
-				}
-			} else {
-				$sSearchStr = $this->BasicSearchSQL($ar, $sSearchType);
-			}
-			if (!$Default && in_array($this->Command, array("", "reset", "resetall"))) $this->Command = "search";
+	// Convert search value
+	function ConvertSearchValue(&$Fld, $FldVal) {
+		if ($FldVal == EW_NULL_VALUE || $FldVal == EW_NOT_NULL_VALUE)
+			return $FldVal;
+		$Value = $FldVal;
+		if ($Fld->FldDataType == EW_DATATYPE_BOOLEAN) {
+			if ($FldVal <> "") $Value = ($FldVal == "1" || strtolower(strval($FldVal)) == "y" || strtolower(strval($FldVal)) == "t") ? $Fld->TrueValue : $Fld->FalseValue;
+		} elseif ($Fld->FldDataType == EW_DATATYPE_DATE || $Fld->FldDataType == EW_DATATYPE_TIME) {
+			if ($FldVal <> "") $Value = ew_UnFormatDateTime($FldVal, $Fld->FldDateTimeFormat);
 		}
-		if (!$Default && $this->Command == "search") {
-			$this->BasicSearch->setKeyword($sSearchKeyword);
-			$this->BasicSearch->setType($sSearchType);
-		}
-		return $sSearchStr;
+		return $Value;
 	}
 
 	// Check if search parm exists
 	function CheckSearchParms() {
-
-		// Check basic search
-		if ($this->BasicSearch->IssetSession())
+		if ($this->id->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Departemen->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->HeadDetail->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->NomorHead->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->SubTotalFlag->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Urutan->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Nomor->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Pos->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Nominal->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->JumlahSiswa->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Bulan->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Jumlah->AdvancedSearch->IssetSession())
+			return TRUE;
+		if ($this->Total->AdvancedSearch->IssetSession())
 			return TRUE;
 		return FALSE;
 	}
@@ -1126,8 +1285,8 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$this->SearchWhere = "";
 		$this->setSearchWhere($this->SearchWhere);
 
-		// Clear basic search parameters
-		$this->ResetBasicSearchParms();
+		// Clear advanced search parameters
+		$this->ResetAdvancedSearchParms();
 	}
 
 	// Load advanced search default values
@@ -1135,17 +1294,41 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		return FALSE;
 	}
 
-	// Clear all basic search parameters
-	function ResetBasicSearchParms() {
-		$this->BasicSearch->UnsetSession();
+	// Clear all advanced search parameters
+	function ResetAdvancedSearchParms() {
+		$this->id->AdvancedSearch->UnsetSession();
+		$this->Departemen->AdvancedSearch->UnsetSession();
+		$this->HeadDetail->AdvancedSearch->UnsetSession();
+		$this->NomorHead->AdvancedSearch->UnsetSession();
+		$this->SubTotalFlag->AdvancedSearch->UnsetSession();
+		$this->Urutan->AdvancedSearch->UnsetSession();
+		$this->Nomor->AdvancedSearch->UnsetSession();
+		$this->Pos->AdvancedSearch->UnsetSession();
+		$this->Nominal->AdvancedSearch->UnsetSession();
+		$this->JumlahSiswa->AdvancedSearch->UnsetSession();
+		$this->Bulan->AdvancedSearch->UnsetSession();
+		$this->Jumlah->AdvancedSearch->UnsetSession();
+		$this->Total->AdvancedSearch->UnsetSession();
 	}
 
 	// Restore all search parameters
 	function RestoreSearchParms() {
 		$this->RestoreSearch = TRUE;
 
-		// Restore basic search values
-		$this->BasicSearch->Load();
+		// Restore advanced search values
+		$this->id->AdvancedSearch->Load();
+		$this->Departemen->AdvancedSearch->Load();
+		$this->HeadDetail->AdvancedSearch->Load();
+		$this->NomorHead->AdvancedSearch->Load();
+		$this->SubTotalFlag->AdvancedSearch->Load();
+		$this->Urutan->AdvancedSearch->Load();
+		$this->Nomor->AdvancedSearch->Load();
+		$this->Pos->AdvancedSearch->Load();
+		$this->Nominal->AdvancedSearch->Load();
+		$this->JumlahSiswa->AdvancedSearch->Load();
+		$this->Bulan->AdvancedSearch->Load();
+		$this->Jumlah->AdvancedSearch->Load();
+		$this->Total->AdvancedSearch->Load();
 	}
 
 	// Set up sort parameters
@@ -1155,7 +1338,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id); // id
+			$this->UpdateSort($this->Departemen); // Departemen
 			$this->UpdateSort($this->HeadDetail); // HeadDetail
 			$this->UpdateSort($this->NomorHead); // NomorHead
 			$this->UpdateSort($this->SubTotalFlag); // SubTotalFlag
@@ -1200,7 +1383,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
+				$this->Departemen->setSort("");
 				$this->HeadDetail->setSort("");
 				$this->NomorHead->setSort("");
 				$this->SubTotalFlag->setSort("");
@@ -1224,34 +1407,24 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function SetupListOptions() {
 		global $Security, $Language;
 
+		// "griddelete"
+		if ($this->AllowAddDeleteRow) {
+			$item = &$this->ListOptions->Add("griddelete");
+			$item->CssClass = "text-nowrap";
+			$item->OnLeft = FALSE;
+			$item->Visible = FALSE; // Default hidden
+		}
+
 		// Add group option item
 		$item = &$this->ListOptions->Add($this->ListOptions->GroupOptionName);
 		$item->Body = "";
 		$item->OnLeft = FALSE;
 		$item->Visible = FALSE;
 
-		// "view"
-		$item = &$this->ListOptions->Add("view");
-		$item->CssClass = "text-nowrap";
-		$item->Visible = TRUE;
-		$item->OnLeft = FALSE;
-
-		// "edit"
-		$item = &$this->ListOptions->Add("edit");
-		$item->CssClass = "text-nowrap";
-		$item->Visible = TRUE;
-		$item->OnLeft = FALSE;
-
 		// "copy"
 		$item = &$this->ListOptions->Add("copy");
 		$item->CssClass = "text-nowrap";
-		$item->Visible = TRUE;
-		$item->OnLeft = FALSE;
-
-		// "delete"
-		$item = &$this->ListOptions->Add("delete");
-		$item->CssClass = "text-nowrap";
-		$item->Visible = TRUE;
+		$item->Visible = ($this->CurrentAction == "add");
 		$item->OnLeft = FALSE;
 
 		// List actions
@@ -1311,6 +1484,21 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 				$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $BlankRowName . "\" id=\"" . $BlankRowName . "\" value=\"1\">";
 		}
 
+		// "delete"
+		if ($this->AllowAddDeleteRow) {
+			if ($this->CurrentAction == "gridadd" || $this->CurrentAction == "gridedit") {
+				$option = &$this->ListOptions;
+				$option->UseButtonGroup = TRUE; // Use button group for grid delete button
+				$option->UseImageAndText = TRUE; // Use image and text for grid delete button
+				$oListOpt = &$option->Items["griddelete"];
+				if (is_numeric($this->RowIndex) && ($this->RowAction == "" || $this->RowAction == "edit")) { // Do not allow delete existing record
+					$oListOpt->Body = "&nbsp;";
+				} else {
+					$oListOpt->Body = "<a class=\"ewGridLink ewGridDelete\" title=\"" . ew_HtmlTitle($Language->Phrase("DeleteLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("DeleteLink")) . "\" onclick=\"return ew_DeleteGridRow(this, " . $this->RowIndex . ");\">" . $Language->Phrase("DeleteLink") . "</a>";
+				}
+			}
+		}
+
 		// "copy"
 		$oListOpt = &$this->ListOptions->Items["copy"];
 		if (($this->CurrentAction == "add" || $this->CurrentAction == "copy") && $this->RowType == EW_ROWTYPE_ADD) { // Inline Add/Copy
@@ -1322,55 +1510,6 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 				"<input type=\"hidden\" name=\"a_list\" id=\"a_list\" value=\"insert\"></div>";
 			return;
 		}
-
-		// "edit"
-		$oListOpt = &$this->ListOptions->Items["edit"];
-		if ($this->CurrentAction == "edit" && $this->RowType == EW_ROWTYPE_EDIT) { // Inline-Edit
-			$this->ListOptions->CustomItem = "edit"; // Show edit column only
-			$cancelurl = $this->AddMasterUrl($this->PageUrl() . "a=cancel");
-				$oListOpt->Body = "<div" . (($oListOpt->OnLeft) ? " style=\"text-align: right\"" : "") . ">" .
-					"<a class=\"ewGridLink ewInlineUpdate\" title=\"" . ew_HtmlTitle($Language->Phrase("UpdateLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("UpdateLink")) . "\" href=\"\" onclick=\"return ewForms(this).Submit('" . ew_UrlAddHash($this->PageName(), "r" . $this->RowCnt . "_" . $this->TableVar) . "');\">" . $Language->Phrase("UpdateLink") . "</a>&nbsp;" .
-					"<a class=\"ewGridLink ewInlineCancel\" title=\"" . ew_HtmlTitle($Language->Phrase("CancelLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("CancelLink")) . "\" href=\"" . $cancelurl . "\">" . $Language->Phrase("CancelLink") . "</a>" .
-					"<input type=\"hidden\" name=\"a_list\" id=\"a_list\" value=\"update\"></div>";
-			$oListOpt->Body .= "<input type=\"hidden\" name=\"k" . $this->RowIndex . "_key\" id=\"k" . $this->RowIndex . "_key\" value=\"" . ew_HtmlEncode($this->id->CurrentValue) . "\">";
-			return;
-		}
-
-		// "view"
-		$oListOpt = &$this->ListOptions->Items["view"];
-		$viewcaption = ew_HtmlTitle($Language->Phrase("ViewLink"));
-		if (TRUE) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewView\" title=\"" . $viewcaption . "\" data-caption=\"" . $viewcaption . "\" href=\"" . ew_HtmlEncode($this->ViewUrl) . "\">" . $Language->Phrase("ViewLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
-
-		// "edit"
-		$oListOpt = &$this->ListOptions->Items["edit"];
-		$editcaption = ew_HtmlTitle($Language->Phrase("EditLink"));
-		if (TRUE) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewEdit\" title=\"" . ew_HtmlTitle($Language->Phrase("EditLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("EditLink")) . "\" href=\"" . ew_HtmlEncode($this->EditUrl) . "\">" . $Language->Phrase("EditLink") . "</a>";
-			$oListOpt->Body .= "<a class=\"ewRowLink ewInlineEdit\" title=\"" . ew_HtmlTitle($Language->Phrase("InlineEditLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("InlineEditLink")) . "\" href=\"" . ew_HtmlEncode(ew_UrlAddHash($this->InlineEditUrl, "r" . $this->RowCnt . "_" . $this->TableVar)) . "\">" . $Language->Phrase("InlineEditLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
-
-		// "copy"
-		$oListOpt = &$this->ListOptions->Items["copy"];
-		$copycaption = ew_HtmlTitle($Language->Phrase("CopyLink"));
-		if (TRUE) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewCopy\" title=\"" . $copycaption . "\" data-caption=\"" . $copycaption . "\" href=\"" . ew_HtmlEncode($this->CopyUrl) . "\">" . $Language->Phrase("CopyLink") . "</a>";
-			$oListOpt->Body .= "<a class=\"ewRowLink ewInlineCopy\" title=\"" . ew_HtmlTitle($Language->Phrase("InlineCopyLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("InlineCopyLink")) . "\" href=\"" . ew_HtmlEncode($this->InlineCopyUrl) . "\">" . $Language->Phrase("InlineCopyLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
-
-		// "delete"
-		$oListOpt = &$this->ListOptions->Items["delete"];
-		if (TRUE)
-			$oListOpt->Body = "<a class=\"ewRowLink ewDelete\"" . "" . " title=\"" . ew_HtmlTitle($Language->Phrase("DeleteLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("DeleteLink")) . "\" href=\"" . ew_HtmlEncode($this->DeleteUrl) . "\">" . $Language->Phrase("DeleteLink") . "</a>";
-		else
-			$oListOpt->Body = "";
 
 		// Set up list action buttons
 		$oListOpt = &$this->ListOptions->GetItem("listactions");
@@ -1404,6 +1543,9 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		// "checkbox"
 		$oListOpt = &$this->ListOptions->Items["checkbox"];
 		$oListOpt->Body = "<input type=\"checkbox\" name=\"key_m[]\" class=\"ewMultiSelect\" value=\"" . ew_HtmlEncode($this->id->CurrentValue) . "\" onclick=\"ew_ClickMultiCheckbox(event);\">";
+		if ($this->CurrentAction == "gridedit" && is_numeric($this->RowIndex)) {
+			$this->MultiSelectKey .= "<input type=\"hidden\" name=\"" . $KeyName . "\" id=\"" . $KeyName . "\" value=\"" . $this->id->CurrentValue . "\">";
+		}
 		$this->RenderListOptionsExt();
 
 		// Call ListOptions_Rendered event
@@ -1416,16 +1558,16 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$options = &$this->OtherOptions;
 		$option = $options["addedit"];
 
-		// Add
-		$item = &$option->Add("add");
-		$addcaption = ew_HtmlTitle($Language->Phrase("AddLink"));
-		$item->Body = "<a class=\"ewAddEdit ewAdd\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . ew_HtmlEncode($this->AddUrl) . "\">" . $Language->Phrase("AddLink") . "</a>";
-		$item->Visible = ($this->AddUrl <> "");
-
 		// Inline Add
 		$item = &$option->Add("inlineadd");
 		$item->Body = "<a class=\"ewAddEdit ewInlineAdd\" title=\"" . ew_HtmlTitle($Language->Phrase("InlineAddLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("InlineAddLink")) . "\" href=\"" . ew_HtmlEncode($this->InlineAddUrl) . "\">" .$Language->Phrase("InlineAddLink") . "</a>";
 		$item->Visible = ($this->InlineAddUrl <> "");
+
+		// Add grid edit
+		$option = $options["addedit"];
+		$item = &$option->Add("gridedit");
+		$item->Body = "<a class=\"ewAddEdit ewGridEdit\" title=\"" . ew_HtmlTitle($Language->Phrase("GridEditLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("GridEditLink")) . "\" href=\"" . ew_HtmlEncode($this->GridEditUrl) . "\">" . $Language->Phrase("GridEditLink") . "</a>";
+		$item->Visible = ($this->GridEditUrl <> "");
 		$option = $options["action"];
 
 		// Set up options default
@@ -1463,6 +1605,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function RenderOtherOptions() {
 		global $Language, $Security;
 		$options = &$this->OtherOptions;
+		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "gridedit") { // Not grid add/edit mode
 			$option = &$options["action"];
 
 			// Set up list action buttons
@@ -1484,6 +1627,32 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 				$option = &$options["action"];
 				$option->HideAllOptions();
 			}
+		} else { // Grid add/edit mode
+
+			// Hide all options first
+			foreach ($options as &$option)
+				$option->HideAllOptions();
+			if ($this->CurrentAction == "gridedit") {
+				if ($this->AllowAddDeleteRow) {
+
+					// Add add blank row
+					$option = &$options["addedit"];
+					$option->UseDropDownButton = FALSE;
+					$option->UseImageAndText = TRUE;
+					$item = &$option->Add("addblankrow");
+					$item->Body = "<a class=\"ewAddEdit ewAddBlankRow\" title=\"" . ew_HtmlTitle($Language->Phrase("AddBlankRow")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("AddBlankRow")) . "\" href=\"javascript:void(0);\" onclick=\"ew_AddGridRow(this);\">" . $Language->Phrase("AddBlankRow") . "</a>";
+					$item->Visible = FALSE;
+				}
+				$option = &$options["action"];
+				$option->UseDropDownButton = FALSE;
+				$option->UseImageAndText = TRUE;
+					$item = &$option->Add("gridsave");
+					$item->Body = "<a class=\"ewAction ewGridSave\" title=\"" . ew_HtmlTitle($Language->Phrase("GridSaveLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("GridSaveLink")) . "\" href=\"\" onclick=\"return ewForms(this).Submit('" . $this->PageName() . "');\">" . $Language->Phrase("GridSaveLink") . "</a>";
+					$item = &$option->Add("gridcancel");
+					$cancelurl = $this->AddMasterUrl($this->PageUrl() . "a=cancel");
+					$item->Body = "<a class=\"ewAction ewGridCancel\" title=\"" . ew_HtmlTitle($Language->Phrase("GridCancelLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("GridCancelLink")) . "\" href=\"" . $cancelurl . "\">" . $Language->Phrase("GridCancelLink") . "</a>";
+			}
+		}
 	}
 
 	// Process list action
@@ -1580,7 +1749,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 
 		// Show all button
 		$item = &$this->SearchOptions->Add("showall");
-		$item->Body = "<a class=\"btn btn-default ewShowAll\" title=\"" . $Language->Phrase("ShowAll") . "\" data-caption=\"" . $Language->Phrase("ShowAll") . "\" href=\"" . $this->PageUrl() . "cmd=reset\">" . $Language->Phrase("ShowAllBtn") . "</a>";
+		$item->Body = "<a class=\"btn btn-default ewShowAll\" title=\"" . $Language->Phrase("ResetSearch") . "\" data-caption=\"" . $Language->Phrase("ResetSearch") . "\" href=\"" . $this->PageUrl() . "cmd=reset\">" . $Language->Phrase("ResetSearchBtn") . "</a>";
 		$item->Visible = ($this->SearchWhere <> $this->DefaultSearchWhere && $this->SearchWhere <> "0=101");
 
 		// Button group for search
@@ -1647,29 +1816,102 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function LoadDefaultValues() {
 		$this->id->CurrentValue = NULL;
 		$this->id->OldValue = $this->id->CurrentValue;
+		$this->Departemen->CurrentValue = "-";
+		$this->Departemen->OldValue = $this->Departemen->CurrentValue;
 		$this->HeadDetail->CurrentValue = "H";
-		$this->NomorHead->CurrentValue = NULL;
+		$this->HeadDetail->OldValue = $this->HeadDetail->CurrentValue;
+		$this->NomorHead->CurrentValue = 0;
 		$this->NomorHead->OldValue = $this->NomorHead->CurrentValue;
-		$this->SubTotalFlag->CurrentValue = NULL;
+		$this->SubTotalFlag->CurrentValue = "N";
 		$this->SubTotalFlag->OldValue = $this->SubTotalFlag->CurrentValue;
-		$this->Urutan->CurrentValue = NULL;
+		$this->Urutan->CurrentValue = 0;
 		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
-		$this->Nomor->CurrentValue = NULL;
+		$this->Nomor->CurrentValue = "-";
 		$this->Nomor->OldValue = $this->Nomor->CurrentValue;
-		$this->Pos->CurrentValue = NULL;
+		$this->Pos->CurrentValue = "-";
 		$this->Pos->OldValue = $this->Pos->CurrentValue;
 		$this->Nominal->CurrentValue = 0.00;
+		$this->Nominal->OldValue = $this->Nominal->CurrentValue;
 		$this->JumlahSiswa->CurrentValue = 0;
+		$this->JumlahSiswa->OldValue = $this->JumlahSiswa->CurrentValue;
 		$this->Bulan->CurrentValue = 0;
+		$this->Bulan->OldValue = $this->Bulan->CurrentValue;
 		$this->Jumlah->CurrentValue = 0.00;
+		$this->Jumlah->OldValue = $this->Jumlah->CurrentValue;
 		$this->Total->CurrentValue = 0.00;
+		$this->Total->OldValue = $this->Total->CurrentValue;
 	}
 
-	// Load basic search values
-	function LoadBasicSearchValues() {
-		$this->BasicSearch->Keyword = @$_GET[EW_TABLE_BASIC_SEARCH];
-		if ($this->BasicSearch->Keyword <> "" && $this->Command == "") $this->Command = "search";
-		$this->BasicSearch->Type = @$_GET[EW_TABLE_BASIC_SEARCH_TYPE];
+	// Load search values for validation
+	function LoadSearchValues() {
+		global $objForm;
+
+		// Load search values
+		// id
+
+		$this->id->AdvancedSearch->SearchValue = @$_GET["x_id"];
+		if ($this->id->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->id->AdvancedSearch->SearchOperator = @$_GET["z_id"];
+
+		// Departemen
+		$this->Departemen->AdvancedSearch->SearchValue = @$_GET["x_Departemen"];
+		if ($this->Departemen->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Departemen->AdvancedSearch->SearchOperator = @$_GET["z_Departemen"];
+
+		// HeadDetail
+		$this->HeadDetail->AdvancedSearch->SearchValue = @$_GET["x_HeadDetail"];
+		if ($this->HeadDetail->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->HeadDetail->AdvancedSearch->SearchOperator = @$_GET["z_HeadDetail"];
+
+		// NomorHead
+		$this->NomorHead->AdvancedSearch->SearchValue = @$_GET["x_NomorHead"];
+		if ($this->NomorHead->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->NomorHead->AdvancedSearch->SearchOperator = @$_GET["z_NomorHead"];
+
+		// SubTotalFlag
+		$this->SubTotalFlag->AdvancedSearch->SearchValue = @$_GET["x_SubTotalFlag"];
+		if ($this->SubTotalFlag->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->SubTotalFlag->AdvancedSearch->SearchOperator = @$_GET["z_SubTotalFlag"];
+
+		// Urutan
+		$this->Urutan->AdvancedSearch->SearchValue = @$_GET["x_Urutan"];
+		if ($this->Urutan->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Urutan->AdvancedSearch->SearchOperator = @$_GET["z_Urutan"];
+
+		// Nomor
+		$this->Nomor->AdvancedSearch->SearchValue = @$_GET["x_Nomor"];
+		if ($this->Nomor->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Nomor->AdvancedSearch->SearchOperator = @$_GET["z_Nomor"];
+
+		// Pos
+		$this->Pos->AdvancedSearch->SearchValue = @$_GET["x_Pos"];
+		if ($this->Pos->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Pos->AdvancedSearch->SearchOperator = @$_GET["z_Pos"];
+
+		// Nominal
+		$this->Nominal->AdvancedSearch->SearchValue = @$_GET["x_Nominal"];
+		if ($this->Nominal->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Nominal->AdvancedSearch->SearchOperator = @$_GET["z_Nominal"];
+
+		// JumlahSiswa
+		$this->JumlahSiswa->AdvancedSearch->SearchValue = @$_GET["x_JumlahSiswa"];
+		if ($this->JumlahSiswa->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->JumlahSiswa->AdvancedSearch->SearchOperator = @$_GET["z_JumlahSiswa"];
+
+		// Bulan
+		$this->Bulan->AdvancedSearch->SearchValue = @$_GET["x_Bulan"];
+		if ($this->Bulan->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Bulan->AdvancedSearch->SearchOperator = @$_GET["z_Bulan"];
+
+		// Jumlah
+		$this->Jumlah->AdvancedSearch->SearchValue = @$_GET["x_Jumlah"];
+		if ($this->Jumlah->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Jumlah->AdvancedSearch->SearchOperator = @$_GET["z_Jumlah"];
+
+		// Total
+		$this->Total->AdvancedSearch->SearchValue = @$_GET["x_Total"];
+		if ($this->Total->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Total->AdvancedSearch->SearchOperator = @$_GET["z_Total"];
 	}
 
 	// Load form values
@@ -1677,8 +1919,9 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
+		if (!$this->Departemen->FldIsDetailKey) {
+			$this->Departemen->setFormValue($objForm->GetValue("x_Departemen"));
+		}
 		if (!$this->HeadDetail->FldIsDetailKey) {
 			$this->HeadDetail->setFormValue($objForm->GetValue("x_HeadDetail"));
 		}
@@ -1712,6 +1955,8 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		if (!$this->Total->FldIsDetailKey) {
 			$this->Total->setFormValue($objForm->GetValue("x_Total"));
 		}
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1719,6 +1964,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		global $objForm;
 		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->CurrentValue = $this->id->FormValue;
+		$this->Departemen->CurrentValue = $this->Departemen->FormValue;
 		$this->HeadDetail->CurrentValue = $this->HeadDetail->FormValue;
 		$this->NomorHead->CurrentValue = $this->NomorHead->FormValue;
 		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
@@ -1792,6 +2038,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Departemen->setDbValue($row['Departemen']);
 		$this->HeadDetail->setDbValue($row['HeadDetail']);
 		$this->NomorHead->setDbValue($row['NomorHead']);
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
@@ -1810,6 +2057,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$this->LoadDefaultValues();
 		$row = array();
 		$row['id'] = $this->id->CurrentValue;
+		$row['Departemen'] = $this->Departemen->CurrentValue;
 		$row['HeadDetail'] = $this->HeadDetail->CurrentValue;
 		$row['NomorHead'] = $this->NomorHead->CurrentValue;
 		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
@@ -1830,6 +2078,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Departemen->DbValue = $row['Departemen'];
 		$this->HeadDetail->DbValue = $row['HeadDetail'];
 		$this->NomorHead->DbValue = $row['NomorHead'];
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
@@ -1894,6 +2143,7 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 
 		// Common render codes for all row types
 		// id
+		// Departemen
 		// HeadDetail
 		// NomorHead
 		// SubTotalFlag
@@ -1911,6 +2161,30 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Departemen
+		if (strval($this->Departemen->CurrentValue) <> "") {
+			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+		$sWhereWrk = "";
+		$this->Departemen->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+		$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
+			}
+		} else {
+			$this->Departemen->ViewValue = NULL;
+		}
+		$this->Departemen->ViewCustomAttributes = "";
 
 		// HeadDetail
 		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
@@ -1956,10 +2230,10 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		$this->Total->ViewValue = $this->Total->CurrentValue;
 		$this->Total->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
+			// Departemen
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
+			$this->Departemen->TooltipValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -2017,9 +2291,27 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			$this->Total->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
-			// HeadDetail
+			// Departemen
+			$this->Departemen->EditAttrs["class"] = "form-control";
+			$this->Departemen->EditCustomAttributes = "";
+			if (trim(strval($this->Departemen->CurrentValue)) == "") {
+				$sFilterWrk = "0=1";
+			} else {
+				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+			}
+			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
+			$sWhereWrk = "";
+			$this->Departemen->LookupFilters = array();
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+			if ($rswrk) $rswrk->Close();
+			$this->Departemen->EditValue = $arwrk;
 
+			// HeadDetail
 			$this->HeadDetail->EditAttrs["class"] = "form-control";
 			$this->HeadDetail->EditCustomAttributes = "";
 			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->CurrentValue);
@@ -2089,10 +2381,10 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) $this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
 
 			// Add refer script
-			// id
+			// Departemen
 
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -2139,11 +2431,25 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			$this->Total->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
 
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
+			// Departemen
+			$this->Departemen->EditAttrs["class"] = "form-control";
+			$this->Departemen->EditCustomAttributes = "";
+			if (trim(strval($this->Departemen->CurrentValue)) == "") {
+				$sFilterWrk = "0=1";
+			} else {
+				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
+			}
+			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
+			$sWhereWrk = "";
+			$this->Departemen->LookupFilters = array();
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+			if ($rswrk) $rswrk->Close();
+			$this->Departemen->EditValue = $arwrk;
 
 			// HeadDetail
 			$this->HeadDetail->EditAttrs["class"] = "form-control";
@@ -2215,10 +2521,10 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) $this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
 
 			// Edit refer script
-			// id
+			// Departemen
 
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
+			$this->Departemen->LinkCustomAttributes = "";
+			$this->Departemen->HrefValue = "";
 
 			// HeadDetail
 			$this->HeadDetail->LinkCustomAttributes = "";
@@ -2263,6 +2569,93 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			// Total
 			$this->Total->LinkCustomAttributes = "";
 			$this->Total->HrefValue = "";
+		} elseif ($this->RowType == EW_ROWTYPE_SEARCH) { // Search row
+
+			// Departemen
+			$this->Departemen->EditAttrs["class"] = "form-control";
+			$this->Departemen->EditCustomAttributes = "";
+			if (trim(strval($this->Departemen->AdvancedSearch->SearchValue)) == "") {
+				$sFilterWrk = "0=1";
+			} else {
+				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->AdvancedSearch->SearchValue, EW_DATATYPE_STRING, "jbsakad");
+			}
+			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
+			$sWhereWrk = "";
+			$this->Departemen->LookupFilters = array();
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `departemen` ASC";
+			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
+			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+			if ($rswrk) $rswrk->Close();
+			$this->Departemen->EditValue = $arwrk;
+
+			// HeadDetail
+			$this->HeadDetail->EditAttrs["class"] = "form-control";
+			$this->HeadDetail->EditCustomAttributes = "";
+			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->AdvancedSearch->SearchValue);
+			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
+
+			// NomorHead
+			$this->NomorHead->EditAttrs["class"] = "form-control";
+			$this->NomorHead->EditCustomAttributes = "";
+			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->AdvancedSearch->SearchValue);
+			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
+
+			// SubTotalFlag
+			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
+			$this->SubTotalFlag->EditCustomAttributes = "";
+			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->AdvancedSearch->SearchValue);
+			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
+
+			// Urutan
+			$this->Urutan->EditAttrs["class"] = "form-control";
+			$this->Urutan->EditCustomAttributes = "";
+			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->AdvancedSearch->SearchValue);
+			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
+
+			// Nomor
+			$this->Nomor->EditAttrs["class"] = "form-control";
+			$this->Nomor->EditCustomAttributes = "";
+			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->AdvancedSearch->SearchValue);
+			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
+
+			// Pos
+			$this->Pos->EditAttrs["class"] = "form-control";
+			$this->Pos->EditCustomAttributes = "";
+			$this->Pos->EditValue = ew_HtmlEncode($this->Pos->AdvancedSearch->SearchValue);
+			$this->Pos->PlaceHolder = ew_RemoveHtml($this->Pos->FldCaption());
+
+			// Nominal
+			$this->Nominal->EditAttrs["class"] = "form-control";
+			$this->Nominal->EditCustomAttributes = "";
+			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->AdvancedSearch->SearchValue);
+			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
+
+			// JumlahSiswa
+			$this->JumlahSiswa->EditAttrs["class"] = "form-control";
+			$this->JumlahSiswa->EditCustomAttributes = "";
+			$this->JumlahSiswa->EditValue = ew_HtmlEncode($this->JumlahSiswa->AdvancedSearch->SearchValue);
+			$this->JumlahSiswa->PlaceHolder = ew_RemoveHtml($this->JumlahSiswa->FldCaption());
+
+			// Bulan
+			$this->Bulan->EditAttrs["class"] = "form-control";
+			$this->Bulan->EditCustomAttributes = "";
+			$this->Bulan->EditValue = ew_HtmlEncode($this->Bulan->AdvancedSearch->SearchValue);
+			$this->Bulan->PlaceHolder = ew_RemoveHtml($this->Bulan->FldCaption());
+
+			// Jumlah
+			$this->Jumlah->EditAttrs["class"] = "form-control";
+			$this->Jumlah->EditCustomAttributes = "";
+			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->AdvancedSearch->SearchValue);
+			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
+
+			// Total
+			$this->Total->EditAttrs["class"] = "form-control";
+			$this->Total->EditCustomAttributes = "";
+			$this->Total->EditValue = ew_HtmlEncode($this->Total->AdvancedSearch->SearchValue);
+			$this->Total->PlaceHolder = ew_RemoveHtml($this->Total->FldCaption());
 		}
 		if ($this->RowType == EW_ROWTYPE_ADD || $this->RowType == EW_ROWTYPE_EDIT || $this->RowType == EW_ROWTYPE_SEARCH) // Add/Edit/Search row
 			$this->SetupFieldTitles();
@@ -2270,6 +2663,29 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		// Call Row Rendered event
 		if ($this->RowType <> EW_ROWTYPE_AGGREGATEINIT)
 			$this->Row_Rendered();
+	}
+
+	// Validate search
+	function ValidateSearch() {
+		global $gsSearchError;
+
+		// Initialize
+		$gsSearchError = "";
+
+		// Check if validation required
+		if (!EW_SERVER_VALIDATE)
+			return TRUE;
+
+		// Return validate result
+		$ValidateSearch = ($gsSearchError == "");
+
+		// Call Form_CustomValidate event
+		$sFormCustomError = "";
+		$ValidateSearch = $ValidateSearch && $this->Form_CustomValidate($sFormCustomError);
+		if ($sFormCustomError <> "") {
+			ew_AddMessage($gsSearchError, $sFormCustomError);
+		}
+		return $ValidateSearch;
 	}
 
 	// Validate form
@@ -2349,6 +2765,79 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		return $ValidateForm;
 	}
 
+	//
+	// Delete records based on current filter
+	//
+	function DeleteRows() {
+		global $Language, $Security;
+		$DeleteRows = TRUE;
+		$sSql = $this->SQL();
+		$conn = &$this->Connection();
+		$conn->raiseErrorFn = $GLOBALS["EW_ERROR_FN"];
+		$rs = $conn->Execute($sSql);
+		$conn->raiseErrorFn = '';
+		if ($rs === FALSE) {
+			return FALSE;
+		} elseif ($rs->EOF) {
+			$this->setFailureMessage($Language->Phrase("NoRecord")); // No record found
+			$rs->Close();
+			return FALSE;
+		}
+		$rows = ($rs) ? $rs->GetRows() : array();
+
+		// Clone old rows
+		$rsold = $rows;
+		if ($rs)
+			$rs->Close();
+
+		// Call row deleting event
+		if ($DeleteRows) {
+			foreach ($rsold as $row) {
+				$DeleteRows = $this->Row_Deleting($row);
+				if (!$DeleteRows) break;
+			}
+		}
+		if ($DeleteRows) {
+			$sKey = "";
+			foreach ($rsold as $row) {
+				$sThisKey = "";
+				if ($sThisKey <> "") $sThisKey .= $GLOBALS["EW_COMPOSITE_KEY_SEPARATOR"];
+				$sThisKey .= $row['id'];
+				$conn->raiseErrorFn = $GLOBALS["EW_ERROR_FN"];
+				$DeleteRows = $this->Delete($row); // Delete
+				$conn->raiseErrorFn = '';
+				if ($DeleteRows === FALSE)
+					break;
+				if ($sKey <> "") $sKey .= ", ";
+				$sKey .= $sThisKey;
+			}
+		}
+		if (!$DeleteRows) {
+
+			// Set up error message
+			if ($this->getSuccessMessage() <> "" || $this->getFailureMessage() <> "") {
+
+				// Use the message, do nothing
+			} elseif ($this->CancelMessage <> "") {
+				$this->setFailureMessage($this->CancelMessage);
+				$this->CancelMessage = "";
+			} else {
+				$this->setFailureMessage($Language->Phrase("DeleteCancelled"));
+			}
+		}
+		if ($DeleteRows) {
+		} else {
+		}
+
+		// Call Row Deleted event
+		if ($DeleteRows) {
+			foreach ($rsold as $row) {
+				$this->Row_Deleted($row);
+			}
+		}
+		return $DeleteRows;
+	}
+
 	// Update record based on key values
 	function EditRow() {
 		global $Security, $Language;
@@ -2371,6 +2860,9 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 			$rsold = &$rs->fields;
 			$this->LoadDbValues($rsold);
 			$rsnew = array();
+
+			// Departemen
+			$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", $this->Departemen->ReadOnly);
 
 			// HeadDetail
 			$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", $this->HeadDetail->ReadOnly);
@@ -2448,23 +2940,26 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		}
 		$rsnew = array();
 
+		// Departemen
+		$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", strval($this->Departemen->CurrentValue) == "");
+
 		// HeadDetail
 		$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", strval($this->HeadDetail->CurrentValue) == "");
 
 		// NomorHead
-		$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, FALSE);
+		$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, strval($this->NomorHead->CurrentValue) == "");
 
 		// SubTotalFlag
-		$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", FALSE);
+		$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", strval($this->SubTotalFlag->CurrentValue) == "");
 
 		// Urutan
-		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, FALSE);
+		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, strval($this->Urutan->CurrentValue) == "");
 
 		// Nomor
-		$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", FALSE);
+		$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", strval($this->Nomor->CurrentValue) == "");
 
 		// Pos
-		$this->Pos->SetDbValueDef($rsnew, $this->Pos->CurrentValue, "", FALSE);
+		$this->Pos->SetDbValueDef($rsnew, $this->Pos->CurrentValue, "", strval($this->Pos->CurrentValue) == "");
 
 		// Nominal
 		$this->Nominal->SetDbValueDef($rsnew, $this->Nominal->CurrentValue, 0, strval($this->Nominal->CurrentValue) == "");
@@ -2511,6 +3006,23 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 		return $AddRow;
 	}
 
+	// Load advanced search
+	function LoadAdvancedSearch() {
+		$this->id->AdvancedSearch->Load();
+		$this->Departemen->AdvancedSearch->Load();
+		$this->HeadDetail->AdvancedSearch->Load();
+		$this->NomorHead->AdvancedSearch->Load();
+		$this->SubTotalFlag->AdvancedSearch->Load();
+		$this->Urutan->AdvancedSearch->Load();
+		$this->Nomor->AdvancedSearch->Load();
+		$this->Pos->AdvancedSearch->Load();
+		$this->Nominal->AdvancedSearch->Load();
+		$this->JumlahSiswa->AdvancedSearch->Load();
+		$this->Bulan->AdvancedSearch->Load();
+		$this->Jumlah->AdvancedSearch->Load();
+		$this->Total->AdvancedSearch->Load();
+	}
+
 	// Set up Breadcrumb
 	function SetupBreadcrumb() {
 		global $Breadcrumb, $Language;
@@ -2524,7 +3036,38 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function SetupLookupFilters($fld, $pageId = null) {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
-		switch ($fld->FldVar) {
+		if ($pageId == "list") {
+			switch ($fld->FldVar) {
+		case "x_Departemen":
+			$sSqlWrk = "";
+				$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+				$sWhereWrk = "";
+				$fld->LookupFilters = array();
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
+			$sSqlWrk = "";
+				$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+				if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+				$sSqlWrk .= " ORDER BY `departemen` ASC";
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
+			}
+		} elseif ($pageId == "extbs") {
+			switch ($fld->FldVar) {
+		case "x_Departemen":
+			$sSqlWrk = "";
+				$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+				$sWhereWrk = "";
+				$fld->LookupFilters = array();
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
+			$sSqlWrk = "";
+				$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+				if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+				$sSqlWrk .= " ORDER BY `departemen` ASC";
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
+			}
 		}
 	}
 
@@ -2532,7 +3075,12 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function SetupAutoSuggestFilters($fld, $pageId = null) {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
-		switch ($fld->FldVar) {
+		if ($pageId == "list") {
+			switch ($fld->FldVar) {
+			}
+		} elseif ($pageId == "extbs") {
+			switch ($fld->FldVar) {
+			}
 		}
 	}
 
@@ -2540,6 +3088,8 @@ class ct01_penerimaan_list extends ct01_penerimaan {
 	function Page_Load() {
 
 		//echo "Page Load";
+		// $this->Departemen->Visible = false;
+
 	}
 
 	// Page Unload event
@@ -2780,9 +3330,39 @@ ft01_penerimaanlist.Form_CustomValidate =
 ft01_penerimaanlist.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft01_penerimaanlist.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
+ft01_penerimaanlist.Lists["x_Departemen"].Data = "<?php echo $t01_penerimaan_list->Departemen->LookupFilterQuery(FALSE, "list") ?>";
 
+// Form object for search
 var CurrentSearchForm = ft01_penerimaanlistsrch = new ew_Form("ft01_penerimaanlistsrch");
+
+// Validate function for search
+ft01_penerimaanlistsrch.Validate = function(fobj) {
+	if (!this.ValidateRequired)
+		return true; // Ignore validation
+	fobj = fobj || this.Form;
+	var infix = "";
+
+	// Fire Form_CustomValidate event
+	if (!this.Form_CustomValidate(fobj))
+		return false;
+	return true;
+}
+
+// Form_CustomValidate event
+ft01_penerimaanlistsrch.Form_CustomValidate = 
+ function(fobj) { // DO NOT CHANGE THIS LINE!
+
+ 	// Your custom validation code here, return false if invalid.
+ 	return true;
+ }
+
+// Use JavaScript validation or not
+ft01_penerimaanlistsrch.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
+
+// Dynamic selection lists
+ft01_penerimaanlistsrch.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
+ft01_penerimaanlistsrch.Lists["x_Departemen"].Data = "<?php echo $t01_penerimaan_list->Departemen->LookupFilterQuery(FALSE, "extbs") ?>";
 </script>
 <script type="text/javascript">
 
@@ -2833,21 +3413,32 @@ $t01_penerimaan_list->RenderOtherOptions();
 <input type="hidden" name="cmd" value="search">
 <input type="hidden" name="t" value="t01_penerimaan">
 	<div class="ewBasicSearch">
+<?php
+if ($gsSearchError == "")
+	$t01_penerimaan_list->LoadAdvancedSearch(); // Load advanced search
+
+// Render for search
+$t01_penerimaan->RowType = EW_ROWTYPE_SEARCH;
+
+// Render row
+$t01_penerimaan->ResetAttrs();
+$t01_penerimaan_list->RenderRow();
+?>
 <div id="xsr_1" class="ewRow">
-	<div class="ewQuickSearch input-group">
-	<input type="text" name="<?php echo EW_TABLE_BASIC_SEARCH ?>" id="<?php echo EW_TABLE_BASIC_SEARCH ?>" class="form-control" value="<?php echo ew_HtmlEncode($t01_penerimaan_list->BasicSearch->getKeyword()) ?>" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Search")) ?>">
-	<input type="hidden" name="<?php echo EW_TABLE_BASIC_SEARCH_TYPE ?>" id="<?php echo EW_TABLE_BASIC_SEARCH_TYPE ?>" value="<?php echo ew_HtmlEncode($t01_penerimaan_list->BasicSearch->getType()) ?>">
-	<div class="input-group-btn">
-		<button type="button" data-toggle="dropdown" class="btn btn-default"><span id="searchtype"><?php echo $t01_penerimaan_list->BasicSearch->getTypeNameShort() ?></span><span class="caret"></span></button>
-		<ul class="dropdown-menu pull-right" role="menu">
-			<li<?php if ($t01_penerimaan_list->BasicSearch->getType() == "") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this)"><?php echo $Language->Phrase("QuickSearchAuto") ?></a></li>
-			<li<?php if ($t01_penerimaan_list->BasicSearch->getType() == "=") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'=')"><?php echo $Language->Phrase("QuickSearchExact") ?></a></li>
-			<li<?php if ($t01_penerimaan_list->BasicSearch->getType() == "AND") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'AND')"><?php echo $Language->Phrase("QuickSearchAll") ?></a></li>
-			<li<?php if ($t01_penerimaan_list->BasicSearch->getType() == "OR") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'OR')"><?php echo $Language->Phrase("QuickSearchAny") ?></a></li>
-		</ul>
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+	<div id="xsc_Departemen" class="ewCell form-group">
+		<label for="x_Departemen" class="ewSearchCaption ewLabel"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></label>
+		<span class="ewSearchOperator"><?php echo $Language->Phrase("LIKE") ?><input type="hidden" name="z_Departemen" id="z_Departemen" value="LIKE"></span>
+		<span class="ewSearchField">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x_Departemen" name="x_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x_Departemen") ?>
+</select>
+</span>
+	</div>
+<?php } ?>
+</div>
+<div id="xsr_2" class="ewRow">
 	<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"><?php echo $Language->Phrase("SearchBtn") ?></button>
-	</div>
-	</div>
 </div>
 	</div>
 </div>
@@ -2880,12 +3471,12 @@ $t01_penerimaan_list->RenderListOptions();
 // Render list options (header, left)
 $t01_penerimaan_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t01_penerimaan->id->Visible) { // id ?>
-	<?php if ($t01_penerimaan->SortUrl($t01_penerimaan->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t01_penerimaan->id->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_id" class="t01_penerimaan_id"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->id->FldCaption() ?></div></div></th>
+<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+	<?php if ($t01_penerimaan->SortUrl($t01_penerimaan->Departemen) == "") { ?>
+		<th data-name="Departemen" class="<?php echo $t01_penerimaan->Departemen->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_Departemen" class="t01_penerimaan_Departemen"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t01_penerimaan->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->id) ?>',1);"><div id="elh_t01_penerimaan_id" class="t01_penerimaan_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+		<th data-name="Departemen" class="<?php echo $t01_penerimaan->Departemen->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->Departemen) ?>',1);"><div id="elh_t01_penerimaan_Departemen" class="t01_penerimaan_Departemen">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Departemen->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->Departemen->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->Departemen->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2894,7 +3485,7 @@ $t01_penerimaan_list->ListOptions->Render("header", "left");
 		<th data-name="HeadDetail" class="<?php echo $t01_penerimaan->HeadDetail->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_HeadDetail" class="t01_penerimaan_HeadDetail"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->HeadDetail->FldCaption() ?></div></div></th>
 	<?php } else { ?>
 		<th data-name="HeadDetail" class="<?php echo $t01_penerimaan->HeadDetail->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->HeadDetail) ?>',1);"><div id="elh_t01_penerimaan_HeadDetail" class="t01_penerimaan_HeadDetail">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->HeadDetail->FldCaption() ?><?php echo $Language->Phrase("SrchLegend") ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->HeadDetail->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->HeadDetail->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->HeadDetail->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->HeadDetail->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->HeadDetail->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2912,7 +3503,7 @@ $t01_penerimaan_list->ListOptions->Render("header", "left");
 		<th data-name="SubTotalFlag" class="<?php echo $t01_penerimaan->SubTotalFlag->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_SubTotalFlag" class="t01_penerimaan_SubTotalFlag"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->SubTotalFlag->FldCaption() ?></div></div></th>
 	<?php } else { ?>
 		<th data-name="SubTotalFlag" class="<?php echo $t01_penerimaan->SubTotalFlag->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->SubTotalFlag) ?>',1);"><div id="elh_t01_penerimaan_SubTotalFlag" class="t01_penerimaan_SubTotalFlag">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->SubTotalFlag->FldCaption() ?><?php echo $Language->Phrase("SrchLegend") ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->SubTotalFlag->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->SubTotalFlag->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->SubTotalFlag->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->SubTotalFlag->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->SubTotalFlag->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2930,7 +3521,7 @@ $t01_penerimaan_list->ListOptions->Render("header", "left");
 		<th data-name="Nomor" class="<?php echo $t01_penerimaan->Nomor->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_Nomor" class="t01_penerimaan_Nomor"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Nomor->FldCaption() ?></div></div></th>
 	<?php } else { ?>
 		<th data-name="Nomor" class="<?php echo $t01_penerimaan->Nomor->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->Nomor) ?>',1);"><div id="elh_t01_penerimaan_Nomor" class="t01_penerimaan_Nomor">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Nomor->FldCaption() ?><?php echo $Language->Phrase("SrchLegend") ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->Nomor->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->Nomor->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Nomor->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->Nomor->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->Nomor->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2939,7 +3530,7 @@ $t01_penerimaan_list->ListOptions->Render("header", "left");
 		<th data-name="Pos" class="<?php echo $t01_penerimaan->Pos->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_Pos" class="t01_penerimaan_Pos"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Pos->FldCaption() ?></div></div></th>
 	<?php } else { ?>
 		<th data-name="Pos" class="<?php echo $t01_penerimaan->Pos->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan->SortUrl($t01_penerimaan->Pos) ?>',1);"><div id="elh_t01_penerimaan_Pos" class="t01_penerimaan_Pos">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Pos->FldCaption() ?><?php echo $Language->Phrase("SrchLegend") ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->Pos->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->Pos->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan->Pos->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan->Pos->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan->Pos->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -3000,8 +3591,6 @@ $t01_penerimaan_list->ListOptions->Render("header", "right");
 	if ($t01_penerimaan->CurrentAction == "add" || $t01_penerimaan->CurrentAction == "copy") {
 		$t01_penerimaan_list->RowIndex = 0;
 		$t01_penerimaan_list->KeyCount = $t01_penerimaan_list->RowIndex;
-		if ($t01_penerimaan->CurrentAction == "copy" && !$t01_penerimaan_list->LoadRow())
-			$t01_penerimaan->CurrentAction = "add";
 		if ($t01_penerimaan->CurrentAction == "add")
 			$t01_penerimaan_list->LoadRowValues();
 		if ($t01_penerimaan->EventCancelled) // Insert failed
@@ -3025,15 +3614,20 @@ $t01_penerimaan_list->ListOptions->Render("header", "right");
 // Render list options (body, left)
 $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->RowCnt);
 ?>
-	<?php if ($t01_penerimaan->id->Visible) { // id ?>
-		<td data-name="id">
-<input type="hidden" data-table="t01_penerimaan" data-field="x_id" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_id" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan->id->OldValue) ?>">
+	<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+		<td data-name="Departemen">
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Departemen" class="form-group t01_penerimaan_Departemen">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen") ?>
+</select>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Departemen" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t01_penerimaan->Departemen->OldValue) ?>">
 </td>
 	<?php } ?>
 	<?php if ($t01_penerimaan->HeadDetail->Visible) { // HeadDetail ?>
 		<td data-name="HeadDetail">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_HeadDetail" class="form-group t01_penerimaan_HeadDetail">
-<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="1" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_HeadDetail" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->OldValue) ?>">
 </td>
@@ -3041,7 +3635,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->NomorHead->Visible) { // NomorHead ?>
 		<td data-name="NomorHead">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_NomorHead" class="form-group t01_penerimaan_NomorHead">
-<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_NomorHead" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->OldValue) ?>">
 </td>
@@ -3049,7 +3643,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->SubTotalFlag->Visible) { // SubTotalFlag ?>
 		<td data-name="SubTotalFlag">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_SubTotalFlag" class="form-group t01_penerimaan_SubTotalFlag">
-<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="1" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->OldValue) ?>">
 </td>
@@ -3057,7 +3651,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Urutan" class="form-group t01_penerimaan_Urutan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Urutan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->OldValue) ?>">
 </td>
@@ -3065,7 +3659,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nomor" class="form-group t01_penerimaan_Nomor">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Nomor" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->OldValue) ?>">
 </td>
@@ -3081,7 +3675,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Nominal->Visible) { // Nominal ?>
 		<td data-name="Nominal">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nominal" class="form-group t01_penerimaan_Nominal">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Nominal" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->OldValue) ?>">
 </td>
@@ -3089,7 +3683,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->JumlahSiswa->Visible) { // JumlahSiswa ?>
 		<td data-name="JumlahSiswa">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_JumlahSiswa" class="form-group t01_penerimaan_JumlahSiswa">
-<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" value="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->OldValue) ?>">
 </td>
@@ -3097,7 +3691,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Bulan->Visible) { // Bulan ?>
 		<td data-name="Bulan">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Bulan" class="form-group t01_penerimaan_Bulan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Bulan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->OldValue) ?>">
 </td>
@@ -3105,7 +3699,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Jumlah->Visible) { // Jumlah ?>
 		<td data-name="Jumlah">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Jumlah" class="form-group t01_penerimaan_Jumlah">
-<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Jumlah" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->OldValue) ?>">
 </td>
@@ -3113,7 +3707,7 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php if ($t01_penerimaan->Total->Visible) { // Total ?>
 		<td data-name="Total">
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Total" class="form-group t01_penerimaan_Total">
-<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan" data-field="x_Total" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t01_penerimaan->Total->OldValue) ?>">
 </td>
@@ -3164,13 +3758,22 @@ if ($t01_penerimaan_list->Recordset && !$t01_penerimaan_list->Recordset->EOF) {
 $t01_penerimaan->RowType = EW_ROWTYPE_AGGREGATEINIT;
 $t01_penerimaan->ResetAttrs();
 $t01_penerimaan_list->RenderRow();
-$t01_penerimaan_list->EditRowCnt = 0;
-if ($t01_penerimaan->CurrentAction == "edit")
-	$t01_penerimaan_list->RowIndex = 1;
+if ($t01_penerimaan->CurrentAction == "gridedit")
+	$t01_penerimaan_list->RowIndex = 0;
 while ($t01_penerimaan_list->RecCnt < $t01_penerimaan_list->StopRec) {
 	$t01_penerimaan_list->RecCnt++;
 	if (intval($t01_penerimaan_list->RecCnt) >= intval($t01_penerimaan_list->StartRec)) {
 		$t01_penerimaan_list->RowCnt++;
+		if ($t01_penerimaan->CurrentAction == "gridadd" || $t01_penerimaan->CurrentAction == "gridedit" || $t01_penerimaan->CurrentAction == "F") {
+			$t01_penerimaan_list->RowIndex++;
+			$objForm->Index = $t01_penerimaan_list->RowIndex;
+			if ($objForm->HasValue($t01_penerimaan_list->FormActionName))
+				$t01_penerimaan_list->RowAction = strval($objForm->GetValue($t01_penerimaan_list->FormActionName));
+			elseif ($t01_penerimaan->CurrentAction == "gridadd")
+				$t01_penerimaan_list->RowAction = "insert";
+			else
+				$t01_penerimaan_list->RowAction = "";
+		}
 
 		// Set up key count
 		$t01_penerimaan_list->KeyCount = $t01_penerimaan_list->RowIndex;
@@ -3184,15 +3787,17 @@ while ($t01_penerimaan_list->RecCnt < $t01_penerimaan_list->StopRec) {
 			$t01_penerimaan_list->LoadRowValues($t01_penerimaan_list->Recordset); // Load row values
 		}
 		$t01_penerimaan->RowType = EW_ROWTYPE_VIEW; // Render view
-		if ($t01_penerimaan->CurrentAction == "edit") {
-			if ($t01_penerimaan_list->CheckInlineEditKey() && $t01_penerimaan_list->EditRowCnt == 0) { // Inline edit
-				$t01_penerimaan->RowType = EW_ROWTYPE_EDIT; // Render edit
+		if ($t01_penerimaan->CurrentAction == "gridedit") { // Grid edit
+			if ($t01_penerimaan->EventCancelled) {
+				$t01_penerimaan_list->RestoreCurrentRowFormValues($t01_penerimaan_list->RowIndex); // Restore form values
 			}
+			if ($t01_penerimaan_list->RowAction == "insert")
+				$t01_penerimaan->RowType = EW_ROWTYPE_ADD; // Render add
+			else
+				$t01_penerimaan->RowType = EW_ROWTYPE_EDIT; // Render edit
 		}
-		if ($t01_penerimaan->CurrentAction == "edit" && $t01_penerimaan->RowType == EW_ROWTYPE_EDIT && $t01_penerimaan->EventCancelled) { // Update failed
-			$objForm->Index = 1;
-			$t01_penerimaan_list->RestoreFormValues(); // Restore form values
-		}
+		if ($t01_penerimaan->CurrentAction == "gridedit" && ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT || $t01_penerimaan->RowType == EW_ROWTYPE_ADD) && $t01_penerimaan->EventCancelled) // Update failed
+			$t01_penerimaan_list->RestoreCurrentRowFormValues($t01_penerimaan_list->RowIndex); // Restore form values
 		if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) // Edit row
 			$t01_penerimaan_list->EditRowCnt++;
 
@@ -3204,6 +3809,9 @@ while ($t01_penerimaan_list->RecCnt < $t01_penerimaan_list->StopRec) {
 
 		// Render list options
 		$t01_penerimaan_list->RenderListOptions();
+
+		// Skip delete row / empty row for confirm page
+		if ($t01_penerimaan_list->RowAction <> "delete" && $t01_penerimaan_list->RowAction <> "insertdelete" && !($t01_penerimaan_list->RowAction == "insert" && $t01_penerimaan->CurrentAction == "F" && $t01_penerimaan_list->EmptyRow())) {
 ?>
 	<tr<?php echo $t01_penerimaan->RowAttributes() ?>>
 <?php
@@ -3211,28 +3819,49 @@ while ($t01_penerimaan_list->RecCnt < $t01_penerimaan_list->StopRec) {
 // Render list options (body, left)
 $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->RowCnt);
 ?>
-	<?php if ($t01_penerimaan->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t01_penerimaan->id->CellAttributes() ?>>
-<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_id" class="form-group t01_penerimaan_id">
-<span<?php echo $t01_penerimaan->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t01_penerimaan->id->EditValue ?></p></span>
+	<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+		<td data-name="Departemen"<?php echo $t01_penerimaan->Departemen->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Departemen" class="form-group t01_penerimaan_Departemen">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen") ?>
+</select>
 </span>
-<input type="hidden" data-table="t01_penerimaan" data-field="x_id" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan->id->CurrentValue) ?>">
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Departemen" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t01_penerimaan->Departemen->OldValue) ?>">
+<?php } ?>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Departemen" class="form-group t01_penerimaan_Departemen">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen") ?>
+</select>
+</span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_id" class="t01_penerimaan_id">
-<span<?php echo $t01_penerimaan->id->ViewAttributes() ?>>
-<?php echo $t01_penerimaan->id->ListViewValue() ?></span>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Departemen" class="t01_penerimaan_Departemen">
+<span<?php echo $t01_penerimaan->Departemen->ViewAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->ListViewValue() ?></span>
 </span>
 <?php } ?>
 </td>
 	<?php } ?>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_id" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan->id->CurrentValue) ?>">
+<input type="hidden" data-table="t01_penerimaan" data-field="x_id" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_id" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT || $t01_penerimaan->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_id" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t01_penerimaan->HeadDetail->Visible) { // HeadDetail ?>
 		<td data-name="HeadDetail"<?php echo $t01_penerimaan->HeadDetail->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_HeadDetail" class="form-group t01_penerimaan_HeadDetail">
+<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="1" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_HeadDetail" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_HeadDetail" class="form-group t01_penerimaan_HeadDetail">
-<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="1" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3245,9 +3874,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->NomorHead->Visible) { // NomorHead ?>
 		<td data-name="NomorHead"<?php echo $t01_penerimaan->NomorHead->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_NomorHead" class="form-group t01_penerimaan_NomorHead">
+<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_NomorHead" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_NomorHead" class="form-group t01_penerimaan_NomorHead">
-<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3260,9 +3895,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->SubTotalFlag->Visible) { // SubTotalFlag ?>
 		<td data-name="SubTotalFlag"<?php echo $t01_penerimaan->SubTotalFlag->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_SubTotalFlag" class="form-group t01_penerimaan_SubTotalFlag">
+<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="1" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_SubTotalFlag" class="form-group t01_penerimaan_SubTotalFlag">
-<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="1" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3275,9 +3916,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan"<?php echo $t01_penerimaan->Urutan->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Urutan" class="form-group t01_penerimaan_Urutan">
+<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Urutan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Urutan" class="form-group t01_penerimaan_Urutan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3290,9 +3937,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor"<?php echo $t01_penerimaan->Nomor->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nomor" class="form-group t01_penerimaan_Nomor">
+<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Nomor" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nomor" class="form-group t01_penerimaan_Nomor">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3305,6 +3958,12 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Pos->Visible) { // Pos ?>
 		<td data-name="Pos"<?php echo $t01_penerimaan->Pos->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Pos" class="form-group t01_penerimaan_Pos">
+<input type="text" data-table="t01_penerimaan" data-field="x_Pos" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Pos->EditValue ?>"<?php echo $t01_penerimaan->Pos->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Pos" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" value="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Pos" class="form-group t01_penerimaan_Pos">
 <input type="text" data-table="t01_penerimaan" data-field="x_Pos" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Pos->EditValue ?>"<?php echo $t01_penerimaan->Pos->EditAttributes() ?>>
@@ -3320,9 +3979,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Nominal->Visible) { // Nominal ?>
 		<td data-name="Nominal"<?php echo $t01_penerimaan->Nominal->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nominal" class="form-group t01_penerimaan_Nominal">
+<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Nominal" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Nominal" class="form-group t01_penerimaan_Nominal">
-<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3335,9 +4000,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->JumlahSiswa->Visible) { // JumlahSiswa ?>
 		<td data-name="JumlahSiswa"<?php echo $t01_penerimaan->JumlahSiswa->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_JumlahSiswa" class="form-group t01_penerimaan_JumlahSiswa">
+<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" value="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_JumlahSiswa" class="form-group t01_penerimaan_JumlahSiswa">
-<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3350,9 +4021,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Bulan->Visible) { // Bulan ?>
 		<td data-name="Bulan"<?php echo $t01_penerimaan->Bulan->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Bulan" class="form-group t01_penerimaan_Bulan">
+<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Bulan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Bulan" class="form-group t01_penerimaan_Bulan">
-<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3365,9 +4042,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Jumlah->Visible) { // Jumlah ?>
 		<td data-name="Jumlah"<?php echo $t01_penerimaan->Jumlah->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Jumlah" class="form-group t01_penerimaan_Jumlah">
+<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Jumlah" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Jumlah" class="form-group t01_penerimaan_Jumlah">
-<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3380,9 +4063,15 @@ $t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->
 	<?php } ?>
 	<?php if ($t01_penerimaan->Total->Visible) { // Total ?>
 		<td data-name="Total"<?php echo $t01_penerimaan->Total->CellAttributes() ?>>
+<?php if ($t01_penerimaan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Total" class="form-group t01_penerimaan_Total">
+<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Total" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t01_penerimaan->Total->OldValue) ?>">
+<?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_list->RowCnt ?>_t01_penerimaan_Total" class="form-group t01_penerimaan_Total">
-<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -3406,8 +4095,143 @@ ft01_penerimaanlist.UpdateOpts(<?php echo $t01_penerimaan_list->RowIndex ?>);
 <?php } ?>
 <?php
 	}
+	} // End delete row checking
 	if ($t01_penerimaan->CurrentAction <> "gridadd")
-		$t01_penerimaan_list->Recordset->MoveNext();
+		if (!$t01_penerimaan_list->Recordset->EOF) $t01_penerimaan_list->Recordset->MoveNext();
+}
+?>
+<?php
+	if ($t01_penerimaan->CurrentAction == "gridadd" || $t01_penerimaan->CurrentAction == "gridedit") {
+		$t01_penerimaan_list->RowIndex = '$rowindex$';
+		$t01_penerimaan_list->LoadRowValues();
+
+		// Set row properties
+		$t01_penerimaan->ResetAttrs();
+		$t01_penerimaan->RowAttrs = array_merge($t01_penerimaan->RowAttrs, array('data-rowindex'=>$t01_penerimaan_list->RowIndex, 'id'=>'r0_t01_penerimaan', 'data-rowtype'=>EW_ROWTYPE_ADD));
+		ew_AppendClass($t01_penerimaan->RowAttrs["class"], "ewTemplate");
+		$t01_penerimaan->RowType = EW_ROWTYPE_ADD;
+
+		// Render row
+		$t01_penerimaan_list->RenderRow();
+
+		// Render list options
+		$t01_penerimaan_list->RenderListOptions();
+		$t01_penerimaan_list->StartRowCnt = 0;
+?>
+	<tr<?php echo $t01_penerimaan->RowAttributes() ?>>
+<?php
+
+// Render list options (body, left)
+$t01_penerimaan_list->ListOptions->Render("body", "left", $t01_penerimaan_list->RowIndex);
+?>
+	<?php if ($t01_penerimaan->Departemen->Visible) { // Departemen ?>
+		<td data-name="Departemen">
+<span id="el$rowindex$_t01_penerimaan_Departemen" class="form-group t01_penerimaan_Departemen">
+<select data-table="t01_penerimaan" data-field="x_Departemen" data-value-separator="<?php echo $t01_penerimaan->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen"<?php echo $t01_penerimaan->Departemen->EditAttributes() ?>>
+<?php echo $t01_penerimaan->Departemen->SelectOptionListHtml("x<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen") ?>
+</select>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Departemen" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t01_penerimaan->Departemen->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->HeadDetail->Visible) { // HeadDetail ?>
+		<td data-name="HeadDetail">
+<span id="el$rowindex$_t01_penerimaan_HeadDetail" class="form-group t01_penerimaan_HeadDetail">
+<input type="text" data-table="t01_penerimaan" data-field="x_HeadDetail" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" size="1" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->HeadDetail->EditValue ?>"<?php echo $t01_penerimaan->HeadDetail->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_HeadDetail" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t01_penerimaan->HeadDetail->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->NomorHead->Visible) { // NomorHead ?>
+		<td data-name="NomorHead">
+<span id="el$rowindex$_t01_penerimaan_NomorHead" class="form-group t01_penerimaan_NomorHead">
+<input type="text" data-table="t01_penerimaan" data-field="x_NomorHead" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->NomorHead->EditValue ?>"<?php echo $t01_penerimaan->NomorHead->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_NomorHead" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t01_penerimaan->NomorHead->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->SubTotalFlag->Visible) { // SubTotalFlag ?>
+		<td data-name="SubTotalFlag">
+<span id="el$rowindex$_t01_penerimaan_SubTotalFlag" class="form-group t01_penerimaan_SubTotalFlag">
+<input type="text" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" size="1" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->SubTotalFlag->EditValue ?>"<?php echo $t01_penerimaan->SubTotalFlag->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_SubTotalFlag" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t01_penerimaan->SubTotalFlag->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Urutan->Visible) { // Urutan ?>
+		<td data-name="Urutan">
+<span id="el$rowindex$_t01_penerimaan_Urutan" class="form-group t01_penerimaan_Urutan">
+<input type="text" data-table="t01_penerimaan" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Urutan->EditValue ?>"<?php echo $t01_penerimaan->Urutan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Urutan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Urutan->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Nomor->Visible) { // Nomor ?>
+		<td data-name="Nomor">
+<span id="el$rowindex$_t01_penerimaan_Nomor" class="form-group t01_penerimaan_Nomor">
+<input type="text" data-table="t01_penerimaan" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nomor->EditValue ?>"<?php echo $t01_penerimaan->Nomor->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Nomor" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nomor->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Pos->Visible) { // Pos ?>
+		<td data-name="Pos">
+<span id="el$rowindex$_t01_penerimaan_Pos" class="form-group t01_penerimaan_Pos">
+<input type="text" data-table="t01_penerimaan" data-field="x_Pos" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Pos->EditValue ?>"<?php echo $t01_penerimaan->Pos->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Pos" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Pos" value="<?php echo ew_HtmlEncode($t01_penerimaan->Pos->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Nominal->Visible) { // Nominal ?>
+		<td data-name="Nominal">
+<span id="el$rowindex$_t01_penerimaan_Nominal" class="form-group t01_penerimaan_Nominal">
+<input type="text" data-table="t01_penerimaan" data-field="x_Nominal" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Nominal->EditValue ?>"<?php echo $t01_penerimaan->Nominal->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Nominal" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Nominal" value="<?php echo ew_HtmlEncode($t01_penerimaan->Nominal->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->JumlahSiswa->Visible) { // JumlahSiswa ?>
+		<td data-name="JumlahSiswa">
+<span id="el$rowindex$_t01_penerimaan_JumlahSiswa" class="form-group t01_penerimaan_JumlahSiswa">
+<input type="text" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->JumlahSiswa->EditValue ?>"<?php echo $t01_penerimaan->JumlahSiswa->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_JumlahSiswa" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_JumlahSiswa" value="<?php echo ew_HtmlEncode($t01_penerimaan->JumlahSiswa->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Bulan->Visible) { // Bulan ?>
+		<td data-name="Bulan">
+<span id="el$rowindex$_t01_penerimaan_Bulan" class="form-group t01_penerimaan_Bulan">
+<input type="text" data-table="t01_penerimaan" data-field="x_Bulan" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" size="1" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Bulan->EditValue ?>"<?php echo $t01_penerimaan->Bulan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Bulan" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Bulan" value="<?php echo ew_HtmlEncode($t01_penerimaan->Bulan->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Jumlah->Visible) { // Jumlah ?>
+		<td data-name="Jumlah">
+<span id="el$rowindex$_t01_penerimaan_Jumlah" class="form-group t01_penerimaan_Jumlah">
+<input type="text" data-table="t01_penerimaan" data-field="x_Jumlah" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Jumlah->EditValue ?>"<?php echo $t01_penerimaan->Jumlah->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Jumlah" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t01_penerimaan->Jumlah->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t01_penerimaan->Total->Visible) { // Total ?>
+		<td data-name="Total">
+<span id="el$rowindex$_t01_penerimaan_Total" class="form-group t01_penerimaan_Total">
+<input type="text" data-table="t01_penerimaan" data-field="x_Total" name="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="x<?php echo $t01_penerimaan_list->RowIndex ?>_Total" size="5" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan->Total->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan->Total->EditValue ?>"<?php echo $t01_penerimaan->Total->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t01_penerimaan" data-field="x_Total" name="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" id="o<?php echo $t01_penerimaan_list->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t01_penerimaan->Total->OldValue) ?>">
+</td>
+	<?php } ?>
+<?php
+
+// Render list options (body, right)
+$t01_penerimaan_list->ListOptions->Render("body", "right", $t01_penerimaan_list->RowIndex);
+?>
+<script type="text/javascript">
+ft01_penerimaanlist.UpdateOpts(<?php echo $t01_penerimaan_list->RowIndex ?>);
+</script>
+	</tr>
+<?php
 }
 ?>
 </tbody>
@@ -3416,8 +4240,10 @@ ft01_penerimaanlist.UpdateOpts(<?php echo $t01_penerimaan_list->RowIndex ?>);
 <?php if ($t01_penerimaan->CurrentAction == "add" || $t01_penerimaan->CurrentAction == "copy") { ?>
 <input type="hidden" name="<?php echo $t01_penerimaan_list->FormKeyCountName ?>" id="<?php echo $t01_penerimaan_list->FormKeyCountName ?>" value="<?php echo $t01_penerimaan_list->KeyCount ?>">
 <?php } ?>
-<?php if ($t01_penerimaan->CurrentAction == "edit") { ?>
+<?php if ($t01_penerimaan->CurrentAction == "gridedit") { ?>
+<input type="hidden" name="a_list" id="a_list" value="gridupdate">
 <input type="hidden" name="<?php echo $t01_penerimaan_list->FormKeyCountName ?>" id="<?php echo $t01_penerimaan_list->FormKeyCountName ?>" value="<?php echo $t01_penerimaan_list->KeyCount ?>">
+<?php echo $t01_penerimaan_list->MultiSelectKey ?>
 <?php } ?>
 <?php if ($t01_penerimaan->CurrentAction == "") { ?>
 <input type="hidden" name="a_list" id="a_list" value="">

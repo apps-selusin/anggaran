@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<ew-language date="2018/5/21" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
+<ew-language date="2018/5/26" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
   <!-- 
 	*** Important Notes:
 	1. Language ID should follow: https://developers.google.com/recaptcha/docs/language,
@@ -618,19 +618,28 @@
   <project>
     <phrase id="bodytitle" value="Rencana Anggaran" />
     <phrase id="footertext" value="&amp;copy;2018 MINU. All rights reserved." />
+    <menu id="10003">
+      <phrase id="menutext" value="departemen" />
+    </menu>
     <menu id="2">
       <phrase id="menutext" value="Beranda" />
     </menu>
-    <menu id="3">
-      <phrase id="menutext" value="Data Penerimaan" />
-    </menu>
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
+    </menu>
+    <menu id="10001">
+      <phrase id="menutext" value="t 01 penerimaan" />
+    </menu>
+    <menu id="10002">
+      <phrase id="menutext" value="Laporan Data Penerimaan" />
     </menu>
     <table id="t01_penerimaan">
       <phrase id="tblcaption" value="Penerimaan" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="departemen">
+        <phrase id="fldcaption" value="Departemen" />
       </field>
       <field id="headdetail">
         <phrase id="fldcaption" value="Head Detail" />
@@ -669,37 +678,25 @@
     <table id="cf01_home_php">
       <phrase id="tblcaption" value="Beranda" />
     </table>
-    <table id="datapenerimaan">
-      <phrase id="tblcaption" value="Data Penerimaan" />
+    <table id="departemen">
+      <phrase id="tblcaption" value="departemen" />
       <field id="replid">
         <phrase id="fldcaption" value="replid" />
       </field>
-      <field id="nama">
-        <phrase id="fldcaption" value="nama" />
+      <field id="departemen">
+        <phrase id="fldcaption" value="departemen" />
       </field>
-      <field id="besar">
-        <phrase id="fldcaption" value="besar" />
+      <field id="nipkepsek">
+        <phrase id="fldcaption" value="nipkepsek" />
       </field>
-      <field id="idkategori">
-        <phrase id="fldcaption" value="idkategori" />
-      </field>
-      <field id="rekkas">
-        <phrase id="fldcaption" value="rekkas" />
-      </field>
-      <field id="rekpendapatan">
-        <phrase id="fldcaption" value="rekpendapatan" />
-      </field>
-      <field id="rekpiutang">
-        <phrase id="fldcaption" value="rekpiutang" />
-      </field>
-      <field id="aktif">
-        <phrase id="fldcaption" value="aktif" />
+      <field id="urutan">
+        <phrase id="fldcaption" value="urutan" />
       </field>
       <field id="keterangan">
         <phrase id="fldcaption" value="keterangan" />
       </field>
-      <field id="departemen">
-        <phrase id="fldcaption" value="departemen" />
+      <field id="aktif">
+        <phrase id="fldcaption" value="aktif" />
       </field>
       <field id="info1">
         <phrase id="fldcaption" value="info 1" />

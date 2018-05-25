@@ -21,6 +21,8 @@ if (!function_exists('DbHelper')) {
 		}
 		if ($dbid == "jbsfina" || $dbid === 1) // jbsfina
 			$dbclass = "cjbsfina_db";
+		elseif ($dbid == "jbsakad" || $dbid === 2) // jbsakad
+			$dbclass = "cjbsakad_db";
 		else // DB
 			$dbclass = "cdb_anggaran_db";
 		$dbhelper = new $dbclass($langfolder, $langid, $info);
@@ -93,6 +95,63 @@ class cjbsfina_db extends cDbHelper {
 	var $Username = 'root';
 	var $Password = 'kebersamaan';
 	var $DbName = 'jbsfina';
+	var $CharSet = "utf-8";
+
+	// ADODB (Access/SQL Server)
+	var $CodePage = 65001; // Code page
+
+	// Database
+	var $StartQuote = "`";
+	var $EndQuote = "`";
+	/**
+	 * MySQL charset (for SET NAMES statement, not used by default)
+	 * Note: Read http://dev.mysql.com/doc/refman/5.0/en/charset-connection.html
+	 * before using this setting.
+	 */
+	var $MySqlCharset = "utf8";
+
+	// Connect to database
+	function &Connect($info = NULL) {
+		$GLOBALS["ADODB_FETCH_MODE"] = ADODB_FETCH_BOTH;
+		$GLOBALS["ADODB_COUNTRECS"] = FALSE;
+		if (EW_USE_ADODB) {
+			if (EW_USE_MYSQLI)
+				$conn = ADONewConnection('mysqli');
+			else
+				$conn = ADONewConnection('mysqlt');
+		} else {
+			$conn = new mysqlt_driver_ADOConnection();
+		}
+		$conn->debug = $this->Debug;
+		if (!$info) {
+			$info = array("host" => $this->Host, "port" => $this->Port,
+			"user" => $this->Username, "pass" => $this->Password, "db" => $this->DbName);
+		}
+		$conn->port = intval($info["port"]);
+
+		// Database connecting event
+		Database_Connecting($info);
+		if ($this->Debug)
+			$conn->raiseErrorFn = $GLOBALS["EW_ERROR_FN"];
+		$conn->Connect($info["host"], $info["user"], $info["pass"], $info["db"]);
+		if ($this->MySqlCharset <> "")
+			$conn->Execute("SET NAMES '" . $this->MySqlCharset . "'");
+		$conn->raiseErrorFn = '';
+
+		// Database connected event
+		Database_Connected($conn);
+		return $conn;
+	}
+}
+
+class cjbsakad_db extends cDbHelper {
+
+	// Database connection info
+	var $Host = 'localhost';
+	var $Port = 3434;
+	var $Username = 'root';
+	var $Password = 'kebersamaan';
+	var $DbName = 'jbsakad';
 	var $CharSet = "utf-8";
 
 	// ADODB (Access/SQL Server)
