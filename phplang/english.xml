@@ -618,14 +618,17 @@
   <project>
     <phrase id="bodytitle" value="Rencana Anggaran" />
     <phrase id="footertext" value="&amp;copy;2018 MINU. All rights reserved." />
-    <menu id="10003">
-      <phrase id="menutext" value="departemen" />
-    </menu>
     <menu id="2">
       <phrase id="menutext" value="Beranda" />
     </menu>
+    <menu id="10003">
+      <phrase id="menutext" value="departemen" />
+    </menu>
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
+    </menu>
+    <menu id="10004">
+      <phrase id="menutext" value="Pengeluaran" />
     </menu>
     <menu id="10001">
       <phrase id="menutext" value="t 01 penerimaan" />
@@ -715,6 +718,48 @@
       </field>
       <field id="issync">
         <phrase id="fldcaption" value="issync" />
+      </field>
+    </table>
+    <table id="t02_pengeluaran">
+      <phrase id="tblcaption" value="Pengeluaran" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="departemen">
+        <phrase id="fldcaption" value="Departemen" />
+      </field>
+      <field id="headdetail">
+        <phrase id="fldcaption" value="Head Detail" />
+      </field>
+      <field id="nomorhead">
+        <phrase id="fldcaption" value="Nomor Head" />
+      </field>
+      <field id="subtotalflag">
+        <phrase id="fldcaption" value="Sub Total Flag" />
+      </field>
+      <field id="urutan">
+        <phrase id="fldcaption" value="Urutan" />
+      </field>
+      <field id="nomor">
+        <phrase id="fldcaption" value="Nomor" />
+      </field>
+      <field id="pos">
+        <phrase id="fldcaption" value="Pos" />
+      </field>
+      <field id="nominal">
+        <phrase id="fldcaption" value="Nominal" />
+      </field>
+      <field id="banyaknya">
+        <phrase id="fldcaption" value="Banyaknya" />
+      </field>
+      <field id="satuan">
+        <phrase id="fldcaption" value="Satuan" />
+      </field>
+      <field id="jumlah">
+        <phrase id="fldcaption" value="Jumlah" />
+      </field>
+      <field id="total">
+        <phrase id="fldcaption" value="Total" />
       </field>
     </table>
   </project>
