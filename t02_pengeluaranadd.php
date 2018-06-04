@@ -292,6 +292,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->SubTotalFlag->SetVisibility();
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
+		$this->Kode->SetVisibility();
 		$this->Pos->SetVisibility();
 		$this->Nominal->SetVisibility();
 		$this->Banyaknya->SetVisibility();
@@ -507,6 +508,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->SubTotalFlag->CurrentValue = "N";
 		$this->Urutan->CurrentValue = 0;
 		$this->Nomor->CurrentValue = "-";
+		$this->Kode->CurrentValue = "-";
 		$this->Pos->CurrentValue = "-";
 		$this->Nominal->CurrentValue = 0.00;
 		$this->Banyaknya->CurrentValue = 0;
@@ -538,6 +540,9 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		if (!$this->Nomor->FldIsDetailKey) {
 			$this->Nomor->setFormValue($objForm->GetValue("x_Nomor"));
 		}
+		if (!$this->Kode->FldIsDetailKey) {
+			$this->Kode->setFormValue($objForm->GetValue("x_Kode"));
+		}
 		if (!$this->Pos->FldIsDetailKey) {
 			$this->Pos->setFormValue($objForm->GetValue("x_Pos"));
 		}
@@ -567,6 +572,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
 		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
 		$this->Nomor->CurrentValue = $this->Nomor->FormValue;
+		$this->Kode->CurrentValue = $this->Kode->FormValue;
 		$this->Pos->CurrentValue = $this->Pos->FormValue;
 		$this->Nominal->CurrentValue = $this->Nominal->FormValue;
 		$this->Banyaknya->CurrentValue = $this->Banyaknya->FormValue;
@@ -615,6 +621,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
 		$this->Urutan->setDbValue($row['Urutan']);
 		$this->Nomor->setDbValue($row['Nomor']);
+		$this->Kode->setDbValue($row['Kode']);
 		$this->Pos->setDbValue($row['Pos']);
 		$this->Nominal->setDbValue($row['Nominal']);
 		$this->Banyaknya->setDbValue($row['Banyaknya']);
@@ -634,6 +641,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
 		$row['Urutan'] = $this->Urutan->CurrentValue;
 		$row['Nomor'] = $this->Nomor->CurrentValue;
+		$row['Kode'] = $this->Kode->CurrentValue;
 		$row['Pos'] = $this->Pos->CurrentValue;
 		$row['Nominal'] = $this->Nominal->CurrentValue;
 		$row['Banyaknya'] = $this->Banyaknya->CurrentValue;
@@ -655,6 +663,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
 		$this->Urutan->DbValue = $row['Urutan'];
 		$this->Nomor->DbValue = $row['Nomor'];
+		$this->Kode->DbValue = $row['Kode'];
 		$this->Pos->DbValue = $row['Pos'];
 		$this->Nominal->DbValue = $row['Nominal'];
 		$this->Banyaknya->DbValue = $row['Banyaknya'];
@@ -714,6 +723,7 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		// SubTotalFlag
 		// Urutan
 		// Nomor
+		// Kode
 		// Pos
 		// Nominal
 		// Banyaknya
@@ -770,6 +780,10 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
 		$this->Nomor->ViewCustomAttributes = "";
 
+		// Kode
+		$this->Kode->ViewValue = $this->Kode->CurrentValue;
+		$this->Kode->ViewCustomAttributes = "";
+
 		// Pos
 		$this->Pos->ViewValue = $this->Pos->CurrentValue;
 		$this->Pos->ViewCustomAttributes = "";
@@ -823,6 +837,11 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 			$this->Nomor->LinkCustomAttributes = "";
 			$this->Nomor->HrefValue = "";
 			$this->Nomor->TooltipValue = "";
+
+			// Kode
+			$this->Kode->LinkCustomAttributes = "";
+			$this->Kode->HrefValue = "";
+			$this->Kode->TooltipValue = "";
 
 			// Pos
 			$this->Pos->LinkCustomAttributes = "";
@@ -904,6 +923,12 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->CurrentValue);
 			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
 
+			// Kode
+			$this->Kode->EditAttrs["class"] = "form-control";
+			$this->Kode->EditCustomAttributes = "";
+			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
+			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
 			$this->Pos->EditCustomAttributes = "";
@@ -968,6 +993,10 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 			// Nomor
 			$this->Nomor->LinkCustomAttributes = "";
 			$this->Nomor->HrefValue = "";
+
+			// Kode
+			$this->Kode->LinkCustomAttributes = "";
+			$this->Kode->HrefValue = "";
 
 			// Pos
 			$this->Pos->LinkCustomAttributes = "";
@@ -1073,6 +1102,9 @@ class ct02_pengeluaran_add extends ct02_pengeluaran {
 
 		// Nomor
 		$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", strval($this->Nomor->CurrentValue) == "");
+
+		// Kode
+		$this->Kode->SetDbValueDef($rsnew, $this->Kode->CurrentValue, "", strval($this->Kode->CurrentValue) == "");
 
 		// Pos
 		$this->Pos->SetDbValueDef($rsnew, $this->Pos->CurrentValue, "", strval($this->Pos->CurrentValue) == "");
@@ -1399,6 +1431,16 @@ $t02_pengeluaran_add->ShowMessage();
 <input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x_Nomor" id="x_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
 </span>
 <?php echo $t02_pengeluaran->Nomor->CustomMsg ?></div></div>
+	</div>
+<?php } ?>
+<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
+	<div id="r_Kode" class="form-group">
+		<label id="elh_t02_pengeluaran_Kode" for="x_Kode" class="<?php echo $t02_pengeluaran_add->LeftColumnClass ?>"><?php echo $t02_pengeluaran->Kode->FldCaption() ?></label>
+		<div class="<?php echo $t02_pengeluaran_add->RightColumnClass ?>"><div<?php echo $t02_pengeluaran->Kode->CellAttributes() ?>>
+<span id="el_t02_pengeluaran_Kode">
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x_Kode" id="x_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+</span>
+<?php echo $t02_pengeluaran->Kode->CustomMsg ?></div></div>
 	</div>
 <?php } ?>
 <?php if ($t02_pengeluaran->Pos->Visible) { // Pos ?>

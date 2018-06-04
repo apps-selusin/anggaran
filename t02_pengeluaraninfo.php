@@ -14,6 +14,7 @@ class ct02_pengeluaran extends cTable {
 	var $SubTotalFlag;
 	var $Urutan;
 	var $Nomor;
+	var $Kode;
 	var $Pos;
 	var $Nominal;
 	var $Banyaknya;
@@ -92,6 +93,11 @@ class ct02_pengeluaran extends cTable {
 		$this->Nomor = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Nomor', 'Nomor', '`Nomor`', '`Nomor`', 200, -1, FALSE, '`Nomor`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->Nomor->Sortable = TRUE; // Allow sort
 		$this->fields['Nomor'] = &$this->Nomor;
+
+		// Kode
+		$this->Kode = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Kode', 'Kode', '`Kode`', '`Kode`', 200, -1, FALSE, '`Kode`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Kode->Sortable = TRUE; // Allow sort
+		$this->fields['Kode'] = &$this->Kode;
 
 		// Pos
 		$this->Pos = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Pos', 'Pos', '`Pos`', '`Pos`', 200, -1, FALSE, '`Pos`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
@@ -661,6 +667,7 @@ class ct02_pengeluaran extends cTable {
 		$this->SubTotalFlag->setDbValue($rs->fields('SubTotalFlag'));
 		$this->Urutan->setDbValue($rs->fields('Urutan'));
 		$this->Nomor->setDbValue($rs->fields('Nomor'));
+		$this->Kode->setDbValue($rs->fields('Kode'));
 		$this->Pos->setDbValue($rs->fields('Pos'));
 		$this->Nominal->setDbValue($rs->fields('Nominal'));
 		$this->Banyaknya->setDbValue($rs->fields('Banyaknya'));
@@ -684,6 +691,7 @@ class ct02_pengeluaran extends cTable {
 		// SubTotalFlag
 		// Urutan
 		// Nomor
+		// Kode
 		// Pos
 		// Nominal
 		// Banyaknya
@@ -737,6 +745,10 @@ class ct02_pengeluaran extends cTable {
 		// Nomor
 		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
 		$this->Nomor->ViewCustomAttributes = "";
+
+		// Kode
+		$this->Kode->ViewValue = $this->Kode->CurrentValue;
+		$this->Kode->ViewCustomAttributes = "";
 
 		// Pos
 		$this->Pos->ViewValue = $this->Pos->CurrentValue;
@@ -796,6 +808,11 @@ class ct02_pengeluaran extends cTable {
 		$this->Nomor->LinkCustomAttributes = "";
 		$this->Nomor->HrefValue = "";
 		$this->Nomor->TooltipValue = "";
+
+		// Kode
+		$this->Kode->LinkCustomAttributes = "";
+		$this->Kode->HrefValue = "";
+		$this->Kode->TooltipValue = "";
 
 		// Pos
 		$this->Pos->LinkCustomAttributes = "";
@@ -881,6 +898,12 @@ class ct02_pengeluaran extends cTable {
 		$this->Nomor->EditValue = $this->Nomor->CurrentValue;
 		$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
 
+		// Kode
+		$this->Kode->EditAttrs["class"] = "form-control";
+		$this->Kode->EditCustomAttributes = "";
+		$this->Kode->EditValue = $this->Kode->CurrentValue;
+		$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+
 		// Pos
 		$this->Pos->EditAttrs["class"] = "form-control";
 		$this->Pos->EditCustomAttributes = "";
@@ -954,6 +977,7 @@ class ct02_pengeluaran extends cTable {
 					if ($this->SubTotalFlag->Exportable) $Doc->ExportCaption($this->SubTotalFlag);
 					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
+					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
 					if ($this->Pos->Exportable) $Doc->ExportCaption($this->Pos);
 					if ($this->Nominal->Exportable) $Doc->ExportCaption($this->Nominal);
 					if ($this->Banyaknya->Exportable) $Doc->ExportCaption($this->Banyaknya);
@@ -968,6 +992,7 @@ class ct02_pengeluaran extends cTable {
 					if ($this->SubTotalFlag->Exportable) $Doc->ExportCaption($this->SubTotalFlag);
 					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
+					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
 					if ($this->Pos->Exportable) $Doc->ExportCaption($this->Pos);
 					if ($this->Nominal->Exportable) $Doc->ExportCaption($this->Nominal);
 					if ($this->Banyaknya->Exportable) $Doc->ExportCaption($this->Banyaknya);
@@ -1012,6 +1037,7 @@ class ct02_pengeluaran extends cTable {
 						if ($this->SubTotalFlag->Exportable) $Doc->ExportField($this->SubTotalFlag);
 						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
+						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
 						if ($this->Pos->Exportable) $Doc->ExportField($this->Pos);
 						if ($this->Nominal->Exportable) $Doc->ExportField($this->Nominal);
 						if ($this->Banyaknya->Exportable) $Doc->ExportField($this->Banyaknya);
@@ -1026,6 +1052,7 @@ class ct02_pengeluaran extends cTable {
 						if ($this->SubTotalFlag->Exportable) $Doc->ExportField($this->SubTotalFlag);
 						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
+						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
 						if ($this->Pos->Exportable) $Doc->ExportField($this->Pos);
 						if ($this->Nominal->Exportable) $Doc->ExportField($this->Nominal);
 						if ($this->Banyaknya->Exportable) $Doc->ExportField($this->Banyaknya);

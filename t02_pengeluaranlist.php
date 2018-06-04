@@ -383,6 +383,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->SetVisibility();
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
+		$this->Kode->SetVisibility();
 		$this->Pos->SetVisibility();
 		$this->Nominal->SetVisibility();
 		$this->Banyaknya->SetVisibility();
@@ -878,6 +879,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			return FALSE;
 		if ($objForm->HasValue("x_Nomor") && $objForm->HasValue("o_Nomor") && $this->Nomor->CurrentValue <> $this->Nomor->OldValue)
 			return FALSE;
+		if ($objForm->HasValue("x_Kode") && $objForm->HasValue("o_Kode") && $this->Kode->CurrentValue <> $this->Kode->OldValue)
+			return FALSE;
 		if ($objForm->HasValue("x_Pos") && $objForm->HasValue("o_Pos") && $this->Pos->CurrentValue <> $this->Pos->OldValue)
 			return FALSE;
 		if ($objForm->HasValue("x_Nominal") && $objForm->HasValue("o_Nominal") && $this->Nominal->CurrentValue <> $this->Nominal->OldValue)
@@ -975,6 +978,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$sFilterList = ew_Concat($sFilterList, $this->SubTotalFlag->AdvancedSearch->ToJson(), ","); // Field SubTotalFlag
 		$sFilterList = ew_Concat($sFilterList, $this->Urutan->AdvancedSearch->ToJson(), ","); // Field Urutan
 		$sFilterList = ew_Concat($sFilterList, $this->Nomor->AdvancedSearch->ToJson(), ","); // Field Nomor
+		$sFilterList = ew_Concat($sFilterList, $this->Kode->AdvancedSearch->ToJson(), ","); // Field Kode
 		$sFilterList = ew_Concat($sFilterList, $this->Pos->AdvancedSearch->ToJson(), ","); // Field Pos
 		$sFilterList = ew_Concat($sFilterList, $this->Nominal->AdvancedSearch->ToJson(), ","); // Field Nominal
 		$sFilterList = ew_Concat($sFilterList, $this->Banyaknya->AdvancedSearch->ToJson(), ","); // Field Banyaknya
@@ -1077,6 +1081,14 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->Nomor->AdvancedSearch->SearchOperator2 = @$filter["w_Nomor"];
 		$this->Nomor->AdvancedSearch->Save();
 
+		// Field Kode
+		$this->Kode->AdvancedSearch->SearchValue = @$filter["x_Kode"];
+		$this->Kode->AdvancedSearch->SearchOperator = @$filter["z_Kode"];
+		$this->Kode->AdvancedSearch->SearchCondition = @$filter["v_Kode"];
+		$this->Kode->AdvancedSearch->SearchValue2 = @$filter["y_Kode"];
+		$this->Kode->AdvancedSearch->SearchOperator2 = @$filter["w_Kode"];
+		$this->Kode->AdvancedSearch->Save();
+
 		// Field Pos
 		$this->Pos->AdvancedSearch->SearchValue = @$filter["x_Pos"];
 		$this->Pos->AdvancedSearch->SearchOperator = @$filter["z_Pos"];
@@ -1137,6 +1149,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->BuildSearchSql($sWhere, $this->SubTotalFlag, $Default, FALSE); // SubTotalFlag
 		$this->BuildSearchSql($sWhere, $this->Urutan, $Default, FALSE); // Urutan
 		$this->BuildSearchSql($sWhere, $this->Nomor, $Default, FALSE); // Nomor
+		$this->BuildSearchSql($sWhere, $this->Kode, $Default, FALSE); // Kode
 		$this->BuildSearchSql($sWhere, $this->Pos, $Default, FALSE); // Pos
 		$this->BuildSearchSql($sWhere, $this->Nominal, $Default, FALSE); // Nominal
 		$this->BuildSearchSql($sWhere, $this->Banyaknya, $Default, FALSE); // Banyaknya
@@ -1156,6 +1169,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->SubTotalFlag->AdvancedSearch->Save(); // SubTotalFlag
 			$this->Urutan->AdvancedSearch->Save(); // Urutan
 			$this->Nomor->AdvancedSearch->Save(); // Nomor
+			$this->Kode->AdvancedSearch->Save(); // Kode
 			$this->Pos->AdvancedSearch->Save(); // Pos
 			$this->Nominal->AdvancedSearch->Save(); // Nominal
 			$this->Banyaknya->AdvancedSearch->Save(); // Banyaknya
@@ -1226,6 +1240,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			return TRUE;
 		if ($this->Nomor->AdvancedSearch->IssetSession())
 			return TRUE;
+		if ($this->Kode->AdvancedSearch->IssetSession())
+			return TRUE;
 		if ($this->Pos->AdvancedSearch->IssetSession())
 			return TRUE;
 		if ($this->Nominal->AdvancedSearch->IssetSession())
@@ -1266,6 +1282,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->AdvancedSearch->UnsetSession();
 		$this->Urutan->AdvancedSearch->UnsetSession();
 		$this->Nomor->AdvancedSearch->UnsetSession();
+		$this->Kode->AdvancedSearch->UnsetSession();
 		$this->Pos->AdvancedSearch->UnsetSession();
 		$this->Nominal->AdvancedSearch->UnsetSession();
 		$this->Banyaknya->AdvancedSearch->UnsetSession();
@@ -1286,6 +1303,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->AdvancedSearch->Load();
 		$this->Urutan->AdvancedSearch->Load();
 		$this->Nomor->AdvancedSearch->Load();
+		$this->Kode->AdvancedSearch->Load();
 		$this->Pos->AdvancedSearch->Load();
 		$this->Nominal->AdvancedSearch->Load();
 		$this->Banyaknya->AdvancedSearch->Load();
@@ -1308,6 +1326,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->UpdateSort($this->SubTotalFlag); // SubTotalFlag
 			$this->UpdateSort($this->Urutan); // Urutan
 			$this->UpdateSort($this->Nomor); // Nomor
+			$this->UpdateSort($this->Kode); // Kode
 			$this->UpdateSort($this->Pos); // Pos
 			$this->UpdateSort($this->Nominal); // Nominal
 			$this->UpdateSort($this->Banyaknya); // Banyaknya
@@ -1354,6 +1373,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 				$this->SubTotalFlag->setSort("");
 				$this->Urutan->setSort("");
 				$this->Nomor->setSort("");
+				$this->Kode->setSort("");
 				$this->Pos->setSort("");
 				$this->Nominal->setSort("");
 				$this->Banyaknya->setSort("");
@@ -1776,6 +1796,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
 		$this->Nomor->CurrentValue = "-";
 		$this->Nomor->OldValue = $this->Nomor->CurrentValue;
+		$this->Kode->CurrentValue = "-";
+		$this->Kode->OldValue = $this->Kode->CurrentValue;
 		$this->Pos->CurrentValue = "-";
 		$this->Pos->OldValue = $this->Pos->CurrentValue;
 		$this->Nominal->CurrentValue = 0.00;
@@ -1830,6 +1852,11 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->Nomor->AdvancedSearch->SearchValue = @$_GET["x_Nomor"];
 		if ($this->Nomor->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
 		$this->Nomor->AdvancedSearch->SearchOperator = @$_GET["z_Nomor"];
+
+		// Kode
+		$this->Kode->AdvancedSearch->SearchValue = @$_GET["x_Kode"];
+		if ($this->Kode->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
+		$this->Kode->AdvancedSearch->SearchOperator = @$_GET["z_Kode"];
 
 		// Pos
 		$this->Pos->AdvancedSearch->SearchValue = @$_GET["x_Pos"];
@@ -1887,6 +1914,9 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if (!$this->Nomor->FldIsDetailKey) {
 			$this->Nomor->setFormValue($objForm->GetValue("x_Nomor"));
 		}
+		if (!$this->Kode->FldIsDetailKey) {
+			$this->Kode->setFormValue($objForm->GetValue("x_Kode"));
+		}
 		if (!$this->Pos->FldIsDetailKey) {
 			$this->Pos->setFormValue($objForm->GetValue("x_Pos"));
 		}
@@ -1918,6 +1948,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
 		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
 		$this->Nomor->CurrentValue = $this->Nomor->FormValue;
+		$this->Kode->CurrentValue = $this->Kode->FormValue;
 		$this->Pos->CurrentValue = $this->Pos->FormValue;
 		$this->Nominal->CurrentValue = $this->Nominal->FormValue;
 		$this->Banyaknya->CurrentValue = $this->Banyaknya->FormValue;
@@ -1992,6 +2023,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
 		$this->Urutan->setDbValue($row['Urutan']);
 		$this->Nomor->setDbValue($row['Nomor']);
+		$this->Kode->setDbValue($row['Kode']);
 		$this->Pos->setDbValue($row['Pos']);
 		$this->Nominal->setDbValue($row['Nominal']);
 		$this->Banyaknya->setDbValue($row['Banyaknya']);
@@ -2011,6 +2043,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
 		$row['Urutan'] = $this->Urutan->CurrentValue;
 		$row['Nomor'] = $this->Nomor->CurrentValue;
+		$row['Kode'] = $this->Kode->CurrentValue;
 		$row['Pos'] = $this->Pos->CurrentValue;
 		$row['Nominal'] = $this->Nominal->CurrentValue;
 		$row['Banyaknya'] = $this->Banyaknya->CurrentValue;
@@ -2032,6 +2065,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
 		$this->Urutan->DbValue = $row['Urutan'];
 		$this->Nomor->DbValue = $row['Nomor'];
+		$this->Kode->DbValue = $row['Kode'];
 		$this->Pos->DbValue = $row['Pos'];
 		$this->Nominal->DbValue = $row['Nominal'];
 		$this->Banyaknya->DbValue = $row['Banyaknya'];
@@ -2097,6 +2131,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// SubTotalFlag
 		// Urutan
 		// Nomor
+		// Kode
 		// Pos
 		// Nominal
 		// Banyaknya
@@ -2152,6 +2187,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Nomor
 		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
 		$this->Nomor->ViewCustomAttributes = "";
+
+		// Kode
+		$this->Kode->ViewValue = $this->Kode->CurrentValue;
+		$this->Kode->ViewCustomAttributes = "";
 
 		// Pos
 		$this->Pos->ViewValue = $this->Pos->CurrentValue;
@@ -2211,6 +2250,11 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Nomor->LinkCustomAttributes = "";
 			$this->Nomor->HrefValue = "";
 			$this->Nomor->TooltipValue = "";
+
+			// Kode
+			$this->Kode->LinkCustomAttributes = "";
+			$this->Kode->HrefValue = "";
+			$this->Kode->TooltipValue = "";
 
 			// Pos
 			$this->Pos->LinkCustomAttributes = "";
@@ -2294,6 +2338,12 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->CurrentValue);
 			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
 
+			// Kode
+			$this->Kode->EditAttrs["class"] = "form-control";
+			$this->Kode->EditCustomAttributes = "";
+			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
+			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
 			$this->Pos->EditCustomAttributes = "";
@@ -2362,6 +2412,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Nomor
 			$this->Nomor->LinkCustomAttributes = "";
 			$this->Nomor->HrefValue = "";
+
+			// Kode
+			$this->Kode->LinkCustomAttributes = "";
+			$this->Kode->HrefValue = "";
 
 			// Pos
 			$this->Pos->LinkCustomAttributes = "";
@@ -2443,6 +2497,12 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->CurrentValue);
 			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
 
+			// Kode
+			$this->Kode->EditAttrs["class"] = "form-control";
+			$this->Kode->EditCustomAttributes = "";
+			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
+			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
 			$this->Pos->EditCustomAttributes = "";
@@ -2511,6 +2571,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Nomor
 			$this->Nomor->LinkCustomAttributes = "";
 			$this->Nomor->HrefValue = "";
+
+			// Kode
+			$this->Kode->LinkCustomAttributes = "";
+			$this->Kode->HrefValue = "";
 
 			// Pos
 			$this->Pos->LinkCustomAttributes = "";
@@ -2591,6 +2655,12 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Nomor->EditCustomAttributes = "";
 			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->AdvancedSearch->SearchValue);
 			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
+
+			// Kode
+			$this->Kode->EditAttrs["class"] = "form-control";
+			$this->Kode->EditCustomAttributes = "";
+			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->AdvancedSearch->SearchValue);
+			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
 
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
@@ -2817,6 +2887,9 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Nomor
 			$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", $this->Nomor->ReadOnly);
 
+			// Kode
+			$this->Kode->SetDbValueDef($rsnew, $this->Kode->CurrentValue, "", $this->Kode->ReadOnly);
+
 			// Pos
 			$this->Pos->SetDbValueDef($rsnew, $this->Pos->CurrentValue, "", $this->Pos->ReadOnly);
 
@@ -2896,6 +2969,9 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Nomor
 		$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", strval($this->Nomor->CurrentValue) == "");
 
+		// Kode
+		$this->Kode->SetDbValueDef($rsnew, $this->Kode->CurrentValue, "", strval($this->Kode->CurrentValue) == "");
+
 		// Pos
 		$this->Pos->SetDbValueDef($rsnew, $this->Pos->CurrentValue, "", strval($this->Pos->CurrentValue) == "");
 
@@ -2953,6 +3029,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SubTotalFlag->AdvancedSearch->Load();
 		$this->Urutan->AdvancedSearch->Load();
 		$this->Nomor->AdvancedSearch->Load();
+		$this->Kode->AdvancedSearch->Load();
 		$this->Pos->AdvancedSearch->Load();
 		$this->Nominal->AdvancedSearch->Load();
 		$this->Banyaknya->AdvancedSearch->Load();
@@ -3435,6 +3512,15 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
+<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
+	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Kode) == "") { ?>
+		<th data-name="Kode" class="<?php echo $t02_pengeluaran->Kode->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Kode->FldCaption() ?></div></div></th>
+	<?php } else { ?>
+		<th data-name="Kode" class="<?php echo $t02_pengeluaran->Kode->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Kode) ?>',1);"><div id="elh_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Kode->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Kode->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Kode->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+		</div></div></th>
+	<?php } ?>
+<?php } ?>
 <?php if ($t02_pengeluaran->Pos->Visible) { // Pos ?>
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Pos) == "") { ?>
 		<th data-name="Pos" class="<?php echo $t02_pengeluaran->Pos->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Pos" class="t02_pengeluaran_Pos"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Pos->FldCaption() ?></div></div></th>
@@ -3742,6 +3828,27 @@ $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list
 <?php } ?>
 </td>
 	<?php } ?>
+	<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
+		<td data-name="Kode"<?php echo $t02_pengeluaran->Kode->CellAttributes() ?>>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_Kode" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->OldValue) ?>">
+<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+</span>
+<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
+<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode">
+<span<?php echo $t02_pengeluaran->Kode->ViewAttributes() ?>>
+<?php echo $t02_pengeluaran->Kode->ListViewValue() ?></span>
+</span>
+<?php } ?>
+</td>
+	<?php } ?>
 	<?php if ($t02_pengeluaran->Pos->Visible) { // Pos ?>
 		<td data-name="Pos"<?php echo $t02_pengeluaran->Pos->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -3963,6 +4070,14 @@ $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list
 <input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Nomor" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Nomor" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
+		<td data-name="Kode">
+<span id="el$rowindex$_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_Kode" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->OldValue) ?>">
 </td>
 	<?php } ?>
 	<?php if ($t02_pengeluaran->Pos->Visible) { // Pos ?>
