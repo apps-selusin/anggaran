@@ -6,6 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql14.php") ?>
 <?php include_once "phpfn14.php" ?>
 <?php include_once "t02_pengeluaraninfo.php" ?>
+<?php include_once "t03_pengeluaran_headinfo.php" ?>
 <?php include_once "userfn14.php" ?>
 <?php
 
@@ -309,6 +310,9 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->MultiDeleteUrl = "t02_pengeluarandelete.php";
 		$this->MultiUpdateUrl = "t02_pengeluaranupdate.php";
 
+		// Table object (t03_pengeluaran_head)
+		if (!isset($GLOBALS['t03_pengeluaran_head'])) $GLOBALS['t03_pengeluaran_head'] = new ct03_pengeluaran_head();
+
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
 			define("EW_PAGE_ID", 'list', TRUE);
@@ -420,6 +424,9 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 
 		// Create Token
 		$this->CreateToken();
+
+		// Set up master detail parameters
+		$this->SetupMasterParms();
 
 		// Setup other options
 		$this->SetupOtherOptions();
@@ -563,6 +570,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 				// Switch to grid edit mode
 				if ($this->CurrentAction == "gridedit")
 					$this->GridEditMode();
+
+				// Switch to inline edit mode
+				if ($this->CurrentAction == "edit")
+					$this->InlineEditMode();
 			} else {
 				if (@$_POST["a_list"] <> "") {
 					$this->CurrentAction = $_POST["a_list"]; // Get action
@@ -580,6 +591,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 							$this->CurrentAction = "gridedit"; // Stay in Grid Edit mode
 						}
 					}
+
+					// Inline Update
+					if (($this->CurrentAction == "update" || $this->CurrentAction == "overwrite") && @$_SESSION[EW_SESSION_INLINE_MODE] == "edit")
+						$this->InlineUpdate();
 				}
 			}
 
@@ -614,30 +629,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 				}
 			}
 
-			// Get default search criteria
-			ew_AddFilter($this->DefaultSearchWhere, $this->AdvancedSearchWhere(TRUE));
-
-			// Get and validate search values for advanced search
-			$this->LoadSearchValues(); // Get search values
-
-			// Process filter list
-			$this->ProcessFilterList();
-			if (!$this->ValidateSearch())
-				$this->setFailureMessage($gsSearchError);
-
-			// Restore search parms from Session if not searching / reset / export
-			if (($this->Export <> "" || $this->Command <> "search" && $this->Command <> "reset" && $this->Command <> "resetall") && $this->Command <> "json" && $this->CheckSearchParms())
-				$this->RestoreSearchParms();
-
-			// Call Recordset SearchValidated event
-			$this->Recordset_SearchValidated();
-
 			// Set up sorting order
 			$this->SetupSortOrder();
-
-			// Get search criteria for advanced search
-			if ($gsSearchError == "")
-				$sSrchAdvanced = $this->AdvancedSearchWhere();
 		}
 
 		// Restore display records
@@ -651,38 +644,29 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if ($this->Command <> "json")
 			$this->LoadSortOrder();
 
-		// Load search default if no existing search criteria
-		if (!$this->CheckSearchParms()) {
-
-			// Load advanced search from default
-			if ($this->LoadAdvancedSearchDefault()) {
-				$sSrchAdvanced = $this->AdvancedSearchWhere();
-			}
-		}
-
-		// Build search criteria
-		ew_AddFilter($this->SearchWhere, $sSrchAdvanced);
-		ew_AddFilter($this->SearchWhere, $sSrchBasic);
-
-		// Call Recordset_Searching event
-		$this->Recordset_Searching($this->SearchWhere);
-
-		// Save search criteria
-		if ($this->Command == "search" && !$this->RestoreSearch) {
-			$this->setSearchWhere($this->SearchWhere); // Save to Session
-			$this->StartRec = 1; // Reset start record counter
-			$this->setStartRecordNumber($this->StartRec);
-		} elseif ($this->Command <> "json") {
-			$this->SearchWhere = $this->getSearchWhere();
-		}
-
 		// Build filter
 		$sFilter = "";
+
+		// Restore master/detail filter
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Restore master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Restore detail filter
 		ew_AddFilter($sFilter, $this->DbDetailFilter);
 		ew_AddFilter($sFilter, $this->SearchWhere);
-		if ($sFilter == "") {
-			$sFilter = "0=101";
-			$this->SearchWhere = $sFilter;
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->GetMasterFilter() <> "" && $this->getCurrentMasterTable() == "t03_pengeluaran_head") {
+			global $t03_pengeluaran_head;
+			$rsmaster = $t03_pengeluaran_head->LoadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->Phrase("NoRecord")); // Set no record found
+				$this->Page_Terminate("t03_pengeluaran_headlist.php"); // Return to master page
+			} else {
+				$t03_pengeluaran_head->LoadListRowValues($rsmaster);
+				$t03_pengeluaran_head->RowType = EW_ROWTYPE_MASTER; // Master row
+				$t03_pengeluaran_head->RenderListRow();
+				$rsmaster->Close();
+			}
 		}
 
 		// Set up filter
@@ -711,6 +695,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 
 	// Exit inline mode
 	function ClearInlineMode() {
+		$this->setKey("id", ""); // Clear inline edit key
 		$this->Nominal->FormValue = ""; // Clear form value
 		$this->Jumlah->FormValue = ""; // Clear form value
 		$this->Total->FormValue = ""; // Clear form value
@@ -722,6 +707,67 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	// Switch to Grid Edit mode
 	function GridEditMode() {
 		$_SESSION[EW_SESSION_INLINE_MODE] = "gridedit"; // Enable grid edit
+	}
+
+	// Switch to Inline Edit mode
+	function InlineEditMode() {
+		global $Security, $Language;
+		$bInlineEdit = TRUE;
+		if (isset($_GET["id"])) {
+			$this->id->setQueryStringValue($_GET["id"]);
+		} else {
+			$bInlineEdit = FALSE;
+		}
+		if ($bInlineEdit) {
+			if ($this->LoadRow()) {
+				$this->setKey("id", $this->id->CurrentValue); // Set up inline edit key
+				$_SESSION[EW_SESSION_INLINE_MODE] = "edit"; // Enable inline edit
+			}
+		}
+	}
+
+	// Perform update to Inline Edit record
+	function InlineUpdate() {
+		global $Language, $objForm, $gsFormError;
+		$objForm->Index = 1;
+		$this->LoadFormValues(); // Get form values
+
+		// Validate form
+		$bInlineUpdate = TRUE;
+		if (!$this->ValidateForm()) {
+			$bInlineUpdate = FALSE; // Form error, reset action
+			$this->setFailureMessage($gsFormError);
+		} else {
+			$bInlineUpdate = FALSE;
+			$rowkey = strval($objForm->GetValue($this->FormKeyName));
+			if ($this->SetupKeyValues($rowkey)) { // Set up key values
+				if ($this->CheckInlineEditKey()) { // Check key
+					$this->SendEmail = TRUE; // Send email on update success
+					$bInlineUpdate = $this->EditRow(); // Update record
+				} else {
+					$bInlineUpdate = FALSE;
+				}
+			}
+		}
+		if ($bInlineUpdate) { // Update success
+			if ($this->getSuccessMessage() == "")
+				$this->setSuccessMessage($Language->Phrase("UpdateSuccess")); // Set up success message
+			$this->ClearInlineMode(); // Clear inline edit mode
+		} else {
+			if ($this->getFailureMessage() == "")
+				$this->setFailureMessage($Language->Phrase("UpdateFailed")); // Set update failed message
+			$this->EventCancelled = TRUE; // Cancel event
+			$this->CurrentAction = "edit"; // Stay in edit mode
+		}
+	}
+
+	// Check Inline Edit key
+	function CheckInlineEditKey() {
+
+		//CheckInlineEditKey = True
+		if (strval($this->getKey("id")) <> strval($this->id->CurrentValue))
+			return FALSE;
+		return TRUE;
 	}
 
 	// Perform update to grid
@@ -964,354 +1010,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->LoadFormValues(); // Load form values
 	}
 
-	// Get list of filters
-	function GetFilterList() {
-		global $UserProfile;
-
-		// Initialize
-		$sFilterList = "";
-		$sSavedFilterList = "";
-		$sFilterList = ew_Concat($sFilterList, $this->id->AdvancedSearch->ToJson(), ","); // Field id
-		$sFilterList = ew_Concat($sFilterList, $this->Departemen->AdvancedSearch->ToJson(), ","); // Field Departemen
-		$sFilterList = ew_Concat($sFilterList, $this->HeadDetail->AdvancedSearch->ToJson(), ","); // Field HeadDetail
-		$sFilterList = ew_Concat($sFilterList, $this->NomorHead->AdvancedSearch->ToJson(), ","); // Field NomorHead
-		$sFilterList = ew_Concat($sFilterList, $this->SubTotalFlag->AdvancedSearch->ToJson(), ","); // Field SubTotalFlag
-		$sFilterList = ew_Concat($sFilterList, $this->Urutan->AdvancedSearch->ToJson(), ","); // Field Urutan
-		$sFilterList = ew_Concat($sFilterList, $this->Nomor->AdvancedSearch->ToJson(), ","); // Field Nomor
-		$sFilterList = ew_Concat($sFilterList, $this->Kode->AdvancedSearch->ToJson(), ","); // Field Kode
-		$sFilterList = ew_Concat($sFilterList, $this->Pos->AdvancedSearch->ToJson(), ","); // Field Pos
-		$sFilterList = ew_Concat($sFilterList, $this->Nominal->AdvancedSearch->ToJson(), ","); // Field Nominal
-		$sFilterList = ew_Concat($sFilterList, $this->Banyaknya->AdvancedSearch->ToJson(), ","); // Field Banyaknya
-		$sFilterList = ew_Concat($sFilterList, $this->Satuan->AdvancedSearch->ToJson(), ","); // Field Satuan
-		$sFilterList = ew_Concat($sFilterList, $this->Jumlah->AdvancedSearch->ToJson(), ","); // Field Jumlah
-		$sFilterList = ew_Concat($sFilterList, $this->Total->AdvancedSearch->ToJson(), ","); // Field Total
-		$sFilterList = preg_replace('/,$/', "", $sFilterList);
-
-		// Return filter list in json
-		if ($sFilterList <> "")
-			$sFilterList = "\"data\":{" . $sFilterList . "}";
-		if ($sSavedFilterList <> "") {
-			if ($sFilterList <> "")
-				$sFilterList .= ",";
-			$sFilterList .= "\"filters\":" . $sSavedFilterList;
-		}
-		return ($sFilterList <> "") ? "{" . $sFilterList . "}" : "null";
-	}
-
-	// Process filter list
-	function ProcessFilterList() {
-		global $UserProfile;
-		if (@$_POST["ajax"] == "savefilters") { // Save filter request (Ajax)
-			$filters = @$_POST["filters"];
-			$UserProfile->SetSearchFilters(CurrentUserName(), "ft02_pengeluaranlistsrch", $filters);
-
-			// Clean output buffer
-			if (!EW_DEBUG_ENABLED && ob_get_length())
-				ob_end_clean();
-			echo ew_ArrayToJson(array(array("success" => TRUE))); // Success
-			$this->Page_Terminate();
-			exit();
-		} elseif (@$_POST["cmd"] == "resetfilter") {
-			$this->RestoreFilterList();
-		}
-	}
-
-	// Restore list of filters
-	function RestoreFilterList() {
-
-		// Return if not reset filter
-		if (@$_POST["cmd"] <> "resetfilter")
-			return FALSE;
-		$filter = json_decode(@$_POST["filter"], TRUE);
-		$this->Command = "search";
-
-		// Field id
-		$this->id->AdvancedSearch->SearchValue = @$filter["x_id"];
-		$this->id->AdvancedSearch->SearchOperator = @$filter["z_id"];
-		$this->id->AdvancedSearch->SearchCondition = @$filter["v_id"];
-		$this->id->AdvancedSearch->SearchValue2 = @$filter["y_id"];
-		$this->id->AdvancedSearch->SearchOperator2 = @$filter["w_id"];
-		$this->id->AdvancedSearch->Save();
-
-		// Field Departemen
-		$this->Departemen->AdvancedSearch->SearchValue = @$filter["x_Departemen"];
-		$this->Departemen->AdvancedSearch->SearchOperator = @$filter["z_Departemen"];
-		$this->Departemen->AdvancedSearch->SearchCondition = @$filter["v_Departemen"];
-		$this->Departemen->AdvancedSearch->SearchValue2 = @$filter["y_Departemen"];
-		$this->Departemen->AdvancedSearch->SearchOperator2 = @$filter["w_Departemen"];
-		$this->Departemen->AdvancedSearch->Save();
-
-		// Field HeadDetail
-		$this->HeadDetail->AdvancedSearch->SearchValue = @$filter["x_HeadDetail"];
-		$this->HeadDetail->AdvancedSearch->SearchOperator = @$filter["z_HeadDetail"];
-		$this->HeadDetail->AdvancedSearch->SearchCondition = @$filter["v_HeadDetail"];
-		$this->HeadDetail->AdvancedSearch->SearchValue2 = @$filter["y_HeadDetail"];
-		$this->HeadDetail->AdvancedSearch->SearchOperator2 = @$filter["w_HeadDetail"];
-		$this->HeadDetail->AdvancedSearch->Save();
-
-		// Field NomorHead
-		$this->NomorHead->AdvancedSearch->SearchValue = @$filter["x_NomorHead"];
-		$this->NomorHead->AdvancedSearch->SearchOperator = @$filter["z_NomorHead"];
-		$this->NomorHead->AdvancedSearch->SearchCondition = @$filter["v_NomorHead"];
-		$this->NomorHead->AdvancedSearch->SearchValue2 = @$filter["y_NomorHead"];
-		$this->NomorHead->AdvancedSearch->SearchOperator2 = @$filter["w_NomorHead"];
-		$this->NomorHead->AdvancedSearch->Save();
-
-		// Field SubTotalFlag
-		$this->SubTotalFlag->AdvancedSearch->SearchValue = @$filter["x_SubTotalFlag"];
-		$this->SubTotalFlag->AdvancedSearch->SearchOperator = @$filter["z_SubTotalFlag"];
-		$this->SubTotalFlag->AdvancedSearch->SearchCondition = @$filter["v_SubTotalFlag"];
-		$this->SubTotalFlag->AdvancedSearch->SearchValue2 = @$filter["y_SubTotalFlag"];
-		$this->SubTotalFlag->AdvancedSearch->SearchOperator2 = @$filter["w_SubTotalFlag"];
-		$this->SubTotalFlag->AdvancedSearch->Save();
-
-		// Field Urutan
-		$this->Urutan->AdvancedSearch->SearchValue = @$filter["x_Urutan"];
-		$this->Urutan->AdvancedSearch->SearchOperator = @$filter["z_Urutan"];
-		$this->Urutan->AdvancedSearch->SearchCondition = @$filter["v_Urutan"];
-		$this->Urutan->AdvancedSearch->SearchValue2 = @$filter["y_Urutan"];
-		$this->Urutan->AdvancedSearch->SearchOperator2 = @$filter["w_Urutan"];
-		$this->Urutan->AdvancedSearch->Save();
-
-		// Field Nomor
-		$this->Nomor->AdvancedSearch->SearchValue = @$filter["x_Nomor"];
-		$this->Nomor->AdvancedSearch->SearchOperator = @$filter["z_Nomor"];
-		$this->Nomor->AdvancedSearch->SearchCondition = @$filter["v_Nomor"];
-		$this->Nomor->AdvancedSearch->SearchValue2 = @$filter["y_Nomor"];
-		$this->Nomor->AdvancedSearch->SearchOperator2 = @$filter["w_Nomor"];
-		$this->Nomor->AdvancedSearch->Save();
-
-		// Field Kode
-		$this->Kode->AdvancedSearch->SearchValue = @$filter["x_Kode"];
-		$this->Kode->AdvancedSearch->SearchOperator = @$filter["z_Kode"];
-		$this->Kode->AdvancedSearch->SearchCondition = @$filter["v_Kode"];
-		$this->Kode->AdvancedSearch->SearchValue2 = @$filter["y_Kode"];
-		$this->Kode->AdvancedSearch->SearchOperator2 = @$filter["w_Kode"];
-		$this->Kode->AdvancedSearch->Save();
-
-		// Field Pos
-		$this->Pos->AdvancedSearch->SearchValue = @$filter["x_Pos"];
-		$this->Pos->AdvancedSearch->SearchOperator = @$filter["z_Pos"];
-		$this->Pos->AdvancedSearch->SearchCondition = @$filter["v_Pos"];
-		$this->Pos->AdvancedSearch->SearchValue2 = @$filter["y_Pos"];
-		$this->Pos->AdvancedSearch->SearchOperator2 = @$filter["w_Pos"];
-		$this->Pos->AdvancedSearch->Save();
-
-		// Field Nominal
-		$this->Nominal->AdvancedSearch->SearchValue = @$filter["x_Nominal"];
-		$this->Nominal->AdvancedSearch->SearchOperator = @$filter["z_Nominal"];
-		$this->Nominal->AdvancedSearch->SearchCondition = @$filter["v_Nominal"];
-		$this->Nominal->AdvancedSearch->SearchValue2 = @$filter["y_Nominal"];
-		$this->Nominal->AdvancedSearch->SearchOperator2 = @$filter["w_Nominal"];
-		$this->Nominal->AdvancedSearch->Save();
-
-		// Field Banyaknya
-		$this->Banyaknya->AdvancedSearch->SearchValue = @$filter["x_Banyaknya"];
-		$this->Banyaknya->AdvancedSearch->SearchOperator = @$filter["z_Banyaknya"];
-		$this->Banyaknya->AdvancedSearch->SearchCondition = @$filter["v_Banyaknya"];
-		$this->Banyaknya->AdvancedSearch->SearchValue2 = @$filter["y_Banyaknya"];
-		$this->Banyaknya->AdvancedSearch->SearchOperator2 = @$filter["w_Banyaknya"];
-		$this->Banyaknya->AdvancedSearch->Save();
-
-		// Field Satuan
-		$this->Satuan->AdvancedSearch->SearchValue = @$filter["x_Satuan"];
-		$this->Satuan->AdvancedSearch->SearchOperator = @$filter["z_Satuan"];
-		$this->Satuan->AdvancedSearch->SearchCondition = @$filter["v_Satuan"];
-		$this->Satuan->AdvancedSearch->SearchValue2 = @$filter["y_Satuan"];
-		$this->Satuan->AdvancedSearch->SearchOperator2 = @$filter["w_Satuan"];
-		$this->Satuan->AdvancedSearch->Save();
-
-		// Field Jumlah
-		$this->Jumlah->AdvancedSearch->SearchValue = @$filter["x_Jumlah"];
-		$this->Jumlah->AdvancedSearch->SearchOperator = @$filter["z_Jumlah"];
-		$this->Jumlah->AdvancedSearch->SearchCondition = @$filter["v_Jumlah"];
-		$this->Jumlah->AdvancedSearch->SearchValue2 = @$filter["y_Jumlah"];
-		$this->Jumlah->AdvancedSearch->SearchOperator2 = @$filter["w_Jumlah"];
-		$this->Jumlah->AdvancedSearch->Save();
-
-		// Field Total
-		$this->Total->AdvancedSearch->SearchValue = @$filter["x_Total"];
-		$this->Total->AdvancedSearch->SearchOperator = @$filter["z_Total"];
-		$this->Total->AdvancedSearch->SearchCondition = @$filter["v_Total"];
-		$this->Total->AdvancedSearch->SearchValue2 = @$filter["y_Total"];
-		$this->Total->AdvancedSearch->SearchOperator2 = @$filter["w_Total"];
-		$this->Total->AdvancedSearch->Save();
-	}
-
-	// Advanced search WHERE clause based on QueryString
-	function AdvancedSearchWhere($Default = FALSE) {
-		global $Security;
-		$sWhere = "";
-		$this->BuildSearchSql($sWhere, $this->id, $Default, FALSE); // id
-		$this->BuildSearchSql($sWhere, $this->Departemen, $Default, FALSE); // Departemen
-		$this->BuildSearchSql($sWhere, $this->HeadDetail, $Default, FALSE); // HeadDetail
-		$this->BuildSearchSql($sWhere, $this->NomorHead, $Default, FALSE); // NomorHead
-		$this->BuildSearchSql($sWhere, $this->SubTotalFlag, $Default, FALSE); // SubTotalFlag
-		$this->BuildSearchSql($sWhere, $this->Urutan, $Default, FALSE); // Urutan
-		$this->BuildSearchSql($sWhere, $this->Nomor, $Default, FALSE); // Nomor
-		$this->BuildSearchSql($sWhere, $this->Kode, $Default, FALSE); // Kode
-		$this->BuildSearchSql($sWhere, $this->Pos, $Default, FALSE); // Pos
-		$this->BuildSearchSql($sWhere, $this->Nominal, $Default, FALSE); // Nominal
-		$this->BuildSearchSql($sWhere, $this->Banyaknya, $Default, FALSE); // Banyaknya
-		$this->BuildSearchSql($sWhere, $this->Satuan, $Default, FALSE); // Satuan
-		$this->BuildSearchSql($sWhere, $this->Jumlah, $Default, FALSE); // Jumlah
-		$this->BuildSearchSql($sWhere, $this->Total, $Default, FALSE); // Total
-
-		// Set up search parm
-		if (!$Default && $sWhere <> "" && in_array($this->Command, array("", "reset", "resetall"))) {
-			$this->Command = "search";
-		}
-		if (!$Default && $this->Command == "search") {
-			$this->id->AdvancedSearch->Save(); // id
-			$this->Departemen->AdvancedSearch->Save(); // Departemen
-			$this->HeadDetail->AdvancedSearch->Save(); // HeadDetail
-			$this->NomorHead->AdvancedSearch->Save(); // NomorHead
-			$this->SubTotalFlag->AdvancedSearch->Save(); // SubTotalFlag
-			$this->Urutan->AdvancedSearch->Save(); // Urutan
-			$this->Nomor->AdvancedSearch->Save(); // Nomor
-			$this->Kode->AdvancedSearch->Save(); // Kode
-			$this->Pos->AdvancedSearch->Save(); // Pos
-			$this->Nominal->AdvancedSearch->Save(); // Nominal
-			$this->Banyaknya->AdvancedSearch->Save(); // Banyaknya
-			$this->Satuan->AdvancedSearch->Save(); // Satuan
-			$this->Jumlah->AdvancedSearch->Save(); // Jumlah
-			$this->Total->AdvancedSearch->Save(); // Total
-		}
-		return $sWhere;
-	}
-
-	// Build search SQL
-	function BuildSearchSql(&$Where, &$Fld, $Default, $MultiValue) {
-		$FldParm = $Fld->FldParm();
-		$FldVal = ($Default) ? $Fld->AdvancedSearch->SearchValueDefault : $Fld->AdvancedSearch->SearchValue; // @$_GET["x_$FldParm"]
-		$FldOpr = ($Default) ? $Fld->AdvancedSearch->SearchOperatorDefault : $Fld->AdvancedSearch->SearchOperator; // @$_GET["z_$FldParm"]
-		$FldCond = ($Default) ? $Fld->AdvancedSearch->SearchConditionDefault : $Fld->AdvancedSearch->SearchCondition; // @$_GET["v_$FldParm"]
-		$FldVal2 = ($Default) ? $Fld->AdvancedSearch->SearchValue2Default : $Fld->AdvancedSearch->SearchValue2; // @$_GET["y_$FldParm"]
-		$FldOpr2 = ($Default) ? $Fld->AdvancedSearch->SearchOperator2Default : $Fld->AdvancedSearch->SearchOperator2; // @$_GET["w_$FldParm"]
-		$sWrk = "";
-		if (is_array($FldVal)) $FldVal = implode(",", $FldVal);
-		if (is_array($FldVal2)) $FldVal2 = implode(",", $FldVal2);
-		$FldOpr = strtoupper(trim($FldOpr));
-		if ($FldOpr == "") $FldOpr = "=";
-		$FldOpr2 = strtoupper(trim($FldOpr2));
-		if ($FldOpr2 == "") $FldOpr2 = "=";
-		if (EW_SEARCH_MULTI_VALUE_OPTION == 1)
-			$MultiValue = FALSE;
-		if ($MultiValue) {
-			$sWrk1 = ($FldVal <> "") ? ew_GetMultiSearchSql($Fld, $FldOpr, $FldVal, $this->DBID) : ""; // Field value 1
-			$sWrk2 = ($FldVal2 <> "") ? ew_GetMultiSearchSql($Fld, $FldOpr2, $FldVal2, $this->DBID) : ""; // Field value 2
-			$sWrk = $sWrk1; // Build final SQL
-			if ($sWrk2 <> "")
-				$sWrk = ($sWrk <> "") ? "($sWrk) $FldCond ($sWrk2)" : $sWrk2;
-		} else {
-			$FldVal = $this->ConvertSearchValue($Fld, $FldVal);
-			$FldVal2 = $this->ConvertSearchValue($Fld, $FldVal2);
-			$sWrk = ew_GetSearchSql($Fld, $FldVal, $FldOpr, $FldCond, $FldVal2, $FldOpr2, $this->DBID);
-		}
-		ew_AddFilter($Where, $sWrk);
-	}
-
-	// Convert search value
-	function ConvertSearchValue(&$Fld, $FldVal) {
-		if ($FldVal == EW_NULL_VALUE || $FldVal == EW_NOT_NULL_VALUE)
-			return $FldVal;
-		$Value = $FldVal;
-		if ($Fld->FldDataType == EW_DATATYPE_BOOLEAN) {
-			if ($FldVal <> "") $Value = ($FldVal == "1" || strtolower(strval($FldVal)) == "y" || strtolower(strval($FldVal)) == "t") ? $Fld->TrueValue : $Fld->FalseValue;
-		} elseif ($Fld->FldDataType == EW_DATATYPE_DATE || $Fld->FldDataType == EW_DATATYPE_TIME) {
-			if ($FldVal <> "") $Value = ew_UnFormatDateTime($FldVal, $Fld->FldDateTimeFormat);
-		}
-		return $Value;
-	}
-
-	// Check if search parm exists
-	function CheckSearchParms() {
-		if ($this->id->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Departemen->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->HeadDetail->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->NomorHead->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->SubTotalFlag->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Urutan->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Nomor->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Kode->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Pos->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Nominal->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Banyaknya->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Satuan->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Jumlah->AdvancedSearch->IssetSession())
-			return TRUE;
-		if ($this->Total->AdvancedSearch->IssetSession())
-			return TRUE;
-		return FALSE;
-	}
-
-	// Clear all search parameters
-	function ResetSearchParms() {
-
-		// Clear search WHERE clause
-		$this->SearchWhere = "";
-		$this->setSearchWhere($this->SearchWhere);
-
-		// Clear advanced search parameters
-		$this->ResetAdvancedSearchParms();
-	}
-
-	// Load advanced search default values
-	function LoadAdvancedSearchDefault() {
-		return FALSE;
-	}
-
-	// Clear all advanced search parameters
-	function ResetAdvancedSearchParms() {
-		$this->id->AdvancedSearch->UnsetSession();
-		$this->Departemen->AdvancedSearch->UnsetSession();
-		$this->HeadDetail->AdvancedSearch->UnsetSession();
-		$this->NomorHead->AdvancedSearch->UnsetSession();
-		$this->SubTotalFlag->AdvancedSearch->UnsetSession();
-		$this->Urutan->AdvancedSearch->UnsetSession();
-		$this->Nomor->AdvancedSearch->UnsetSession();
-		$this->Kode->AdvancedSearch->UnsetSession();
-		$this->Pos->AdvancedSearch->UnsetSession();
-		$this->Nominal->AdvancedSearch->UnsetSession();
-		$this->Banyaknya->AdvancedSearch->UnsetSession();
-		$this->Satuan->AdvancedSearch->UnsetSession();
-		$this->Jumlah->AdvancedSearch->UnsetSession();
-		$this->Total->AdvancedSearch->UnsetSession();
-	}
-
-	// Restore all search parameters
-	function RestoreSearchParms() {
-		$this->RestoreSearch = TRUE;
-
-		// Restore advanced search values
-		$this->id->AdvancedSearch->Load();
-		$this->Departemen->AdvancedSearch->Load();
-		$this->HeadDetail->AdvancedSearch->Load();
-		$this->NomorHead->AdvancedSearch->Load();
-		$this->SubTotalFlag->AdvancedSearch->Load();
-		$this->Urutan->AdvancedSearch->Load();
-		$this->Nomor->AdvancedSearch->Load();
-		$this->Kode->AdvancedSearch->Load();
-		$this->Pos->AdvancedSearch->Load();
-		$this->Nominal->AdvancedSearch->Load();
-		$this->Banyaknya->AdvancedSearch->Load();
-		$this->Satuan->AdvancedSearch->Load();
-		$this->Jumlah->AdvancedSearch->Load();
-		$this->Total->AdvancedSearch->Load();
-	}
-
 	// Set up sort parameters
 	function SetupSortOrder() {
 
@@ -1358,9 +1056,13 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Check if reset command
 		if (substr($this->Command,0,5) == "reset") {
 
-			// Reset search criteria
-			if ($this->Command == "reset" || $this->Command == "resetall")
-				$this->ResetSearchParms();
+			// Reset master/detail keys
+			if ($this->Command == "resetall") {
+				$this->setCurrentMasterTable(""); // Clear master table
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+				$this->Kode->setSessionValue("");
+			}
 
 			// Reset sorting order
 			if ($this->Command == "resetsort") {
@@ -1405,6 +1107,12 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$item->Body = "";
 		$item->OnLeft = FALSE;
 		$item->Visible = FALSE;
+
+		// "edit"
+		$item = &$this->ListOptions->Add("edit");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = TRUE;
+		$item->OnLeft = FALSE;
 
 		// List actions
 		$item = &$this->ListOptions->Add("listactions");
@@ -1478,6 +1186,28 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			}
 		}
 
+		// "edit"
+		$oListOpt = &$this->ListOptions->Items["edit"];
+		if ($this->CurrentAction == "edit" && $this->RowType == EW_ROWTYPE_EDIT) { // Inline-Edit
+			$this->ListOptions->CustomItem = "edit"; // Show edit column only
+			$cancelurl = $this->AddMasterUrl($this->PageUrl() . "a=cancel");
+				$oListOpt->Body = "<div" . (($oListOpt->OnLeft) ? " style=\"text-align: right\"" : "") . ">" .
+					"<a class=\"ewGridLink ewInlineUpdate\" title=\"" . ew_HtmlTitle($Language->Phrase("UpdateLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("UpdateLink")) . "\" href=\"\" onclick=\"return ewForms(this).Submit('" . ew_UrlAddHash($this->PageName(), "r" . $this->RowCnt . "_" . $this->TableVar) . "');\">" . $Language->Phrase("UpdateLink") . "</a>&nbsp;" .
+					"<a class=\"ewGridLink ewInlineCancel\" title=\"" . ew_HtmlTitle($Language->Phrase("CancelLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("CancelLink")) . "\" href=\"" . $cancelurl . "\">" . $Language->Phrase("CancelLink") . "</a>" .
+					"<input type=\"hidden\" name=\"a_list\" id=\"a_list\" value=\"update\"></div>";
+			$oListOpt->Body .= "<input type=\"hidden\" name=\"k" . $this->RowIndex . "_key\" id=\"k" . $this->RowIndex . "_key\" value=\"" . ew_HtmlEncode($this->id->CurrentValue) . "\">";
+			return;
+		}
+
+		// "edit"
+		$oListOpt = &$this->ListOptions->Items["edit"];
+		$editcaption = ew_HtmlTitle($Language->Phrase("EditLink"));
+		if (TRUE) {
+			$oListOpt->Body .= "<a class=\"ewRowLink ewInlineEdit\" title=\"" . ew_HtmlTitle($Language->Phrase("InlineEditLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("InlineEditLink")) . "\" href=\"" . ew_HtmlEncode(ew_UrlAddHash($this->InlineEditUrl, "r" . $this->RowCnt . "_" . $this->TableVar)) . "\">" . $Language->Phrase("InlineEditLink") . "</a>";
+		} else {
+			$oListOpt->Body = "";
+		}
+
 		// Set up list action buttons
 		$oListOpt = &$this->ListOptions->GetItem("listactions");
 		if ($oListOpt && $this->Export == "" && $this->CurrentAction == "") {
@@ -1523,13 +1253,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	function SetupOtherOptions() {
 		global $Language, $Security;
 		$options = &$this->OtherOptions;
-		$option = $options["addedit"];
-
-		// Add
-		$item = &$option->Add("add");
-		$addcaption = ew_HtmlTitle($Language->Phrase("AddLink"));
-		$item->Body = "<a class=\"ewAddEdit ewAdd\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . ew_HtmlEncode($this->AddUrl) . "\">" . $Language->Phrase("AddLink") . "</a>";
-		$item->Visible = ($this->AddUrl <> "");
 
 		// Add grid edit
 		$option = $options["addedit"];
@@ -1555,10 +1278,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Filter button
 		$item = &$this->FilterOptions->Add("savecurrentfilter");
 		$item->Body = "<a class=\"ewSaveFilter\" data-form=\"ft02_pengeluaranlistsrch\" href=\"#\">" . $Language->Phrase("SaveCurrentFilter") . "</a>";
-		$item->Visible = TRUE;
+		$item->Visible = FALSE;
 		$item = &$this->FilterOptions->Add("deletefilter");
 		$item->Body = "<a class=\"ewDeleteFilter\" data-form=\"ft02_pengeluaranlistsrch\" href=\"#\">" . $Language->Phrase("DeleteFilter") . "</a>";
-		$item->Visible = TRUE;
+		$item->Visible = FALSE;
 		$this->FilterOptions->UseDropDownButton = TRUE;
 		$this->FilterOptions->UseButtonGroup = !$this->FilterOptions->UseDropDownButton;
 		$this->FilterOptions->DropDownButtonPhrase = $Language->Phrase("Filters");
@@ -1609,7 +1332,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 					$option->UseImageAndText = TRUE;
 					$item = &$option->Add("addblankrow");
 					$item->Body = "<a class=\"ewAddEdit ewAddBlankRow\" title=\"" . ew_HtmlTitle($Language->Phrase("AddBlankRow")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("AddBlankRow")) . "\" href=\"javascript:void(0);\" onclick=\"ew_AddGridRow(this);\">" . $Language->Phrase("AddBlankRow") . "</a>";
-					$item->Visible = TRUE;
+					$item->Visible = FALSE;
 				}
 				$option = &$options["action"];
 				$option->UseDropDownButton = FALSE;
@@ -1709,17 +1432,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->SearchOptions->Tag = "div";
 		$this->SearchOptions->TagClassName = "ewSearchOption";
 
-		// Search button
-		$item = &$this->SearchOptions->Add("searchtoggle");
-		$SearchToggleClass = ($this->SearchWhere <> "") ? " active" : " active";
-		$item->Body = "<button type=\"button\" class=\"btn btn-default ewSearchToggle" . $SearchToggleClass . "\" title=\"" . $Language->Phrase("SearchPanel") . "\" data-caption=\"" . $Language->Phrase("SearchPanel") . "\" data-toggle=\"button\" data-form=\"ft02_pengeluaranlistsrch\">" . $Language->Phrase("SearchLink") . "</button>";
-		$item->Visible = TRUE;
-
-		// Show all button
-		$item = &$this->SearchOptions->Add("showall");
-		$item->Body = "<a class=\"btn btn-default ewShowAll\" title=\"" . $Language->Phrase("ResetSearch") . "\" data-caption=\"" . $Language->Phrase("ResetSearch") . "\" href=\"" . $this->PageUrl() . "cmd=reset\">" . $Language->Phrase("ResetSearchBtn") . "</a>";
-		$item->Visible = ($this->SearchWhere <> $this->DefaultSearchWhere && $this->SearchWhere <> "0=101");
-
 		// Button group for search
 		$this->SearchOptions->UseDropDownButton = FALSE;
 		$this->SearchOptions->UseImageAndText = TRUE;
@@ -1810,83 +1522,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->Jumlah->OldValue = $this->Jumlah->CurrentValue;
 		$this->Total->CurrentValue = 0.00;
 		$this->Total->OldValue = $this->Total->CurrentValue;
-	}
-
-	// Load search values for validation
-	function LoadSearchValues() {
-		global $objForm;
-
-		// Load search values
-		// id
-
-		$this->id->AdvancedSearch->SearchValue = @$_GET["x_id"];
-		if ($this->id->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->id->AdvancedSearch->SearchOperator = @$_GET["z_id"];
-
-		// Departemen
-		$this->Departemen->AdvancedSearch->SearchValue = @$_GET["x_Departemen"];
-		if ($this->Departemen->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Departemen->AdvancedSearch->SearchOperator = @$_GET["z_Departemen"];
-
-		// HeadDetail
-		$this->HeadDetail->AdvancedSearch->SearchValue = @$_GET["x_HeadDetail"];
-		if ($this->HeadDetail->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->HeadDetail->AdvancedSearch->SearchOperator = @$_GET["z_HeadDetail"];
-
-		// NomorHead
-		$this->NomorHead->AdvancedSearch->SearchValue = @$_GET["x_NomorHead"];
-		if ($this->NomorHead->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->NomorHead->AdvancedSearch->SearchOperator = @$_GET["z_NomorHead"];
-
-		// SubTotalFlag
-		$this->SubTotalFlag->AdvancedSearch->SearchValue = @$_GET["x_SubTotalFlag"];
-		if ($this->SubTotalFlag->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->SubTotalFlag->AdvancedSearch->SearchOperator = @$_GET["z_SubTotalFlag"];
-
-		// Urutan
-		$this->Urutan->AdvancedSearch->SearchValue = @$_GET["x_Urutan"];
-		if ($this->Urutan->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Urutan->AdvancedSearch->SearchOperator = @$_GET["z_Urutan"];
-
-		// Nomor
-		$this->Nomor->AdvancedSearch->SearchValue = @$_GET["x_Nomor"];
-		if ($this->Nomor->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Nomor->AdvancedSearch->SearchOperator = @$_GET["z_Nomor"];
-
-		// Kode
-		$this->Kode->AdvancedSearch->SearchValue = @$_GET["x_Kode"];
-		if ($this->Kode->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Kode->AdvancedSearch->SearchOperator = @$_GET["z_Kode"];
-
-		// Pos
-		$this->Pos->AdvancedSearch->SearchValue = @$_GET["x_Pos"];
-		if ($this->Pos->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Pos->AdvancedSearch->SearchOperator = @$_GET["z_Pos"];
-
-		// Nominal
-		$this->Nominal->AdvancedSearch->SearchValue = @$_GET["x_Nominal"];
-		if ($this->Nominal->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Nominal->AdvancedSearch->SearchOperator = @$_GET["z_Nominal"];
-
-		// Banyaknya
-		$this->Banyaknya->AdvancedSearch->SearchValue = @$_GET["x_Banyaknya"];
-		if ($this->Banyaknya->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Banyaknya->AdvancedSearch->SearchOperator = @$_GET["z_Banyaknya"];
-
-		// Satuan
-		$this->Satuan->AdvancedSearch->SearchValue = @$_GET["x_Satuan"];
-		if ($this->Satuan->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Satuan->AdvancedSearch->SearchOperator = @$_GET["z_Satuan"];
-
-		// Jumlah
-		$this->Jumlah->AdvancedSearch->SearchValue = @$_GET["x_Jumlah"];
-		if ($this->Jumlah->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Jumlah->AdvancedSearch->SearchOperator = @$_GET["z_Jumlah"];
-
-		// Total
-		$this->Total->AdvancedSearch->SearchValue = @$_GET["x_Total"];
-		if ($this->Total->AdvancedSearch->SearchValue <> "" && $this->Command == "") $this->Command = "search";
-		$this->Total->AdvancedSearch->SearchOperator = @$_GET["z_Total"];
 	}
 
 	// Load form values
@@ -2341,8 +1976,14 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Kode
 			$this->Kode->EditAttrs["class"] = "form-control";
 			$this->Kode->EditCustomAttributes = "";
+			if ($this->Kode->getSessionValue() <> "") {
+				$this->Kode->CurrentValue = $this->Kode->getSessionValue();
+			$this->Kode->ViewValue = $this->Kode->CurrentValue;
+			$this->Kode->ViewCustomAttributes = "";
+			} else {
 			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
 			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+			}
 
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
@@ -2500,8 +2141,14 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Kode
 			$this->Kode->EditAttrs["class"] = "form-control";
 			$this->Kode->EditCustomAttributes = "";
+			if ($this->Kode->getSessionValue() <> "") {
+				$this->Kode->CurrentValue = $this->Kode->getSessionValue();
+			$this->Kode->ViewValue = $this->Kode->CurrentValue;
+			$this->Kode->ViewCustomAttributes = "";
+			} else {
 			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
 			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
+			}
 
 			// Pos
 			$this->Pos->EditAttrs["class"] = "form-control";
@@ -2599,104 +2246,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			// Total
 			$this->Total->LinkCustomAttributes = "";
 			$this->Total->HrefValue = "";
-		} elseif ($this->RowType == EW_ROWTYPE_SEARCH) { // Search row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = ew_HtmlEncode($this->id->AdvancedSearch->SearchValue);
-			$this->id->PlaceHolder = ew_RemoveHtml($this->id->FldCaption());
-
-			// Departemen
-			$this->Departemen->EditAttrs["class"] = "form-control";
-			$this->Departemen->EditCustomAttributes = "";
-			if (trim(strval($this->Departemen->AdvancedSearch->SearchValue)) == "") {
-				$sFilterWrk = "0=1";
-			} else {
-				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->AdvancedSearch->SearchValue, EW_DATATYPE_STRING, "jbsakad");
-			}
-			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
-			$sWhereWrk = "";
-			$this->Departemen->LookupFilters = array();
-			ew_AddFilter($sWhereWrk, $sFilterWrk);
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
-			if ($rswrk) $rswrk->Close();
-			$this->Departemen->EditValue = $arwrk;
-
-			// HeadDetail
-			$this->HeadDetail->EditAttrs["class"] = "form-control";
-			$this->HeadDetail->EditCustomAttributes = "";
-			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->AdvancedSearch->SearchValue);
-			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-			// NomorHead
-			$this->NomorHead->EditAttrs["class"] = "form-control";
-			$this->NomorHead->EditCustomAttributes = "";
-			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->AdvancedSearch->SearchValue);
-			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-			// SubTotalFlag
-			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-			$this->SubTotalFlag->EditCustomAttributes = "";
-			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->AdvancedSearch->SearchValue);
-			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
-
-			// Urutan
-			$this->Urutan->EditAttrs["class"] = "form-control";
-			$this->Urutan->EditCustomAttributes = "";
-			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->AdvancedSearch->SearchValue);
-			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
-
-			// Nomor
-			$this->Nomor->EditAttrs["class"] = "form-control";
-			$this->Nomor->EditCustomAttributes = "";
-			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->AdvancedSearch->SearchValue);
-			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
-
-			// Kode
-			$this->Kode->EditAttrs["class"] = "form-control";
-			$this->Kode->EditCustomAttributes = "";
-			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->AdvancedSearch->SearchValue);
-			$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
-
-			// Pos
-			$this->Pos->EditAttrs["class"] = "form-control";
-			$this->Pos->EditCustomAttributes = "";
-			$this->Pos->EditValue = ew_HtmlEncode($this->Pos->AdvancedSearch->SearchValue);
-			$this->Pos->PlaceHolder = ew_RemoveHtml($this->Pos->FldCaption());
-
-			// Nominal
-			$this->Nominal->EditAttrs["class"] = "form-control";
-			$this->Nominal->EditCustomAttributes = "";
-			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->AdvancedSearch->SearchValue);
-			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
-
-			// Banyaknya
-			$this->Banyaknya->EditAttrs["class"] = "form-control";
-			$this->Banyaknya->EditCustomAttributes = "";
-			$this->Banyaknya->EditValue = ew_HtmlEncode($this->Banyaknya->AdvancedSearch->SearchValue);
-			$this->Banyaknya->PlaceHolder = ew_RemoveHtml($this->Banyaknya->FldCaption());
-
-			// Satuan
-			$this->Satuan->EditAttrs["class"] = "form-control";
-			$this->Satuan->EditCustomAttributes = "";
-			$this->Satuan->EditValue = ew_HtmlEncode($this->Satuan->AdvancedSearch->SearchValue);
-			$this->Satuan->PlaceHolder = ew_RemoveHtml($this->Satuan->FldCaption());
-
-			// Jumlah
-			$this->Jumlah->EditAttrs["class"] = "form-control";
-			$this->Jumlah->EditCustomAttributes = "";
-			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->AdvancedSearch->SearchValue);
-			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
-
-			// Total
-			$this->Total->EditAttrs["class"] = "form-control";
-			$this->Total->EditCustomAttributes = "";
-			$this->Total->EditValue = ew_HtmlEncode($this->Total->AdvancedSearch->SearchValue);
-			$this->Total->PlaceHolder = ew_RemoveHtml($this->Total->FldCaption());
 		}
 		if ($this->RowType == EW_ROWTYPE_ADD || $this->RowType == EW_ROWTYPE_EDIT || $this->RowType == EW_ROWTYPE_SEARCH) // Add/Edit/Search row
 			$this->SetupFieldTitles();
@@ -2704,29 +2253,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Call Row Rendered event
 		if ($this->RowType <> EW_ROWTYPE_AGGREGATEINIT)
 			$this->Row_Rendered();
-	}
-
-	// Validate search
-	function ValidateSearch() {
-		global $gsSearchError;
-
-		// Initialize
-		$gsSearchError = "";
-
-		// Check if validation required
-		if (!EW_SERVER_VALIDATE)
-			return TRUE;
-
-		// Return validate result
-		$ValidateSearch = ($gsSearchError == "");
-
-		// Call Form_CustomValidate event
-		$sFormCustomError = "";
-		$ValidateSearch = $ValidateSearch && $this->Form_CustomValidate($sFormCustomError);
-		if ($sFormCustomError <> "") {
-			ew_AddMessage($gsSearchError, $sFormCustomError);
-		}
-		return $ValidateSearch;
 	}
 
 	// Validate form
@@ -3020,22 +2546,70 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		return $AddRow;
 	}
 
-	// Load advanced search
-	function LoadAdvancedSearch() {
-		$this->id->AdvancedSearch->Load();
-		$this->Departemen->AdvancedSearch->Load();
-		$this->HeadDetail->AdvancedSearch->Load();
-		$this->NomorHead->AdvancedSearch->Load();
-		$this->SubTotalFlag->AdvancedSearch->Load();
-		$this->Urutan->AdvancedSearch->Load();
-		$this->Nomor->AdvancedSearch->Load();
-		$this->Kode->AdvancedSearch->Load();
-		$this->Pos->AdvancedSearch->Load();
-		$this->Nominal->AdvancedSearch->Load();
-		$this->Banyaknya->AdvancedSearch->Load();
-		$this->Satuan->AdvancedSearch->Load();
-		$this->Jumlah->AdvancedSearch->Load();
-		$this->Total->AdvancedSearch->Load();
+	// Set up master/detail based on QueryString
+	function SetupMasterParms() {
+		$bValidMaster = FALSE;
+
+		// Get the keys for master table
+		if (isset($_GET[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_GET[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pengeluaran_head") {
+				$bValidMaster = TRUE;
+				if (@$_GET["fk_Kode"] <> "") {
+					$GLOBALS["t03_pengeluaran_head"]->Kode->setQueryStringValue($_GET["fk_Kode"]);
+					$this->Kode->setQueryStringValue($GLOBALS["t03_pengeluaran_head"]->Kode->QueryStringValue);
+					$this->Kode->setSessionValue($this->Kode->QueryStringValue);
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		} elseif (isset($_POST[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_POST[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pengeluaran_head") {
+				$bValidMaster = TRUE;
+				if (@$_POST["fk_Kode"] <> "") {
+					$GLOBALS["t03_pengeluaran_head"]->Kode->setFormValue($_POST["fk_Kode"]);
+					$this->Kode->setFormValue($GLOBALS["t03_pengeluaran_head"]->Kode->FormValue);
+					$this->Kode->setSessionValue($this->Kode->FormValue);
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		}
+		if ($bValidMaster) {
+
+			// Update URL
+			$this->AddUrl = $this->AddMasterUrl($this->AddUrl);
+			$this->InlineAddUrl = $this->AddMasterUrl($this->InlineAddUrl);
+			$this->GridAddUrl = $this->AddMasterUrl($this->GridAddUrl);
+			$this->GridEditUrl = $this->AddMasterUrl($this->GridEditUrl);
+
+			// Save current master table
+			$this->setCurrentMasterTable($sMasterTblVar);
+
+			// Reset start record counter (new master key)
+			if (!$this->IsAddOrEdit()) {
+				$this->StartRec = 1;
+				$this->setStartRecordNumber($this->StartRec);
+			}
+
+			// Clear previous master key from Session
+			if ($sMasterTblVar <> "t03_pengeluaran_head") {
+				if ($this->Kode->CurrentValue == "") $this->Kode->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Get detail filter
 	}
 
 	// Set up Breadcrumb
@@ -3051,36 +2625,19 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	function SetupLookupFilters($fld, $pageId = null) {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
-		if ($pageId == "list") {
-			switch ($fld->FldVar) {
+		switch ($fld->FldVar) {
 		case "x_Departemen":
 			$sSqlWrk = "";
-				$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-				$sWhereWrk = "";
-				$fld->LookupFilters = array();
+			$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
+			$sWhereWrk = "";
+			$fld->LookupFilters = array();
 			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
 			$sSqlWrk = "";
-				$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-				if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
 			if ($sSqlWrk <> "")
 				$fld->LookupFilters["s"] .= $sSqlWrk;
 			break;
-			}
-		} elseif ($pageId == "extbs") {
-			switch ($fld->FldVar) {
-		case "x_Departemen":
-			$sSqlWrk = "";
-				$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-				$sWhereWrk = "";
-				$fld->LookupFilters = array();
-			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
-			$sSqlWrk = "";
-				$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-				if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			if ($sSqlWrk <> "")
-				$fld->LookupFilters["s"] .= $sSqlWrk;
-			break;
-			}
 		}
 	}
 
@@ -3088,12 +2645,7 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	function SetupAutoSuggestFilters($fld, $pageId = null) {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
-		if ($pageId == "list") {
-			switch ($fld->FldVar) {
-			}
-		} elseif ($pageId == "extbs") {
-			switch ($fld->FldVar) {
-			}
+		switch ($fld->FldVar) {
 		}
 	}
 
@@ -3312,35 +2864,6 @@ ft02_pengeluaranlist.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":
 ft02_pengeluaranlist.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluaran_list->Departemen->LookupFilterQuery(FALSE, "list") ?>";
 
 // Form object for search
-var CurrentSearchForm = ft02_pengeluaranlistsrch = new ew_Form("ft02_pengeluaranlistsrch");
-
-// Validate function for search
-ft02_pengeluaranlistsrch.Validate = function(fobj) {
-	if (!this.ValidateRequired)
-		return true; // Ignore validation
-	fobj = fobj || this.Form;
-	var infix = "";
-
-	// Fire Form_CustomValidate event
-	if (!this.Form_CustomValidate(fobj))
-		return false;
-	return true;
-}
-
-// Form_CustomValidate event
-ft02_pengeluaranlistsrch.Form_CustomValidate = 
- function(fobj) { // DO NOT CHANGE THIS LINE!
-
- 	// Your custom validation code here, return false if invalid.
- 	return true;
- }
-
-// Use JavaScript validation or not
-ft02_pengeluaranlistsrch.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
-
-// Dynamic selection lists
-ft02_pengeluaranlistsrch.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
-ft02_pengeluaranlistsrch.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluaran_list->Departemen->LookupFilterQuery(FALSE, "extbs") ?>";
 </script>
 <script type="text/javascript">
 
@@ -3350,14 +2873,19 @@ ft02_pengeluaranlistsrch.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluar
 <?php if ($t02_pengeluaran_list->TotalRecs > 0 && $t02_pengeluaran_list->ExportOptions->Visible()) { ?>
 <?php $t02_pengeluaran_list->ExportOptions->Render("body") ?>
 <?php } ?>
-<?php if ($t02_pengeluaran_list->SearchOptions->Visible()) { ?>
-<?php $t02_pengeluaran_list->SearchOptions->Render("body") ?>
-<?php } ?>
-<?php if ($t02_pengeluaran_list->FilterOptions->Visible()) { ?>
-<?php $t02_pengeluaran_list->FilterOptions->Render("body") ?>
-<?php } ?>
 <div class="clearfix"></div>
 </div>
+<?php if (($t02_pengeluaran->Export == "") || (EW_EXPORT_MASTER_RECORD && $t02_pengeluaran->Export == "print")) { ?>
+<?php
+if ($t02_pengeluaran_list->DbMasterFilter <> "" && $t02_pengeluaran->getCurrentMasterTable() == "t03_pengeluaran_head") {
+	if ($t02_pengeluaran_list->MasterRecordExists) {
+?>
+<?php include_once "t03_pengeluaran_headmaster.php" ?>
+<?php
+	}
+}
+?>
+<?php } ?>
 <?php
 	$bSelectLimit = $t02_pengeluaran_list->UseSelectLimit;
 	if ($bSelectLimit) {
@@ -3384,44 +2912,6 @@ ft02_pengeluaranlistsrch.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluar
 	}
 $t02_pengeluaran_list->RenderOtherOptions();
 ?>
-<?php if ($t02_pengeluaran->Export == "" && $t02_pengeluaran->CurrentAction == "") { ?>
-<form name="ft02_pengeluaranlistsrch" id="ft02_pengeluaranlistsrch" class="form-inline ewForm ewExtSearchForm" action="<?php echo ew_CurrentPage() ?>">
-<?php $SearchPanelClass = ($t02_pengeluaran_list->SearchWhere <> "") ? " in" : " in"; ?>
-<div id="ft02_pengeluaranlistsrch_SearchPanel" class="ewSearchPanel collapse<?php echo $SearchPanelClass ?>">
-<input type="hidden" name="cmd" value="search">
-<input type="hidden" name="t" value="t02_pengeluaran">
-	<div class="ewBasicSearch">
-<?php
-if ($gsSearchError == "")
-	$t02_pengeluaran_list->LoadAdvancedSearch(); // Load advanced search
-
-// Render for search
-$t02_pengeluaran->RowType = EW_ROWTYPE_SEARCH;
-
-// Render row
-$t02_pengeluaran->ResetAttrs();
-$t02_pengeluaran_list->RenderRow();
-?>
-<div id="xsr_1" class="ewRow">
-<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-	<div id="xsc_Departemen" class="ewCell form-group">
-		<label for="x_Departemen" class="ewSearchCaption ewLabel"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></label>
-		<span class="ewSearchOperator"><?php echo $Language->Phrase("LIKE") ?><input type="hidden" name="z_Departemen" id="z_Departemen" value="LIKE"></span>
-		<span class="ewSearchField">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x_Departemen" name="x_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x_Departemen") ?>
-</select>
-</span>
-	</div>
-<?php } ?>
-</div>
-<div id="xsr_2" class="ewRow">
-	<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"><?php echo $Language->Phrase("SearchBtn") ?></button>
-</div>
-	</div>
-</div>
-</form>
-<?php } ?>
 <?php $t02_pengeluaran_list->ShowPageHeader(); ?>
 <?php
 $t02_pengeluaran_list->ShowMessage();
@@ -3433,6 +2923,10 @@ $t02_pengeluaran_list->ShowMessage();
 <input type="hidden" name="<?php echo EW_TOKEN_NAME ?>" value="<?php echo $t02_pengeluaran_list->Token ?>">
 <?php } ?>
 <input type="hidden" name="t" value="t02_pengeluaran">
+<?php if ($t02_pengeluaran->getCurrentMasterTable() == "t03_pengeluaran_head" && $t02_pengeluaran->CurrentAction <> "") { ?>
+<input type="hidden" name="<?php echo EW_TABLE_SHOW_MASTER ?>" value="t03_pengeluaran_head">
+<input type="hidden" name="fk_Kode" value="<?php echo $t02_pengeluaran->Kode->getSessionValue() ?>">
+<?php } ?>
 <div id="gmp_t02_pengeluaran" class="<?php if (ew_IsResponsiveLayout()) { ?>table-responsive <?php } ?>ewGridMiddlePanel">
 <?php if ($t02_pengeluaran_list->TotalRecs > 0 || $t02_pengeluaran->CurrentAction == "gridedit") { ?>
 <table id="tbl_t02_pengeluaranlist" class="table ewTable">
@@ -3617,6 +3111,9 @@ if ($t02_pengeluaran_list->Recordset && !$t02_pengeluaran_list->Recordset->EOF) 
 $t02_pengeluaran->RowType = EW_ROWTYPE_AGGREGATEINIT;
 $t02_pengeluaran->ResetAttrs();
 $t02_pengeluaran_list->RenderRow();
+$t02_pengeluaran_list->EditRowCnt = 0;
+if ($t02_pengeluaran->CurrentAction == "edit")
+	$t02_pengeluaran_list->RowIndex = 1;
 if ($t02_pengeluaran->CurrentAction == "gridedit")
 	$t02_pengeluaran_list->RowIndex = 0;
 while ($t02_pengeluaran_list->RecCnt < $t02_pengeluaran_list->StopRec) {
@@ -3646,6 +3143,11 @@ while ($t02_pengeluaran_list->RecCnt < $t02_pengeluaran_list->StopRec) {
 			$t02_pengeluaran_list->LoadRowValues($t02_pengeluaran_list->Recordset); // Load row values
 		}
 		$t02_pengeluaran->RowType = EW_ROWTYPE_VIEW; // Render view
+		if ($t02_pengeluaran->CurrentAction == "edit") {
+			if ($t02_pengeluaran_list->CheckInlineEditKey() && $t02_pengeluaran_list->EditRowCnt == 0) { // Inline edit
+				$t02_pengeluaran->RowType = EW_ROWTYPE_EDIT; // Render edit
+			}
+		}
 		if ($t02_pengeluaran->CurrentAction == "gridedit") { // Grid edit
 			if ($t02_pengeluaran->EventCancelled) {
 				$t02_pengeluaran_list->RestoreCurrentRowFormValues($t02_pengeluaran_list->RowIndex); // Restore form values
@@ -3654,6 +3156,10 @@ while ($t02_pengeluaran_list->RecCnt < $t02_pengeluaran_list->StopRec) {
 				$t02_pengeluaran->RowType = EW_ROWTYPE_ADD; // Render add
 			else
 				$t02_pengeluaran->RowType = EW_ROWTYPE_EDIT; // Render edit
+		}
+		if ($t02_pengeluaran->CurrentAction == "edit" && $t02_pengeluaran->RowType == EW_ROWTYPE_EDIT && $t02_pengeluaran->EventCancelled) { // Update failed
+			$objForm->Index = 1;
+			$t02_pengeluaran_list->RestoreFormValues(); // Restore form values
 		}
 		if ($t02_pengeluaran->CurrentAction == "gridedit" && ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT || $t02_pengeluaran->RowType == EW_ROWTYPE_ADD) && $t02_pengeluaran->EventCancelled) // Update failed
 			$t02_pengeluaran_list->RestoreCurrentRowFormValues($t02_pengeluaran_list->RowIndex); // Restore form values
@@ -3831,15 +3337,31 @@ $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list
 	<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
 		<td data-name="Kode"<?php echo $t02_pengeluaran->Kode->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<?php if ($t02_pengeluaran->Kode->getSessionValue() <> "") { ?>
+<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<span<?php echo $t02_pengeluaran->Kode->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t02_pengeluaran->Kode->ViewValue ?></p></span>
+</span>
+<input type="hidden" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
+<?php } else { ?>
 <span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
 <input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
+<?php } ?>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Kode" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<?php if ($t02_pengeluaran->Kode->getSessionValue() <> "") { ?>
+<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<span<?php echo $t02_pengeluaran->Kode->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t02_pengeluaran->Kode->ViewValue ?></p></span>
+</span>
+<input type="hidden" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
+<?php } else { ?>
 <span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
 <input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
+<?php } ?>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
 <span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode">
@@ -4074,9 +3596,17 @@ $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list
 	<?php } ?>
 	<?php if ($t02_pengeluaran->Kode->Visible) { // Kode ?>
 		<td data-name="Kode">
+<?php if ($t02_pengeluaran->Kode->getSessionValue() <> "") { ?>
+<span id="el$rowindex$_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
+<span<?php echo $t02_pengeluaran->Kode->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t02_pengeluaran->Kode->ViewValue ?></p></span>
+</span>
+<input type="hidden" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
+<?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
 <input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
+<?php } ?>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Kode" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->OldValue) ?>">
 </td>
 	<?php } ?>
@@ -4142,6 +3672,9 @@ ft02_pengeluaranlist.UpdateOpts(<?php echo $t02_pengeluaran_list->RowIndex ?>);
 ?>
 </tbody>
 </table>
+<?php } ?>
+<?php if ($t02_pengeluaran->CurrentAction == "edit") { ?>
+<input type="hidden" name="<?php echo $t02_pengeluaran_list->FormKeyCountName ?>" id="<?php echo $t02_pengeluaran_list->FormKeyCountName ?>" value="<?php echo $t02_pengeluaran_list->KeyCount ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->CurrentAction == "gridedit") { ?>
 <input type="hidden" name="a_list" id="a_list" value="gridupdate">
@@ -4231,8 +3764,6 @@ if ($t02_pengeluaran_list->Recordset)
 <div class="clearfix"></div>
 <?php } ?>
 <script type="text/javascript">
-ft02_pengeluaranlistsrch.FilterList = <?php echo $t02_pengeluaran_list->GetFilterList() ?>;
-ft02_pengeluaranlistsrch.Init();
 ft02_pengeluaranlist.Init();
 </script>
 <?php
