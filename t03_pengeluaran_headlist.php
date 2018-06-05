@@ -970,14 +970,17 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 	// Set up sort parameters
 	function SetupSortOrder() {
 
+		// Check for Ctrl pressed
+		$bCtrl = (@$_GET["ctrl"] <> "");
+
 		// Check for "order" parameter
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id); // id
-			$this->UpdateSort($this->Kode); // Kode
-			$this->UpdateSort($this->Nama); // Nama
-			$this->UpdateSort($this->Urutan); // Urutan
+			$this->UpdateSort($this->id, $bCtrl); // id
+			$this->UpdateSort($this->Kode, $bCtrl); // Kode
+			$this->UpdateSort($this->Nama, $bCtrl); // Nama
+			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
 			$this->setStartRecordNumber(1); // Reset start position
 		}
 	}
@@ -1036,6 +1039,12 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$item->Body = "";
 		$item->OnLeft = FALSE;
 		$item->Visible = FALSE;
+
+		// "view"
+		$item = &$this->ListOptions->Add("view");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = TRUE;
+		$item->OnLeft = FALSE;
 
 		// "edit"
 		$item = &$this->ListOptions->Add("edit");
@@ -1150,6 +1159,15 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			return;
 		}
 
+		// "view"
+		$oListOpt = &$this->ListOptions->Items["view"];
+		$viewcaption = ew_HtmlTitle($Language->Phrase("ViewLink"));
+		if (TRUE) {
+			$oListOpt->Body = "<a class=\"ewRowLink ewView\" title=\"" . $viewcaption . "\" data-caption=\"" . $viewcaption . "\" href=\"" . ew_HtmlEncode($this->ViewUrl) . "\">" . $Language->Phrase("ViewLink") . "</a>";
+		} else {
+			$oListOpt->Body = "";
+		}
+
 		// "edit"
 		$oListOpt = &$this->ListOptions->Items["edit"];
 		$editcaption = ew_HtmlTitle($Language->Phrase("EditLink"));
@@ -1197,6 +1215,13 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$body = $Language->Phrase("DetailLink") . $Language->TablePhrase("t02_pengeluaran", "TblCaption");
 			$body = "<a class=\"btn btn-default btn-sm ewRowLink ewDetail\" data-action=\"list\" href=\"" . ew_HtmlEncode("t02_pengeluaranlist.php?" . EW_TABLE_SHOW_MASTER . "=t03_pengeluaran_head&fk_Kode=" . urlencode(strval($this->Kode->CurrentValue)) . "") . "\">" . $body . "</a>";
 			$links = "";
+			if ($GLOBALS["t02_pengeluaran_grid"]->DetailView) {
+				$caption = $Language->Phrase("MasterDetailViewLink");
+				$url = $this->GetViewUrl(EW_TABLE_SHOW_DETAIL . "=t02_pengeluaran");
+				$links .= "<li><a class=\"ewRowLink ewDetailView\" data-action=\"view\" data-caption=\"" . ew_HtmlTitle($caption) . "\" href=\"" . ew_HtmlEncode($url) . "\">" . ew_HtmlImageAndText($caption) . "</a></li>";
+				if ($DetailViewTblVar <> "") $DetailViewTblVar .= ",";
+				$DetailViewTblVar .= "t02_pengeluaran";
+			}
 			if ($links <> "") {
 				$body .= "<button class=\"dropdown-toggle btn btn-default btn-sm ewDetail\" data-toggle=\"dropdown\"><b class=\"caret\"></b></button>";
 				$body .= "<ul class=\"dropdown-menu\">". $links . "</ul>";
@@ -2283,7 +2308,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->id) == "") { ?>
 		<th data-name="id" class="<?php echo $t03_pengeluaran_head->id->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t03_pengeluaran_head->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->id) ?>',1);"><div id="elh_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id">
+		<th data-name="id" class="<?php echo $t03_pengeluaran_head->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->id) ?>',2);"><div id="elh_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2292,7 +2317,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Kode) == "") { ?>
 		<th data-name="Kode" class="<?php echo $t03_pengeluaran_head->Kode->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Kode" class="t03_pengeluaran_head_Kode"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Kode->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Kode" class="<?php echo $t03_pengeluaran_head->Kode->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Kode) ?>',1);"><div id="elh_t03_pengeluaran_head_Kode" class="t03_pengeluaran_head_Kode">
+		<th data-name="Kode" class="<?php echo $t03_pengeluaran_head->Kode->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Kode) ?>',2);"><div id="elh_t03_pengeluaran_head_Kode" class="t03_pengeluaran_head_Kode">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Kode->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Kode->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Kode->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2301,7 +2326,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nama) == "") { ?>
 		<th data-name="Nama" class="<?php echo $t03_pengeluaran_head->Nama->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Nama" class="t03_pengeluaran_head_Nama"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Nama->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Nama" class="<?php echo $t03_pengeluaran_head->Nama->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nama) ?>',1);"><div id="elh_t03_pengeluaran_head_Nama" class="t03_pengeluaran_head_Nama">
+		<th data-name="Nama" class="<?php echo $t03_pengeluaran_head->Nama->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nama) ?>',2);"><div id="elh_t03_pengeluaran_head_Nama" class="t03_pengeluaran_head_Nama">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Nama->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Nama->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Nama->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2310,7 +2335,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) ?>',1);"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
+		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) ?>',2);"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Urutan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Urutan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>

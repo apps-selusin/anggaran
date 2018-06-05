@@ -1013,24 +1013,27 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	// Set up sort parameters
 	function SetupSortOrder() {
 
+		// Check for Ctrl pressed
+		$bCtrl = (@$_GET["ctrl"] <> "");
+
 		// Check for "order" parameter
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id); // id
-			$this->UpdateSort($this->Departemen); // Departemen
-			$this->UpdateSort($this->HeadDetail); // HeadDetail
-			$this->UpdateSort($this->NomorHead); // NomorHead
-			$this->UpdateSort($this->SubTotalFlag); // SubTotalFlag
-			$this->UpdateSort($this->Urutan); // Urutan
-			$this->UpdateSort($this->Nomor); // Nomor
-			$this->UpdateSort($this->Kode); // Kode
-			$this->UpdateSort($this->Pos); // Pos
-			$this->UpdateSort($this->Nominal); // Nominal
-			$this->UpdateSort($this->Banyaknya); // Banyaknya
-			$this->UpdateSort($this->Satuan); // Satuan
-			$this->UpdateSort($this->Jumlah); // Jumlah
-			$this->UpdateSort($this->Total); // Total
+			$this->UpdateSort($this->id, $bCtrl); // id
+			$this->UpdateSort($this->Departemen, $bCtrl); // Departemen
+			$this->UpdateSort($this->HeadDetail, $bCtrl); // HeadDetail
+			$this->UpdateSort($this->NomorHead, $bCtrl); // NomorHead
+			$this->UpdateSort($this->SubTotalFlag, $bCtrl); // SubTotalFlag
+			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
+			$this->UpdateSort($this->Nomor, $bCtrl); // Nomor
+			$this->UpdateSort($this->Kode, $bCtrl); // Kode
+			$this->UpdateSort($this->Pos, $bCtrl); // Pos
+			$this->UpdateSort($this->Nominal, $bCtrl); // Nominal
+			$this->UpdateSort($this->Banyaknya, $bCtrl); // Banyaknya
+			$this->UpdateSort($this->Satuan, $bCtrl); // Satuan
+			$this->UpdateSort($this->Jumlah, $bCtrl); // Jumlah
+			$this->UpdateSort($this->Total, $bCtrl); // Total
 			$this->setStartRecordNumber(1); // Reset start position
 		}
 	}
@@ -2947,7 +2950,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->id) == "") { ?>
 		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->id) ?>',1);"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id">
+		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->id) ?>',2);"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2956,7 +2959,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) == "") { ?>
 		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) ?>',1);"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
+		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) ?>',2);"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Departemen->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Departemen->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2965,7 +2968,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) == "") { ?>
 		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) ?>',1);"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
+		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) ?>',2);"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->HeadDetail->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->HeadDetail->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2974,7 +2977,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) == "") { ?>
 		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) ?>',1);"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
+		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) ?>',2);"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->NomorHead->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->NomorHead->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2983,7 +2986,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) == "") { ?>
 		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) ?>',1);"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
+		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) ?>',2);"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->SubTotalFlag->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->SubTotalFlag->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -2992,7 +2995,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t02_pengeluaran->Urutan->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Urutan" class="t02_pengeluaran_Urutan"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Urutan->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Urutan" class="<?php echo $t02_pengeluaran->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Urutan) ?>',1);"><div id="elh_t02_pengeluaran_Urutan" class="t02_pengeluaran_Urutan">
+		<th data-name="Urutan" class="<?php echo $t02_pengeluaran->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Urutan) ?>',2);"><div id="elh_t02_pengeluaran_Urutan" class="t02_pengeluaran_Urutan">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Urutan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Urutan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Urutan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3001,7 +3004,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Nomor) == "") { ?>
 		<th data-name="Nomor" class="<?php echo $t02_pengeluaran->Nomor->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Nomor" class="t02_pengeluaran_Nomor"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Nomor->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Nomor" class="<?php echo $t02_pengeluaran->Nomor->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Nomor) ?>',1);"><div id="elh_t02_pengeluaran_Nomor" class="t02_pengeluaran_Nomor">
+		<th data-name="Nomor" class="<?php echo $t02_pengeluaran->Nomor->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Nomor) ?>',2);"><div id="elh_t02_pengeluaran_Nomor" class="t02_pengeluaran_Nomor">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Nomor->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Nomor->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Nomor->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3010,7 +3013,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Kode) == "") { ?>
 		<th data-name="Kode" class="<?php echo $t02_pengeluaran->Kode->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Kode->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Kode" class="<?php echo $t02_pengeluaran->Kode->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Kode) ?>',1);"><div id="elh_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode">
+		<th data-name="Kode" class="<?php echo $t02_pengeluaran->Kode->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Kode) ?>',2);"><div id="elh_t02_pengeluaran_Kode" class="t02_pengeluaran_Kode">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Kode->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Kode->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Kode->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3019,7 +3022,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Pos) == "") { ?>
 		<th data-name="Pos" class="<?php echo $t02_pengeluaran->Pos->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Pos" class="t02_pengeluaran_Pos"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Pos->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Pos" class="<?php echo $t02_pengeluaran->Pos->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Pos) ?>',1);"><div id="elh_t02_pengeluaran_Pos" class="t02_pengeluaran_Pos">
+		<th data-name="Pos" class="<?php echo $t02_pengeluaran->Pos->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Pos) ?>',2);"><div id="elh_t02_pengeluaran_Pos" class="t02_pengeluaran_Pos">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Pos->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Pos->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Pos->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3028,7 +3031,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Nominal) == "") { ?>
 		<th data-name="Nominal" class="<?php echo $t02_pengeluaran->Nominal->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Nominal" class="t02_pengeluaran_Nominal"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Nominal->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Nominal" class="<?php echo $t02_pengeluaran->Nominal->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Nominal) ?>',1);"><div id="elh_t02_pengeluaran_Nominal" class="t02_pengeluaran_Nominal">
+		<th data-name="Nominal" class="<?php echo $t02_pengeluaran->Nominal->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Nominal) ?>',2);"><div id="elh_t02_pengeluaran_Nominal" class="t02_pengeluaran_Nominal">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Nominal->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Nominal->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Nominal->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3037,7 +3040,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Banyaknya) == "") { ?>
 		<th data-name="Banyaknya" class="<?php echo $t02_pengeluaran->Banyaknya->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Banyaknya" class="t02_pengeluaran_Banyaknya"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Banyaknya->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Banyaknya" class="<?php echo $t02_pengeluaran->Banyaknya->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Banyaknya) ?>',1);"><div id="elh_t02_pengeluaran_Banyaknya" class="t02_pengeluaran_Banyaknya">
+		<th data-name="Banyaknya" class="<?php echo $t02_pengeluaran->Banyaknya->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Banyaknya) ?>',2);"><div id="elh_t02_pengeluaran_Banyaknya" class="t02_pengeluaran_Banyaknya">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Banyaknya->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Banyaknya->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Banyaknya->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3046,7 +3049,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Satuan) == "") { ?>
 		<th data-name="Satuan" class="<?php echo $t02_pengeluaran->Satuan->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Satuan" class="t02_pengeluaran_Satuan"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Satuan->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Satuan" class="<?php echo $t02_pengeluaran->Satuan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Satuan) ?>',1);"><div id="elh_t02_pengeluaran_Satuan" class="t02_pengeluaran_Satuan">
+		<th data-name="Satuan" class="<?php echo $t02_pengeluaran->Satuan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Satuan) ?>',2);"><div id="elh_t02_pengeluaran_Satuan" class="t02_pengeluaran_Satuan">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Satuan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Satuan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Satuan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3055,7 +3058,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Jumlah) == "") { ?>
 		<th data-name="Jumlah" class="<?php echo $t02_pengeluaran->Jumlah->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Jumlah" class="t02_pengeluaran_Jumlah"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Jumlah->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Jumlah" class="<?php echo $t02_pengeluaran->Jumlah->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Jumlah) ?>',1);"><div id="elh_t02_pengeluaran_Jumlah" class="t02_pengeluaran_Jumlah">
+		<th data-name="Jumlah" class="<?php echo $t02_pengeluaran->Jumlah->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Jumlah) ?>',2);"><div id="elh_t02_pengeluaran_Jumlah" class="t02_pengeluaran_Jumlah">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Jumlah->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Jumlah->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Jumlah->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
@@ -3064,7 +3067,7 @@ $t02_pengeluaran_list->ListOptions->Render("header", "left");
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Total) == "") { ?>
 		<th data-name="Total" class="<?php echo $t02_pengeluaran->Total->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Total" class="t02_pengeluaran_Total"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Total->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="Total" class="<?php echo $t02_pengeluaran->Total->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Total) ?>',1);"><div id="elh_t02_pengeluaran_Total" class="t02_pengeluaran_Total">
+		<th data-name="Total" class="<?php echo $t02_pengeluaran->Total->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Total) ?>',2);"><div id="elh_t02_pengeluaran_Total" class="t02_pengeluaran_Total">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Total->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Total->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Total->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
