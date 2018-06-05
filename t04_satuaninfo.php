@@ -1,21 +1,14 @@
 <?php
 
 // Global variable for table object
-$t02_pengeluaran = NULL;
+$t04_satuan = NULL;
 
 //
-// Table class for t02_pengeluaran
+// Table class for t04_satuan
 //
-class ct02_pengeluaran extends cTable {
+class ct04_satuan extends cTable {
 	var $id;
-	var $Urutan;
-	var $Nomor;
-	var $Kode;
-	var $Pos;
-	var $Nominal;
-	var $Banyaknya;
-	var $Satuan;
-	var $Jumlah;
+	var $Nama;
 
 	//
 	// Table class constructor
@@ -25,12 +18,12 @@ class ct02_pengeluaran extends cTable {
 
 		// Language object
 		if (!isset($Language)) $Language = new cLanguage();
-		$this->TableVar = 't02_pengeluaran';
-		$this->TableName = 't02_pengeluaran';
+		$this->TableVar = 't04_satuan';
+		$this->TableName = 't04_satuan';
 		$this->TableType = 'TABLE';
 
 		// Update Table
-		$this->UpdateTable = "`t02_pengeluaran`";
+		$this->UpdateTable = "`t04_satuan`";
 		$this->DBID = 'DB';
 		$this->ExportAll = TRUE;
 		$this->ExportPageBreakCount = 0; // Page break per every n record (PDF only)
@@ -41,8 +34,8 @@ class ct02_pengeluaran extends cTable {
 		$this->ExportWordPageOrientation = "portrait"; // Page orientation (PHPWord only)
 		$this->ExportWordColumnWidth = NULL; // Cell width (PHPWord only)
 		$this->DetailAdd = FALSE; // Allow detail add
-		$this->DetailEdit = TRUE; // Allow detail edit
-		$this->DetailView = TRUE; // Allow detail view
+		$this->DetailEdit = FALSE; // Allow detail edit
+		$this->DetailView = FALSE; // Allow detail view
 		$this->ShowMultipleDetails = FALSE; // Show multiple details
 		$this->GridAddRowCount = 5;
 		$this->AllowAddDeleteRow = TRUE; // Allow add/delete row
@@ -50,55 +43,15 @@ class ct02_pengeluaran extends cTable {
 		$this->BasicSearch = new cBasicSearch($this->TableVar);
 
 		// id
-		$this->id = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_id', 'id', '`id`', '`id`', 3, -1, FALSE, '`id`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'NO');
+		$this->id = new cField('t04_satuan', 't04_satuan', 'x_id', 'id', '`id`', '`id`', 3, -1, FALSE, '`id`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'NO');
 		$this->id->Sortable = TRUE; // Allow sort
 		$this->id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['id'] = &$this->id;
 
-		// Urutan
-		$this->Urutan = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Urutan', 'Urutan', '`Urutan`', '`Urutan`', 16, -1, FALSE, '`Urutan`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Urutan->Sortable = TRUE; // Allow sort
-		$this->Urutan->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
-		$this->fields['Urutan'] = &$this->Urutan;
-
-		// Nomor
-		$this->Nomor = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Nomor', 'Nomor', '`Nomor`', '`Nomor`', 200, -1, FALSE, '`Nomor`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Nomor->Sortable = TRUE; // Allow sort
-		$this->fields['Nomor'] = &$this->Nomor;
-
-		// Kode
-		$this->Kode = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Kode', 'Kode', '`Kode`', '`Kode`', 200, -1, FALSE, '`Kode`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Kode->Sortable = TRUE; // Allow sort
-		$this->fields['Kode'] = &$this->Kode;
-
-		// Pos
-		$this->Pos = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Pos', 'Pos', '`Pos`', '`Pos`', 200, -1, FALSE, '`Pos`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Pos->Sortable = TRUE; // Allow sort
-		$this->fields['Pos'] = &$this->Pos;
-
-		// Nominal
-		$this->Nominal = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Nominal', 'Nominal', '`Nominal`', '`Nominal`', 4, -1, FALSE, '`Nominal`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Nominal->Sortable = TRUE; // Allow sort
-		$this->Nominal->FldDefaultErrMsg = $Language->Phrase("IncorrectFloat");
-		$this->fields['Nominal'] = &$this->Nominal;
-
-		// Banyaknya
-		$this->Banyaknya = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Banyaknya', 'Banyaknya', '`Banyaknya`', '`Banyaknya`', 2, -1, FALSE, '`Banyaknya`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Banyaknya->Sortable = TRUE; // Allow sort
-		$this->Banyaknya->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
-		$this->fields['Banyaknya'] = &$this->Banyaknya;
-
-		// Satuan
-		$this->Satuan = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Satuan', 'Satuan', '`Satuan`', '`Satuan`', 16, -1, FALSE, '`EV__Satuan`', TRUE, TRUE, TRUE, 'FORMATTED TEXT', 'TEXT');
-		$this->Satuan->Sortable = TRUE; // Allow sort
-		$this->Satuan->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
-		$this->fields['Satuan'] = &$this->Satuan;
-
-		// Jumlah
-		$this->Jumlah = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Jumlah', 'Jumlah', '`Jumlah`', '`Jumlah`', 4, -1, FALSE, '`Jumlah`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Jumlah->Sortable = TRUE; // Allow sort
-		$this->Jumlah->FldDefaultErrMsg = $Language->Phrase("IncorrectFloat");
-		$this->fields['Jumlah'] = &$this->Jumlah;
+		// Nama
+		$this->Nama = new cField('t04_satuan', 't04_satuan', 'x_Nama', 'Nama', '`Nama`', '`Nama`', 200, -1, FALSE, '`Nama`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Nama->Sortable = TRUE; // Allow sort
+		$this->fields['Nama'] = &$this->Nama;
 	}
 
 	// Field Visibility
@@ -144,85 +97,16 @@ class ct02_pengeluaran extends cTable {
 			} else {
 				$this->setSessionOrderBy($sSortField . " " . $sThisSort); // Save to Session
 			}
-			$sSortFieldList = ($ofld->FldVirtualExpression <> "") ? $ofld->FldVirtualExpression : $sSortField;
-			if ($ctrl) {
-				$sOrderByList = $this->getSessionOrderByList();
-				if (strpos($sOrderByList, $sSortFieldList . " " . $sLastSort) !== FALSE) {
-					$sOrderByList = str_replace($sSortFieldList . " " . $sLastSort, $sSortFieldList . " " . $sThisSort, $sOrderByList);
-				} else {
-					if ($sOrderByList <> "") $sOrderByList .= ", ";
-					$sOrderByList .= $sSortFieldList . " " . $sThisSort;
-				}
-				$this->setSessionOrderByList($sOrderByList); // Save to Session
-			} else {
-				$this->setSessionOrderByList($sSortFieldList . " " . $sThisSort); // Save to Session
-			}
 		} else {
 			if (!$ctrl) $ofld->setSort("");
 		}
-	}
-
-	// Session ORDER BY for List page
-	function getSessionOrderByList() {
-		return @$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_ORDER_BY_LIST];
-	}
-
-	function setSessionOrderByList($v) {
-		$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_ORDER_BY_LIST] = $v;
-	}
-
-	// Current master table name
-	function getCurrentMasterTable() {
-		return @$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_MASTER_TABLE];
-	}
-
-	function setCurrentMasterTable($v) {
-		$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_MASTER_TABLE] = $v;
-	}
-
-	// Session master WHERE clause
-	function GetMasterFilter() {
-
-		// Master filter
-		$sMasterFilter = "";
-		if ($this->getCurrentMasterTable() == "t03_pengeluaran_head") {
-			if ($this->Kode->getSessionValue() <> "")
-				$sMasterFilter .= "`Kode`=" . ew_QuotedValue($this->Kode->getSessionValue(), EW_DATATYPE_STRING, "DB");
-			else
-				return "";
-		}
-		return $sMasterFilter;
-	}
-
-	// Session detail WHERE clause
-	function GetDetailFilter() {
-
-		// Detail filter
-		$sDetailFilter = "";
-		if ($this->getCurrentMasterTable() == "t03_pengeluaran_head") {
-			if ($this->Kode->getSessionValue() <> "")
-				$sDetailFilter .= "`Kode`=" . ew_QuotedValue($this->Kode->getSessionValue(), EW_DATATYPE_STRING, "DB");
-			else
-				return "";
-		}
-		return $sDetailFilter;
-	}
-
-	// Master filter
-	function SqlMasterFilter_t03_pengeluaran_head() {
-		return "`Kode`='@Kode@'";
-	}
-
-	// Detail filter
-	function SqlDetailFilter_t03_pengeluaran_head() {
-		return "`Kode`='@Kode@'";
 	}
 
 	// Table level SQL
 	var $_SqlFrom = "";
 
 	function getSqlFrom() { // From
-		return ($this->_SqlFrom <> "") ? $this->_SqlFrom : "`t02_pengeluaran`";
+		return ($this->_SqlFrom <> "") ? $this->_SqlFrom : "`t04_satuan`";
 	}
 
 	function SqlFrom() { // For backward compatibility
@@ -244,23 +128,6 @@ class ct02_pengeluaran extends cTable {
 
 	function setSqlSelect($v) {
 		$this->_SqlSelect = $v;
-	}
-	var $_SqlSelectList = "";
-
-	function getSqlSelectList() { // Select for List page
-		$select = "";
-		$select = "SELECT * FROM (" .
-			"SELECT *, (SELECT `Nama` FROM `t04_satuan` `EW_TMP_LOOKUPTABLE` WHERE `EW_TMP_LOOKUPTABLE`.`id` = `t02_pengeluaran`.`Satuan` LIMIT 1) AS `EV__Satuan` FROM `t02_pengeluaran`" .
-			") `EW_TMP_TABLE`";
-		return ($this->_SqlSelectList <> "") ? $this->_SqlSelectList : $select;
-	}
-
-	function SqlSelectList() { // For backward compatibility
-		return $this->getSqlSelectList();
-	}
-
-	function setSqlSelectList($v) {
-		$this->_SqlSelectList = $v;
 	}
 	var $_SqlWhere = "";
 
@@ -307,7 +174,7 @@ class ct02_pengeluaran extends cTable {
 	var $_SqlOrderBy = "";
 
 	function getSqlOrderBy() { // Order By
-		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "`Urutan` ASC";
+		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "`Nama` ASC";
 	}
 
 	function SqlOrderBy() { // For backward compatibility
@@ -373,38 +240,16 @@ class ct02_pengeluaran extends cTable {
 		ew_AddFilter($sFilter, $this->CurrentFilter);
 		$sFilter = $this->ApplyUserIDFilters($sFilter);
 		$this->Recordset_Selecting($sFilter);
-		if ($this->UseVirtualFields()) {
-			$sSelect = $this->getSqlSelectList();
-			$sSort = $this->UseSessionForListSQL ? $this->getSessionOrderByList() : "";
-		} else {
-			$sSelect = $this->getSqlSelect();
-			$sSort = $this->UseSessionForListSQL ? $this->getSessionOrderBy() : "";
-		}
+		$sSelect = $this->getSqlSelect();
+		$sSort = $this->UseSessionForListSQL ? $this->getSessionOrderBy() : "";
 		return ew_BuildSelectSql($sSelect, $this->getSqlWhere(), $this->getSqlGroupBy(),
 			$this->getSqlHaving(), $this->getSqlOrderBy(), $sFilter, $sSort);
 	}
 
 	// Get ORDER BY clause
 	function GetOrderBy() {
-		$sSort = ($this->UseVirtualFields()) ? $this->getSessionOrderByList() : $this->getSessionOrderBy();
+		$sSort = $this->getSessionOrderBy();
 		return ew_BuildSelectSql("", "", "", "", $this->getSqlOrderBy(), "", $sSort);
-	}
-
-	// Check if virtual fields is used in SQL
-	function UseVirtualFields() {
-		$sWhere = $this->UseSessionForListSQL ? $this->getSessionWhere() : $this->CurrentFilter;
-		$sOrderBy = $this->UseSessionForListSQL ? $this->getSessionOrderByList() : "";
-		if ($sWhere <> "")
-			$sWhere = " " . str_replace(array("(",")"), array("",""), $sWhere) . " ";
-		if ($sOrderBy <> "")
-			$sOrderBy = " " . str_replace(array("(",")"), array("",""), $sOrderBy) . " ";
-		if ($this->Satuan->AdvancedSearch->SearchValue <> "" ||
-			$this->Satuan->AdvancedSearch->SearchValue2 <> "" ||
-			strpos($sWhere, " " . $this->Satuan->FldVirtualExpression . " ") !== FALSE)
-			return TRUE;
-		if (strpos($sOrderBy, " " . $this->Satuan->FldVirtualExpression . " ") !== FALSE)
-			return TRUE;
-		return FALSE;
 	}
 
 	// Try to get record count
@@ -455,10 +300,7 @@ class ct02_pengeluaran extends cTable {
 		$select = $this->TableType == 'CUSTOMVIEW' ? $this->getSqlSelect() : "SELECT * FROM " . $this->getSqlFrom();
 		$groupBy = $this->TableType == 'CUSTOMVIEW' ? $this->getSqlGroupBy() : "";
 		$having = $this->TableType == 'CUSTOMVIEW' ? $this->getSqlHaving() : "";
-		if ($this->UseVirtualFields())
-			$sql = ew_BuildSelectSql($this->getSqlSelectList(), $this->getSqlWhere(), $groupBy, $having, "", $filter, "");
-		else
-			$sql = ew_BuildSelectSql($select, $this->getSqlWhere(), $groupBy, $having, "", $filter, "");
+		$sql = ew_BuildSelectSql($select, $this->getSqlWhere(), $groupBy, $having, "", $filter, "");
 		$cnt = $this->TryGetRecordCount($sql);
 		if ($cnt == -1) {
 			$conn = &$this->Connection();
@@ -577,7 +419,7 @@ class ct02_pengeluaran extends cTable {
 		if (@$_SESSION[$name] <> "") {
 			return $_SESSION[$name];
 		} else {
-			return "t02_pengeluaranlist.php";
+			return "t04_satuanlist.php";
 		}
 	}
 
@@ -588,11 +430,11 @@ class ct02_pengeluaran extends cTable {
 	// Get modal caption
 	function GetModalCaption($pageName) {
 		global $Language;
-		if ($pageName == "t02_pengeluaranview.php")
+		if ($pageName == "t04_satuanview.php")
 			return $Language->Phrase("View");
-		elseif ($pageName == "t02_pengeluaranedit.php")
+		elseif ($pageName == "t04_satuanedit.php")
 			return $Language->Phrase("Edit");
-		elseif ($pageName == "t02_pengeluaranadd.php")
+		elseif ($pageName == "t04_satuanadd.php")
 			return $Language->Phrase("Add");
 		else
 			return "";
@@ -600,30 +442,30 @@ class ct02_pengeluaran extends cTable {
 
 	// List URL
 	function GetListUrl() {
-		return "t02_pengeluaranlist.php";
+		return "t04_satuanlist.php";
 	}
 
 	// View URL
 	function GetViewUrl($parm = "") {
 		if ($parm <> "")
-			$url = $this->KeyUrl("t02_pengeluaranview.php", $this->UrlParm($parm));
+			$url = $this->KeyUrl("t04_satuanview.php", $this->UrlParm($parm));
 		else
-			$url = $this->KeyUrl("t02_pengeluaranview.php", $this->UrlParm(EW_TABLE_SHOW_DETAIL . "="));
+			$url = $this->KeyUrl("t04_satuanview.php", $this->UrlParm(EW_TABLE_SHOW_DETAIL . "="));
 		return $this->AddMasterUrl($url);
 	}
 
 	// Add URL
 	function GetAddUrl($parm = "") {
 		if ($parm <> "")
-			$url = "t02_pengeluaranadd.php?" . $this->UrlParm($parm);
+			$url = "t04_satuanadd.php?" . $this->UrlParm($parm);
 		else
-			$url = "t02_pengeluaranadd.php";
+			$url = "t04_satuanadd.php";
 		return $this->AddMasterUrl($url);
 	}
 
 	// Edit URL
 	function GetEditUrl($parm = "") {
-		$url = $this->KeyUrl("t02_pengeluaranedit.php", $this->UrlParm($parm));
+		$url = $this->KeyUrl("t04_satuanedit.php", $this->UrlParm($parm));
 		return $this->AddMasterUrl($url);
 	}
 
@@ -635,7 +477,7 @@ class ct02_pengeluaran extends cTable {
 
 	// Copy URL
 	function GetCopyUrl($parm = "") {
-		$url = $this->KeyUrl("t02_pengeluaranadd.php", $this->UrlParm($parm));
+		$url = $this->KeyUrl("t04_satuanadd.php", $this->UrlParm($parm));
 		return $this->AddMasterUrl($url);
 	}
 
@@ -647,15 +489,11 @@ class ct02_pengeluaran extends cTable {
 
 	// Delete URL
 	function GetDeleteUrl() {
-		return $this->KeyUrl("t02_pengeluarandelete.php", $this->UrlParm());
+		return $this->KeyUrl("t04_satuandelete.php", $this->UrlParm());
 	}
 
 	// Add master url
 	function AddMasterUrl($url) {
-		if ($this->getCurrentMasterTable() == "t03_pengeluaran_head" && strpos($url, EW_TABLE_SHOW_MASTER . "=") === FALSE) {
-			$url .= (strpos($url, "?") !== FALSE ? "&" : "?") . EW_TABLE_SHOW_MASTER . "=" . $this->getCurrentMasterTable();
-			$url .= "&fk_Kode=" . urlencode($this->Kode->CurrentValue);
-		}
 		return $url;
 	}
 
@@ -753,14 +591,7 @@ class ct02_pengeluaran extends cTable {
 	// Load row values from recordset
 	function LoadListRowValues(&$rs) {
 		$this->id->setDbValue($rs->fields('id'));
-		$this->Urutan->setDbValue($rs->fields('Urutan'));
-		$this->Nomor->setDbValue($rs->fields('Nomor'));
-		$this->Kode->setDbValue($rs->fields('Kode'));
-		$this->Pos->setDbValue($rs->fields('Pos'));
-		$this->Nominal->setDbValue($rs->fields('Nominal'));
-		$this->Banyaknya->setDbValue($rs->fields('Banyaknya'));
-		$this->Satuan->setDbValue($rs->fields('Satuan'));
-		$this->Jumlah->setDbValue($rs->fields('Jumlah'));
+		$this->Nama->setDbValue($rs->fields('Nama'));
 	}
 
 	// Render list row values
@@ -772,126 +603,25 @@ class ct02_pengeluaran extends cTable {
 
 	// Common render codes
 		// id
-		// Urutan
-		// Nomor
-		// Kode
-		// Pos
-		// Nominal
-		// Banyaknya
-		// Satuan
-		// Jumlah
+		// Nama
 		// id
 
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
 
-		// Urutan
-		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
-		$this->Urutan->ViewCustomAttributes = "";
-
-		// Nomor
-		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
-		$this->Nomor->ViewCustomAttributes = "";
-
-		// Kode
-		$this->Kode->ViewValue = $this->Kode->CurrentValue;
-		$this->Kode->ViewCustomAttributes = "";
-
-		// Pos
-		$this->Pos->ViewValue = $this->Pos->CurrentValue;
-		$this->Pos->ViewCustomAttributes = "";
-
-		// Nominal
-		$this->Nominal->ViewValue = $this->Nominal->CurrentValue;
-		$this->Nominal->ViewValue = ew_FormatNumber($this->Nominal->ViewValue, 0, -2, -2, -2);
-		$this->Nominal->CellCssStyle .= "text-align: right;";
-		$this->Nominal->ViewCustomAttributes = "";
-
-		// Banyaknya
-		$this->Banyaknya->ViewValue = $this->Banyaknya->CurrentValue;
-		$this->Banyaknya->ViewValue = ew_FormatNumber($this->Banyaknya->ViewValue, 0, -2, -2, -2);
-		$this->Banyaknya->CellCssStyle .= "text-align: right;";
-		$this->Banyaknya->ViewCustomAttributes = "";
-
-		// Satuan
-		if ($this->Satuan->VirtualValue <> "") {
-			$this->Satuan->ViewValue = $this->Satuan->VirtualValue;
-		} else {
-			$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
-		if (strval($this->Satuan->CurrentValue) <> "") {
-			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Satuan->CurrentValue, EW_DATATYPE_NUMBER, "");
-		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t04_satuan`";
-		$sWhereWrk = "";
-		$this->Satuan->LookupFilters = array("dx1" => '`Nama`');
-		ew_AddFilter($sWhereWrk, $sFilterWrk);
-		$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
-		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-		$sSqlWrk .= " ORDER BY `Nama` ASC";
-			$rswrk = Conn()->Execute($sSqlWrk);
-			if ($rswrk && !$rswrk->EOF) { // Lookup values found
-				$arwrk = array();
-				$arwrk[1] = $rswrk->fields('DispFld');
-				$this->Satuan->ViewValue = $this->Satuan->DisplayValue($arwrk);
-				$rswrk->Close();
-			} else {
-				$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
-			}
-		} else {
-			$this->Satuan->ViewValue = NULL;
-		}
-		}
-		$this->Satuan->ViewCustomAttributes = "";
-
-		// Jumlah
-		$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
-		$this->Jumlah->ViewValue = ew_FormatNumber($this->Jumlah->ViewValue, 0, -2, -2, -2);
-		$this->Jumlah->CellCssStyle .= "text-align: right;";
-		$this->Jumlah->ViewCustomAttributes = "";
+		// Nama
+		$this->Nama->ViewValue = $this->Nama->CurrentValue;
+		$this->Nama->ViewCustomAttributes = "";
 
 		// id
 		$this->id->LinkCustomAttributes = "";
 		$this->id->HrefValue = "";
 		$this->id->TooltipValue = "";
 
-		// Urutan
-		$this->Urutan->LinkCustomAttributes = "";
-		$this->Urutan->HrefValue = "";
-		$this->Urutan->TooltipValue = "";
-
-		// Nomor
-		$this->Nomor->LinkCustomAttributes = "";
-		$this->Nomor->HrefValue = "";
-		$this->Nomor->TooltipValue = "";
-
-		// Kode
-		$this->Kode->LinkCustomAttributes = "";
-		$this->Kode->HrefValue = "";
-		$this->Kode->TooltipValue = "";
-
-		// Pos
-		$this->Pos->LinkCustomAttributes = "";
-		$this->Pos->HrefValue = "";
-		$this->Pos->TooltipValue = "";
-
-		// Nominal
-		$this->Nominal->LinkCustomAttributes = "";
-		$this->Nominal->HrefValue = "";
-		$this->Nominal->TooltipValue = "";
-
-		// Banyaknya
-		$this->Banyaknya->LinkCustomAttributes = "";
-		$this->Banyaknya->HrefValue = "";
-		$this->Banyaknya->TooltipValue = "";
-
-		// Satuan
-		$this->Satuan->LinkCustomAttributes = "";
-		$this->Satuan->HrefValue = "";
-		$this->Satuan->TooltipValue = "";
-
-		// Jumlah
-		$this->Jumlah->LinkCustomAttributes = "";
-		$this->Jumlah->HrefValue = "";
-		$this->Jumlah->TooltipValue = "";
+		// Nama
+		$this->Nama->LinkCustomAttributes = "";
+		$this->Nama->HrefValue = "";
+		$this->Nama->TooltipValue = "";
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -913,61 +643,11 @@ class ct02_pengeluaran extends cTable {
 		$this->id->EditValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
 
-		// Urutan
-		$this->Urutan->EditAttrs["class"] = "form-control";
-		$this->Urutan->EditCustomAttributes = "";
-		$this->Urutan->EditValue = $this->Urutan->CurrentValue;
-		$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
-
-		// Nomor
-		$this->Nomor->EditAttrs["class"] = "form-control";
-		$this->Nomor->EditCustomAttributes = "";
-		$this->Nomor->EditValue = $this->Nomor->CurrentValue;
-		$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
-
-		// Kode
-		$this->Kode->EditAttrs["class"] = "form-control";
-		$this->Kode->EditCustomAttributes = "";
-		if ($this->Kode->getSessionValue() <> "") {
-			$this->Kode->CurrentValue = $this->Kode->getSessionValue();
-		$this->Kode->ViewValue = $this->Kode->CurrentValue;
-		$this->Kode->ViewCustomAttributes = "";
-		} else {
-		$this->Kode->EditValue = $this->Kode->CurrentValue;
-		$this->Kode->PlaceHolder = ew_RemoveHtml($this->Kode->FldCaption());
-		}
-
-		// Pos
-		$this->Pos->EditAttrs["class"] = "form-control";
-		$this->Pos->EditCustomAttributes = "";
-		$this->Pos->EditValue = $this->Pos->CurrentValue;
-		$this->Pos->PlaceHolder = ew_RemoveHtml($this->Pos->FldCaption());
-
-		// Nominal
-		$this->Nominal->EditAttrs["class"] = "form-control";
-		$this->Nominal->EditCustomAttributes = "";
-		$this->Nominal->EditValue = $this->Nominal->CurrentValue;
-		$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
-		if (strval($this->Nominal->EditValue) <> "" && is_numeric($this->Nominal->EditValue)) $this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -2, -2, -2);
-
-		// Banyaknya
-		$this->Banyaknya->EditAttrs["class"] = "form-control";
-		$this->Banyaknya->EditCustomAttributes = "";
-		$this->Banyaknya->EditValue = $this->Banyaknya->CurrentValue;
-		$this->Banyaknya->PlaceHolder = ew_RemoveHtml($this->Banyaknya->FldCaption());
-
-		// Satuan
-		$this->Satuan->EditAttrs["class"] = "form-control";
-		$this->Satuan->EditCustomAttributes = "";
-		$this->Satuan->EditValue = $this->Satuan->CurrentValue;
-		$this->Satuan->PlaceHolder = ew_RemoveHtml($this->Satuan->FldCaption());
-
-		// Jumlah
-		$this->Jumlah->EditAttrs["class"] = "form-control";
-		$this->Jumlah->EditCustomAttributes = "";
-		$this->Jumlah->EditValue = $this->Jumlah->CurrentValue;
-		$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
-		if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) $this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -2, -2, -2);
+		// Nama
+		$this->Nama->EditAttrs["class"] = "form-control";
+		$this->Nama->EditCustomAttributes = "";
+		$this->Nama->EditValue = $this->Nama->CurrentValue;
+		$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -975,18 +655,10 @@ class ct02_pengeluaran extends cTable {
 
 	// Aggregate list row values
 	function AggregateListRowValues() {
-			if (is_numeric($this->Jumlah->CurrentValue))
-				$this->Jumlah->Total += $this->Jumlah->CurrentValue; // Accumulate total
 	}
 
 	// Aggregate list row (for rendering)
 	function AggregateListRow() {
-			$this->Jumlah->CurrentValue = $this->Jumlah->Total;
-			$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
-			$this->Jumlah->ViewValue = ew_FormatNumber($this->Jumlah->ViewValue, 0, -2, -2, -2);
-			$this->Jumlah->CellCssStyle .= "text-align: right;";
-			$this->Jumlah->ViewCustomAttributes = "";
-			$this->Jumlah->HrefValue = ""; // Clear href value
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -1004,24 +676,11 @@ class ct02_pengeluaran extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
-					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
-					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
-					if ($this->Pos->Exportable) $Doc->ExportCaption($this->Pos);
-					if ($this->Nominal->Exportable) $Doc->ExportCaption($this->Nominal);
-					if ($this->Banyaknya->Exportable) $Doc->ExportCaption($this->Banyaknya);
-					if ($this->Satuan->Exportable) $Doc->ExportCaption($this->Satuan);
-					if ($this->Jumlah->Exportable) $Doc->ExportCaption($this->Jumlah);
+					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
+					if ($this->Nama->Exportable) $Doc->ExportCaption($this->Nama);
 				} else {
 					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
-					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
-					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
-					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
-					if ($this->Pos->Exportable) $Doc->ExportCaption($this->Pos);
-					if ($this->Nominal->Exportable) $Doc->ExportCaption($this->Nominal);
-					if ($this->Banyaknya->Exportable) $Doc->ExportCaption($this->Banyaknya);
-					if ($this->Satuan->Exportable) $Doc->ExportCaption($this->Satuan);
-					if ($this->Jumlah->Exportable) $Doc->ExportCaption($this->Jumlah);
+					if ($this->Nama->Exportable) $Doc->ExportCaption($this->Nama);
 				}
 				$Doc->EndExportRow();
 			}
@@ -1045,7 +704,6 @@ class ct02_pengeluaran extends cTable {
 						$Doc->ExportPageBreak();
 				}
 				$this->LoadListRowValues($Recordset);
-				$this->AggregateListRowValues(); // Aggregate row values
 
 				// Render row
 				$this->RowType = EW_ROWTYPE_VIEW; // Render view
@@ -1054,24 +712,11 @@ class ct02_pengeluaran extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
-						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
-						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
-						if ($this->Pos->Exportable) $Doc->ExportField($this->Pos);
-						if ($this->Nominal->Exportable) $Doc->ExportField($this->Nominal);
-						if ($this->Banyaknya->Exportable) $Doc->ExportField($this->Banyaknya);
-						if ($this->Satuan->Exportable) $Doc->ExportField($this->Satuan);
-						if ($this->Jumlah->Exportable) $Doc->ExportField($this->Jumlah);
+						if ($this->id->Exportable) $Doc->ExportField($this->id);
+						if ($this->Nama->Exportable) $Doc->ExportField($this->Nama);
 					} else {
 						if ($this->id->Exportable) $Doc->ExportField($this->id);
-						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
-						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
-						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
-						if ($this->Pos->Exportable) $Doc->ExportField($this->Pos);
-						if ($this->Nominal->Exportable) $Doc->ExportField($this->Nominal);
-						if ($this->Banyaknya->Exportable) $Doc->ExportField($this->Banyaknya);
-						if ($this->Satuan->Exportable) $Doc->ExportField($this->Satuan);
-						if ($this->Jumlah->Exportable) $Doc->ExportField($this->Jumlah);
+						if ($this->Nama->Exportable) $Doc->ExportField($this->Nama);
 					}
 					$Doc->EndExportRow($RowCnt);
 				}
@@ -1081,26 +726,6 @@ class ct02_pengeluaran extends cTable {
 			if ($Doc->ExportCustom)
 				$this->Row_Export($Recordset->fields);
 			$Recordset->MoveNext();
-		}
-
-		// Export aggregates (horizontal format only)
-		if ($Doc->Horizontal) {
-			$this->RowType = EW_ROWTYPE_AGGREGATE;
-			$this->ResetAttrs();
-			$this->AggregateListRow();
-			if (!$Doc->ExportCustom) {
-				$Doc->BeginExportRow(-1);
-				if ($this->id->Exportable) $Doc->ExportAggregate($this->id, '');
-				if ($this->Urutan->Exportable) $Doc->ExportAggregate($this->Urutan, '');
-				if ($this->Nomor->Exportable) $Doc->ExportAggregate($this->Nomor, '');
-				if ($this->Kode->Exportable) $Doc->ExportAggregate($this->Kode, '');
-				if ($this->Pos->Exportable) $Doc->ExportAggregate($this->Pos, '');
-				if ($this->Nominal->Exportable) $Doc->ExportAggregate($this->Nominal, '');
-				if ($this->Banyaknya->Exportable) $Doc->ExportAggregate($this->Banyaknya, '');
-				if ($this->Satuan->Exportable) $Doc->ExportAggregate($this->Satuan, '');
-				if ($this->Jumlah->Exportable) $Doc->ExportAggregate($this->Jumlah, 'TOTAL');
-				$Doc->EndExportRow();
-			}
 		}
 		if (!$Doc->ExportCustom) {
 			$Doc->ExportTableFooter();

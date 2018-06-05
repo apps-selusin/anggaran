@@ -69,6 +69,10 @@ ew_RenderJsTemplates();
 </script>
 <!-- modal dialog -->
 <div id="ewModalDialog" class="modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"></h4></div><div class="modal-body"></div><div class="modal-footer"></div></div></div></div>
+<!-- modal lookup dialog -->
+<div id="ewModalLookupDialog" class="modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"></h4></div><div class="modal-body"></div><div class="modal-footer"></div></div></div></div>
+<!-- add option dialog -->
+<div id="ewAddOptDialog" class="modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"></h4></div><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-primary ewButton"><?php echo $Language->Phrase("AddBtn") ?></button><button type="button" class="btn btn-default ewButton" data-dismiss="modal"><?php echo $Language->Phrase("CancelBtn") ?></button></div></div></div></div>
 <!-- message box -->
 <div id="ewMsgBox" class="modal" role="dialog" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-primary ewButton" data-dismiss="modal"><?php echo $Language->Phrase("MessageOK") ?></button></div></div></div></div>
 <!-- prompt -->
@@ -86,7 +90,36 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt14.js");
 
 // Write your global startup script here
 // document.write("page loaded");
+// Table 't02_pengeluaran' Field 'Nominal'
 
+$('[data-table=t02_pengeluaran][data-field=x_Nominal]').on(
+	{ // keys = event types, values = handler functions
+		"change keyup": function(e) {
+			var $row = $(this).fields();
+			var banyaknya = parseFloat($row["Banyaknya"].val());
+			var nominal_asli = $row["Nominal"].val();
+			var nominal_clean = nominal_asli.replace(/,/g, '');
+			var nominal = parseFloat(nominal_clean);
+			var jumlah = banyaknya * nominal;
+			$row["Jumlah"].val(jumlah);
+		}
+	}
+);
+
+// Table 't02_pengeluaran' Field 'Banyaknya'
+$('[data-table=t02_pengeluaran][data-field=x_Banyaknya]').on(
+	{ // keys = event types, values = handler functions
+		"change keyup": function(e) {
+			var $row = $(this).fields();
+			var banyaknya = parseFloat($row["Banyaknya"].val());
+			var nominal_asli = $row["Nominal"].val();
+			var nominal_clean = nominal_asli.replace(/,/g, '');
+			var nominal = parseFloat(nominal_clean);
+			var jumlah = banyaknya * nominal;
+			$row["Jumlah"].val(jumlah);
+		}
+	}
+);
 </script>
 <?php } ?>
 </body>

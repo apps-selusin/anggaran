@@ -321,7 +321,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->Banyaknya->SetVisibility();
 		$this->Satuan->SetVisibility();
 		$this->Jumlah->SetVisibility();
-		$this->Total->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
 		Page_Loading();
@@ -548,7 +547,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 	function ClearInlineMode() {
 		$this->Nominal->FormValue = ""; // Clear form value
 		$this->Jumlah->FormValue = ""; // Clear form value
-		$this->Total->FormValue = ""; // Clear form value
 		$this->LastAction = $this->CurrentAction; // Save last action
 		$this->CurrentAction = ""; // Clear action
 		$_SESSION[EW_SESSION_INLINE_MODE] = ""; // Clear inline mode
@@ -804,8 +802,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			return FALSE;
 		if ($objForm->HasValue("x_Jumlah") && $objForm->HasValue("o_Jumlah") && $this->Jumlah->CurrentValue <> $this->Jumlah->OldValue)
 			return FALSE;
-		if ($objForm->HasValue("x_Total") && $objForm->HasValue("o_Total") && $this->Total->CurrentValue <> $this->Total->OldValue)
-			return FALSE;
 		return TRUE;
 	}
 
@@ -921,6 +917,7 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
+				$this->setSessionOrderByList($sOrderBy);
 			}
 
 			// Reset start position
@@ -1128,8 +1125,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->Satuan->OldValue = $this->Satuan->CurrentValue;
 		$this->Jumlah->CurrentValue = 0.00;
 		$this->Jumlah->OldValue = $this->Jumlah->CurrentValue;
-		$this->Total->CurrentValue = 0.00;
-		$this->Total->OldValue = $this->Total->CurrentValue;
 	}
 
 	// Load form values
@@ -1170,10 +1165,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Jumlah->setFormValue($objForm->GetValue("x_Jumlah"));
 		}
 		$this->Jumlah->setOldValue($objForm->GetValue("o_Jumlah"));
-		if (!$this->Total->FldIsDetailKey) {
-			$this->Total->setFormValue($objForm->GetValue("x_Total"));
-		}
-		$this->Total->setOldValue($objForm->GetValue("o_Total"));
 		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
@@ -1191,7 +1182,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->Banyaknya->CurrentValue = $this->Banyaknya->FormValue;
 		$this->Satuan->CurrentValue = $this->Satuan->FormValue;
 		$this->Jumlah->CurrentValue = $this->Jumlah->FormValue;
-		$this->Total->CurrentValue = $this->Total->FormValue;
 	}
 
 	// Load recordset
@@ -1206,7 +1196,7 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		if ($this->UseSelectLimit) {
 			$conn->raiseErrorFn = $GLOBALS["EW_ERROR_FN"];
 			if ($dbtype == "MSSQL") {
-				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset, array("_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderBy())));
+				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset, array("_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderByList())));
 			} else {
 				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset);
 			}
@@ -1261,8 +1251,12 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->Nominal->setDbValue($row['Nominal']);
 		$this->Banyaknya->setDbValue($row['Banyaknya']);
 		$this->Satuan->setDbValue($row['Satuan']);
+		if (array_key_exists('EV__Satuan', $rs->fields)) {
+			$this->Satuan->VirtualValue = $rs->fields('EV__Satuan'); // Set up virtual field value
+		} else {
+			$this->Satuan->VirtualValue = ""; // Clear value
+		}
 		$this->Jumlah->setDbValue($row['Jumlah']);
-		$this->Total->setDbValue($row['Total']);
 	}
 
 	// Return a row with default values
@@ -1278,7 +1272,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$row['Banyaknya'] = $this->Banyaknya->CurrentValue;
 		$row['Satuan'] = $this->Satuan->CurrentValue;
 		$row['Jumlah'] = $this->Jumlah->CurrentValue;
-		$row['Total'] = $this->Total->CurrentValue;
 		return $row;
 	}
 
@@ -1296,7 +1289,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->Banyaknya->DbValue = $row['Banyaknya'];
 		$this->Satuan->DbValue = $row['Satuan'];
 		$this->Jumlah->DbValue = $row['Jumlah'];
-		$this->Total->DbValue = $row['Total'];
 	}
 
 	// Load old record
@@ -1345,10 +1337,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		if ($this->Jumlah->FormValue == $this->Jumlah->CurrentValue && is_numeric(ew_StrToFloat($this->Jumlah->CurrentValue)))
 			$this->Jumlah->CurrentValue = ew_StrToFloat($this->Jumlah->CurrentValue);
 
-		// Convert decimal values if posted back
-		if ($this->Total->FormValue == $this->Total->CurrentValue && is_numeric(ew_StrToFloat($this->Total->CurrentValue)))
-			$this->Total->CurrentValue = ew_StrToFloat($this->Total->CurrentValue);
-
 		// Call Row_Rendering event
 		$this->Row_Rendering();
 
@@ -1362,7 +1350,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// Banyaknya
 		// Satuan
 		// Jumlah
-		// Total
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
@@ -1388,23 +1375,50 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 
 		// Nominal
 		$this->Nominal->ViewValue = $this->Nominal->CurrentValue;
+		$this->Nominal->ViewValue = ew_FormatNumber($this->Nominal->ViewValue, 0, -2, -2, -2);
+		$this->Nominal->CellCssStyle .= "text-align: right;";
 		$this->Nominal->ViewCustomAttributes = "";
 
 		// Banyaknya
 		$this->Banyaknya->ViewValue = $this->Banyaknya->CurrentValue;
+		$this->Banyaknya->ViewValue = ew_FormatNumber($this->Banyaknya->ViewValue, 0, -2, -2, -2);
+		$this->Banyaknya->CellCssStyle .= "text-align: right;";
 		$this->Banyaknya->ViewCustomAttributes = "";
 
 		// Satuan
-		$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
+		if ($this->Satuan->VirtualValue <> "") {
+			$this->Satuan->ViewValue = $this->Satuan->VirtualValue;
+		} else {
+			$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
+		if (strval($this->Satuan->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Satuan->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t04_satuan`";
+		$sWhereWrk = "";
+		$this->Satuan->LookupFilters = array("dx1" => '`Nama`');
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+		$sSqlWrk .= " ORDER BY `Nama` ASC";
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Satuan->ViewValue = $this->Satuan->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
+			}
+		} else {
+			$this->Satuan->ViewValue = NULL;
+		}
+		}
 		$this->Satuan->ViewCustomAttributes = "";
 
 		// Jumlah
 		$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
+		$this->Jumlah->ViewValue = ew_FormatNumber($this->Jumlah->ViewValue, 0, -2, -2, -2);
+		$this->Jumlah->CellCssStyle .= "text-align: right;";
 		$this->Jumlah->ViewCustomAttributes = "";
-
-		// Total
-		$this->Total->ViewValue = $this->Total->CurrentValue;
-		$this->Total->ViewCustomAttributes = "";
 
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
@@ -1445,11 +1459,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Jumlah->LinkCustomAttributes = "";
 			$this->Jumlah->HrefValue = "";
 			$this->Jumlah->TooltipValue = "";
-
-			// Total
-			$this->Total->LinkCustomAttributes = "";
-			$this->Total->HrefValue = "";
-			$this->Total->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
 			// Urutan
@@ -1489,7 +1498,7 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->CurrentValue);
 			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
 			if (strval($this->Nominal->EditValue) <> "" && is_numeric($this->Nominal->EditValue)) {
-			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -1, -2, 0);
+			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -2, -2, -2);
 			$this->Nominal->OldValue = $this->Nominal->EditValue;
 			}
 
@@ -1503,6 +1512,27 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Satuan->EditAttrs["class"] = "form-control";
 			$this->Satuan->EditCustomAttributes = "";
 			$this->Satuan->EditValue = ew_HtmlEncode($this->Satuan->CurrentValue);
+			if (strval($this->Satuan->CurrentValue) <> "") {
+				$sFilterWrk = "`id`" . ew_SearchString("=", $this->Satuan->CurrentValue, EW_DATATYPE_NUMBER, "");
+			$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t04_satuan`";
+			$sWhereWrk = "";
+			$this->Satuan->LookupFilters = array("dx1" => '`Nama`');
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `Nama` ASC";
+				$rswrk = Conn()->Execute($sSqlWrk);
+				if ($rswrk && !$rswrk->EOF) { // Lookup values found
+					$arwrk = array();
+					$arwrk[1] = ew_HtmlEncode($rswrk->fields('DispFld'));
+					$this->Satuan->EditValue = $this->Satuan->DisplayValue($arwrk);
+					$rswrk->Close();
+				} else {
+					$this->Satuan->EditValue = ew_HtmlEncode($this->Satuan->CurrentValue);
+				}
+			} else {
+				$this->Satuan->EditValue = NULL;
+			}
 			$this->Satuan->PlaceHolder = ew_RemoveHtml($this->Satuan->FldCaption());
 
 			// Jumlah
@@ -1511,18 +1541,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->CurrentValue);
 			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) {
-			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
+			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -2, -2, -2);
 			$this->Jumlah->OldValue = $this->Jumlah->EditValue;
-			}
-
-			// Total
-			$this->Total->EditAttrs["class"] = "form-control";
-			$this->Total->EditCustomAttributes = "";
-			$this->Total->EditValue = ew_HtmlEncode($this->Total->CurrentValue);
-			$this->Total->PlaceHolder = ew_RemoveHtml($this->Total->FldCaption());
-			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) {
-			$this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
-			$this->Total->OldValue = $this->Total->EditValue;
 			}
 
 			// Add refer script
@@ -1558,10 +1578,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			// Jumlah
 			$this->Jumlah->LinkCustomAttributes = "";
 			$this->Jumlah->HrefValue = "";
-
-			// Total
-			$this->Total->LinkCustomAttributes = "";
-			$this->Total->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
 
 			// Urutan
@@ -1601,7 +1617,7 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->CurrentValue);
 			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
 			if (strval($this->Nominal->EditValue) <> "" && is_numeric($this->Nominal->EditValue)) {
-			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -1, -2, 0);
+			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -2, -2, -2);
 			$this->Nominal->OldValue = $this->Nominal->EditValue;
 			}
 
@@ -1615,6 +1631,27 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Satuan->EditAttrs["class"] = "form-control";
 			$this->Satuan->EditCustomAttributes = "";
 			$this->Satuan->EditValue = ew_HtmlEncode($this->Satuan->CurrentValue);
+			if (strval($this->Satuan->CurrentValue) <> "") {
+				$sFilterWrk = "`id`" . ew_SearchString("=", $this->Satuan->CurrentValue, EW_DATATYPE_NUMBER, "");
+			$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t04_satuan`";
+			$sWhereWrk = "";
+			$this->Satuan->LookupFilters = array("dx1" => '`Nama`');
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `Nama` ASC";
+				$rswrk = Conn()->Execute($sSqlWrk);
+				if ($rswrk && !$rswrk->EOF) { // Lookup values found
+					$arwrk = array();
+					$arwrk[1] = ew_HtmlEncode($rswrk->fields('DispFld'));
+					$this->Satuan->EditValue = $this->Satuan->DisplayValue($arwrk);
+					$rswrk->Close();
+				} else {
+					$this->Satuan->EditValue = ew_HtmlEncode($this->Satuan->CurrentValue);
+				}
+			} else {
+				$this->Satuan->EditValue = NULL;
+			}
 			$this->Satuan->PlaceHolder = ew_RemoveHtml($this->Satuan->FldCaption());
 
 			// Jumlah
@@ -1623,18 +1660,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->CurrentValue);
 			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) {
-			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
+			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -2, -2, -2);
 			$this->Jumlah->OldValue = $this->Jumlah->EditValue;
-			}
-
-			// Total
-			$this->Total->EditAttrs["class"] = "form-control";
-			$this->Total->EditCustomAttributes = "";
-			$this->Total->EditValue = ew_HtmlEncode($this->Total->CurrentValue);
-			$this->Total->PlaceHolder = ew_RemoveHtml($this->Total->FldCaption());
-			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) {
-			$this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
-			$this->Total->OldValue = $this->Total->EditValue;
 			}
 
 			// Edit refer script
@@ -1670,10 +1697,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			// Jumlah
 			$this->Jumlah->LinkCustomAttributes = "";
 			$this->Jumlah->HrefValue = "";
-
-			// Total
-			$this->Total->LinkCustomAttributes = "";
-			$this->Total->HrefValue = "";
 		}
 		if ($this->RowType == EW_ROWTYPE_ADD || $this->RowType == EW_ROWTYPE_EDIT || $this->RowType == EW_ROWTYPE_SEARCH) // Add/Edit/Search row
 			$this->SetupFieldTitles();
@@ -1699,14 +1722,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		if (!ew_CheckInteger($this->Banyaknya->FormValue)) {
 			ew_AddMessage($gsFormError, $this->Banyaknya->FldErrMsg());
 		}
-		if (!ew_CheckInteger($this->Satuan->FormValue)) {
-			ew_AddMessage($gsFormError, $this->Satuan->FldErrMsg());
-		}
 		if (!ew_CheckNumber($this->Jumlah->FormValue)) {
 			ew_AddMessage($gsFormError, $this->Jumlah->FldErrMsg());
-		}
-		if (!ew_CheckNumber($this->Total->FormValue)) {
-			ew_AddMessage($gsFormError, $this->Total->FldErrMsg());
 		}
 
 		// Return validate result
@@ -1841,9 +1858,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			// Jumlah
 			$this->Jumlah->SetDbValueDef($rsnew, $this->Jumlah->CurrentValue, 0, $this->Jumlah->ReadOnly);
 
-			// Total
-			$this->Total->SetDbValueDef($rsnew, $this->Total->CurrentValue, 0, $this->Total->ReadOnly);
-
 			// Call Row Updating event
 			$bUpdateRow = $this->Row_Updating($rsold, $rsnew);
 			if ($bUpdateRow) {
@@ -1916,9 +1930,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// Jumlah
 		$this->Jumlah->SetDbValueDef($rsnew, $this->Jumlah->CurrentValue, 0, strval($this->Jumlah->CurrentValue) == "");
 
-		// Total
-		$this->Total->SetDbValueDef($rsnew, $this->Total->CurrentValue, 0, strval($this->Total->CurrentValue) == "");
-
 		// Call Row Inserting event
 		$rs = ($rsold == NULL) ? NULL : $rsold->fields;
 		$bInsertRow = $this->Row_Inserting($rs, $rsnew);
@@ -1967,6 +1978,19 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
+		case "x_Satuan":
+			$sSqlWrk = "";
+			$sSqlWrk = "SELECT `id` AS `LinkFld`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t04_satuan`";
+			$sWhereWrk = "{filter}";
+			$fld->LookupFilters = array("dx1" => '`Nama`');
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "", "f0" => '`id` IN ({filter_value})', "t0" => "3", "fn0" => "");
+			$sSqlWrk = "";
+			$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `Nama` ASC";
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
 		}
 	}
 
@@ -1975,6 +1999,19 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
+		case "x_Satuan":
+			$sSqlWrk = "";
+			$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld` FROM `t04_satuan`";
+			$sWhereWrk = "`Nama` LIKE '{query_value}%'";
+			$fld->LookupFilters = array("dx1" => '`Nama`');
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "");
+			$sSqlWrk = "";
+			$this->Lookup_Selecting($this->Satuan, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$sSqlWrk .= " ORDER BY `Nama` ASC";
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
 		}
 	}
 

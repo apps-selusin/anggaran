@@ -624,14 +624,17 @@
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
     </menu>
+    <menu id="10005">
+      <phrase id="menutext" value="Pengeluaran" />
+    </menu>
+    <menu id="10006">
+      <phrase id="menutext" value="Satuan" />
+    </menu>
     <menu id="10003">
       <phrase id="menutext" value="departemen" />
     </menu>
-    <menu id="10005">
-      <phrase id="menutext" value="Pengeluaran Head" />
-    </menu>
     <menu id="10004">
-      <phrase id="menutext" value="Pengeluaran Detail" />
+      <phrase id="menutext" value="Pengeluaran (Detail)" />
     </menu>
     <menu id="10001">
       <phrase id="menutext" value="t 01 penerimaan" />
@@ -724,7 +727,7 @@
       </field>
     </table>
     <table id="t02_pengeluaran">
-      <phrase id="tblcaption" value="Pengeluaran Detail" />
+      <phrase id="tblcaption" value="Pengeluaran (Detail)" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -752,12 +755,9 @@
       <field id="jumlah">
         <phrase id="fldcaption" value="Jumlah" />
       </field>
-      <field id="total">
-        <phrase id="fldcaption" value="Total" />
-      </field>
     </table>
     <table id="t03_pengeluaran_head">
-      <phrase id="tblcaption" value="Pengeluaran Head" />
+      <phrase id="tblcaption" value="Pengeluaran" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -769,6 +769,15 @@
       </field>
       <field id="kode">
         <phrase id="fldcaption" value="Kode" />
+      </field>
+      <field id="nama">
+        <phrase id="fldcaption" value="Nama" />
+      </field>
+    </table>
+    <table id="t04_satuan">
+      <phrase id="tblcaption" value="Satuan" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
       </field>
       <field id="nama">
         <phrase id="fldcaption" value="Nama" />

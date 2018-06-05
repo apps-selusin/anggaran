@@ -50,15 +50,9 @@ ft02_pengeluarangrid.Validate = function() {
 			elm = this.GetElements("x" + infix + "_Banyaknya");
 			if (elm && !ew_CheckInteger(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Banyaknya->FldErrMsg()) ?>");
-			elm = this.GetElements("x" + infix + "_Satuan");
-			if (elm && !ew_CheckInteger(elm.value))
-				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Satuan->FldErrMsg()) ?>");
 			elm = this.GetElements("x" + infix + "_Jumlah");
 			if (elm && !ew_CheckNumber(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Jumlah->FldErrMsg()) ?>");
-			elm = this.GetElements("x" + infix + "_Total");
-			if (elm && !ew_CheckNumber(elm.value))
-				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Total->FldErrMsg()) ?>");
 
 			// Fire Form_CustomValidate event
 			if (!this.Form_CustomValidate(fobj))
@@ -79,7 +73,6 @@ ft02_pengeluarangrid.EmptyRow = function(infix) {
 	if (ew_ValueChanged(fobj, infix, "Banyaknya", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Satuan", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Jumlah", false)) return false;
-	if (ew_ValueChanged(fobj, infix, "Total", false)) return false;
 	return true;
 }
 
@@ -95,8 +88,11 @@ ft02_pengeluarangrid.Form_CustomValidate =
 ft02_pengeluarangrid.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft02_pengeluarangrid.Lists["x_Satuan"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_Nama","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t04_satuan"};
+ft02_pengeluarangrid.Lists["x_Satuan"].Data = "<?php echo $t02_pengeluaran_grid->Satuan->LookupFilterQuery(FALSE, "grid") ?>";
+ft02_pengeluarangrid.AutoSuggests["x_Satuan"] = <?php echo json_encode(array("data" => "ajax=autosuggest&" . $t02_pengeluaran_grid->Satuan->LookupFilterQuery(TRUE, "grid"))) ?>;
 
+// Form object for search
 </script>
 <?php } ?>
 <?php
@@ -237,15 +233,6 @@ $t02_pengeluaran_grid->ListOptions->Render("header", "left");
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
-<?php if ($t02_pengeluaran->Total->Visible) { // Total ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Total) == "") { ?>
-		<th data-name="Total" class="<?php echo $t02_pengeluaran->Total->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Total" class="t02_pengeluaran_Total"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Total->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="Total" class="<?php echo $t02_pengeluaran->Total->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_Total" class="t02_pengeluaran_Total">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Total->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Total->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Total->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php
 
 // Render list options (header, right)
@@ -359,13 +346,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Urutan"<?php echo $t02_pengeluaran->Urutan->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Urutan" class="form-group t02_pengeluaran_Urutan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Urutan" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Urutan" class="form-group t02_pengeluaran_Urutan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -394,13 +381,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Nomor"<?php echo $t02_pengeluaran->Nomor->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Nomor" class="form-group t02_pengeluaran_Nomor">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Nomor" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Nomor" class="form-group t02_pengeluaran_Nomor">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -429,7 +416,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <input type="hidden" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Kode" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->OldValue) ?>">
@@ -443,7 +430,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <input type="hidden" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php } ?>
@@ -494,13 +481,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Nominal"<?php echo $t02_pengeluaran->Nominal->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Nominal" class="form-group t02_pengeluaran_Nominal">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Nominal" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Nominal" class="form-group t02_pengeluaran_Nominal">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -522,13 +509,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Banyaknya"<?php echo $t02_pengeluaran->Banyaknya->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Banyaknya" class="form-group t02_pengeluaran_Banyaknya">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Banyaknya" class="form-group t02_pengeluaran_Banyaknya">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -550,13 +537,39 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Satuan"<?php echo $t02_pengeluaran->Satuan->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Satuan" class="form-group t02_pengeluaran_Satuan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Satuan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+<?php
+$wrkonchange = trim(" " . @$t02_pengeluaran->Satuan->EditAttrs["onchange"]);
+if ($wrkonchange <> "") $wrkonchange = " onchange=\"" . ew_JsEncode2($wrkonchange) . "\"";
+$t02_pengeluaran->Satuan->EditAttrs["onchange"] = "";
+?>
+<span id="as_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" style="white-space: nowrap; z-index: <?php echo (9000 - $t02_pengeluaran_grid->RowCnt * 10) ?>">
+	<input type="text" name="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" data-placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_Satuan" data-multiple="0" data-lookup="1" data-value-separator="<?php echo $t02_pengeluaran->Satuan->DisplayValueSeparatorAttribute() ?>" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->CurrentValue) ?>"<?php echo $wrkonchange ?>>
+<script type="text/javascript">
+ft02_pengeluarangrid.CreateAutoSuggest({"id":"x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan","forceSelect":true});
+</script>
+<button type="button" title="<?php echo ew_HtmlEncode(str_replace("%s", ew_RemoveHtml($t02_pengeluaran->Satuan->FldCaption()), $Language->Phrase("LookupLink", TRUE))) ?>" onclick="ew_ModalLookupShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',m:0,n:10,srch:false});" class="ewLookupBtn btn btn-default btn-sm"<?php echo (($t02_pengeluaran->Satuan->ReadOnly || $t02_pengeluaran->Satuan->Disabled) ? " disabled" : "")?>><span class="glyphicon glyphicon-search ewIcon"></span></button>
+<button type="button" title="<?php echo ew_HtmlTitle($Language->Phrase("AddLink")) . "&nbsp;" . $t02_pengeluaran->Satuan->FldCaption() ?>" onclick="ew_AddOptDialogShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',url:'t04_satuanaddopt.php'});" class="ewAddOptBtn btn btn-default btn-sm" id="aol_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan"><span class="glyphicon glyphicon-plus ewIcon"></span><span class="hide"><?php echo $Language->Phrase("AddLink") ?>&nbsp;<?php echo $t02_pengeluaran->Satuan->FldCaption() ?></span></button>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Satuan" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Satuan" class="form-group t02_pengeluaran_Satuan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Satuan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+<?php
+$wrkonchange = trim(" " . @$t02_pengeluaran->Satuan->EditAttrs["onchange"]);
+if ($wrkonchange <> "") $wrkonchange = " onchange=\"" . ew_JsEncode2($wrkonchange) . "\"";
+$t02_pengeluaran->Satuan->EditAttrs["onchange"] = "";
+?>
+<span id="as_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" style="white-space: nowrap; z-index: <?php echo (9000 - $t02_pengeluaran_grid->RowCnt * 10) ?>">
+	<input type="text" name="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" data-placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_Satuan" data-multiple="0" data-lookup="1" data-value-separator="<?php echo $t02_pengeluaran->Satuan->DisplayValueSeparatorAttribute() ?>" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->CurrentValue) ?>"<?php echo $wrkonchange ?>>
+<script type="text/javascript">
+ft02_pengeluarangrid.CreateAutoSuggest({"id":"x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan","forceSelect":true});
+</script>
+<button type="button" title="<?php echo ew_HtmlEncode(str_replace("%s", ew_RemoveHtml($t02_pengeluaran->Satuan->FldCaption()), $Language->Phrase("LookupLink", TRUE))) ?>" onclick="ew_ModalLookupShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',m:0,n:10,srch:false});" class="ewLookupBtn btn btn-default btn-sm"<?php echo (($t02_pengeluaran->Satuan->ReadOnly || $t02_pengeluaran->Satuan->Disabled) ? " disabled" : "")?>><span class="glyphicon glyphicon-search ewIcon"></span></button>
+<button type="button" title="<?php echo ew_HtmlTitle($Language->Phrase("AddLink")) . "&nbsp;" . $t02_pengeluaran->Satuan->FldCaption() ?>" onclick="ew_AddOptDialogShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',url:'t04_satuanaddopt.php'});" class="ewAddOptBtn btn btn-default btn-sm" id="aol_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan"><span class="glyphicon glyphicon-plus ewIcon"></span><span class="hide"><?php echo $Language->Phrase("AddLink") ?>&nbsp;<?php echo $t02_pengeluaran->Satuan->FldCaption() ?></span></button>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -578,13 +591,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Jumlah"<?php echo $t02_pengeluaran->Jumlah->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Jumlah" class="form-group t02_pengeluaran_Jumlah">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Jumlah" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Jumlah" class="form-group t02_pengeluaran_Jumlah">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -598,34 +611,6 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <?php } else { ?>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Jumlah" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->FormValue) ?>">
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Jumlah" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Total->Visible) { // Total ?>
-		<td data-name="Total"<?php echo $t02_pengeluaran->Total->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Total" class="form-group t02_pengeluaran_Total">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Total" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Total->EditValue ?>"<?php echo $t02_pengeluaran->Total->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Total" class="form-group t02_pengeluaran_Total">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Total" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Total->EditValue ?>"<?php echo $t02_pengeluaran->Total->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Total" class="t02_pengeluaran_Total">
-<span<?php echo $t02_pengeluaran->Total->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->Total->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->OldValue) ?>">
 <?php } ?>
 <?php } ?>
 </td>
@@ -676,7 +661,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Urutan">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Urutan" class="form-group t02_pengeluaran_Urutan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Urutan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Urutan->EditValue ?>"<?php echo $t02_pengeluaran->Urutan->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Urutan" class="form-group t02_pengeluaran_Urutan">
@@ -692,7 +677,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Nomor">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Nomor" class="form-group t02_pengeluaran_Nomor">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nomor" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nomor->EditValue ?>"<?php echo $t02_pengeluaran->Nomor->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Nomor" class="form-group t02_pengeluaran_Nomor">
@@ -715,7 +700,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <input type="hidden" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Kode" class="form-group t02_pengeluaran_Kode">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Kode" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Kode->EditValue ?>"<?php echo $t02_pengeluaran->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php } else { ?>
@@ -748,7 +733,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Nominal">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Nominal" class="form-group t02_pengeluaran_Nominal">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Nominal" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Nominal" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Nominal->EditValue ?>"<?php echo $t02_pengeluaran->Nominal->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Nominal" class="form-group t02_pengeluaran_Nominal">
@@ -764,7 +749,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Banyaknya">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Banyaknya" class="form-group t02_pengeluaran_Banyaknya">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Banyaknya" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Banyaknya" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Banyaknya->EditValue ?>"<?php echo $t02_pengeluaran->Banyaknya->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Banyaknya" class="form-group t02_pengeluaran_Banyaknya">
@@ -780,7 +765,20 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Satuan">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Satuan" class="form-group t02_pengeluaran_Satuan">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Satuan" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+<?php
+$wrkonchange = trim(" " . @$t02_pengeluaran->Satuan->EditAttrs["onchange"]);
+if ($wrkonchange <> "") $wrkonchange = " onchange=\"" . ew_JsEncode2($wrkonchange) . "\"";
+$t02_pengeluaran->Satuan->EditAttrs["onchange"] = "";
+?>
+<span id="as_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" style="white-space: nowrap; z-index: <?php echo (9000 - $t02_pengeluaran_grid->RowCnt * 10) ?>">
+	<input type="text" name="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="sv_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo $t02_pengeluaran->Satuan->EditValue ?>" size="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>" data-placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->getPlaceHolder()) ?>"<?php echo $t02_pengeluaran->Satuan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_Satuan" data-multiple="0" data-lookup="1" data-value-separator="<?php echo $t02_pengeluaran->Satuan->DisplayValueSeparatorAttribute() ?>" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Satuan->CurrentValue) ?>"<?php echo $wrkonchange ?>>
+<script type="text/javascript">
+ft02_pengeluarangrid.CreateAutoSuggest({"id":"x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan","forceSelect":true});
+</script>
+<button type="button" title="<?php echo ew_HtmlEncode(str_replace("%s", ew_RemoveHtml($t02_pengeluaran->Satuan->FldCaption()), $Language->Phrase("LookupLink", TRUE))) ?>" onclick="ew_ModalLookupShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',m:0,n:10,srch:false});" class="ewLookupBtn btn btn-default btn-sm"<?php echo (($t02_pengeluaran->Satuan->ReadOnly || $t02_pengeluaran->Satuan->Disabled) ? " disabled" : "")?>><span class="glyphicon glyphicon-search ewIcon"></span></button>
+<button type="button" title="<?php echo ew_HtmlTitle($Language->Phrase("AddLink")) . "&nbsp;" . $t02_pengeluaran->Satuan->FldCaption() ?>" onclick="ew_AddOptDialogShow({lnk:this,el:'x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan',url:'t04_satuanaddopt.php'});" class="ewAddOptBtn btn btn-default btn-sm" id="aol_x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Satuan"><span class="glyphicon glyphicon-plus ewIcon"></span><span class="hide"><?php echo $Language->Phrase("AddLink") ?>&nbsp;<?php echo $t02_pengeluaran->Satuan->FldCaption() ?></span></button>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Satuan" class="form-group t02_pengeluaran_Satuan">
@@ -796,7 +794,7 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 		<td data-name="Jumlah">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_pengeluaran_Jumlah" class="form-group t02_pengeluaran_Jumlah">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" size="5" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Jumlah->EditValue ?>"<?php echo $t02_pengeluaran->Jumlah->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_pengeluaran_Jumlah" class="form-group t02_pengeluaran_Jumlah">
@@ -806,22 +804,6 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Jumlah" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->FormValue) ?>">
 <?php } ?>
 <input type="hidden" data-table="t02_pengeluaran" data-field="x_Jumlah" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Jumlah->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Total->Visible) { // Total ?>
-		<td data-name="Total">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<span id="el$rowindex$_t02_pengeluaran_Total" class="form-group t02_pengeluaran_Total">
-<input type="text" data-table="t02_pengeluaran" data-field="x_Total" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->Total->EditValue ?>"<?php echo $t02_pengeluaran->Total->EditAttributes() ?>>
-</span>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_Total" class="form-group t02_pengeluaran_Total">
-<span<?php echo $t02_pengeluaran->Total->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->Total->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Total" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Total" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Total->OldValue) ?>">
 </td>
 	<?php } ?>
 <?php
