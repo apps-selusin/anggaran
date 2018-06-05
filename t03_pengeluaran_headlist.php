@@ -375,12 +375,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
+		$this->Urutan->SetVisibility();
+		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
 		$this->Nama->SetVisibility();
-		$this->Urutan->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
 		Page_Loading();
@@ -890,11 +888,13 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 	// Check if empty row
 	function EmptyRow() {
 		global $objForm;
+		if ($objForm->HasValue("x_Urutan") && $objForm->HasValue("o_Urutan") && $this->Urutan->CurrentValue <> $this->Urutan->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Nomor") && $objForm->HasValue("o_Nomor") && $this->Nomor->CurrentValue <> $this->Nomor->OldValue)
+			return FALSE;
 		if ($objForm->HasValue("x_Kode") && $objForm->HasValue("o_Kode") && $this->Kode->CurrentValue <> $this->Kode->OldValue)
 			return FALSE;
 		if ($objForm->HasValue("x_Nama") && $objForm->HasValue("o_Nama") && $this->Nama->CurrentValue <> $this->Nama->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_Urutan") && $objForm->HasValue("o_Urutan") && $this->Urutan->CurrentValue <> $this->Urutan->OldValue)
 			return FALSE;
 		return TRUE;
 	}
@@ -977,10 +977,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
+			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
+			$this->UpdateSort($this->Nomor, $bCtrl); // Nomor
 			$this->UpdateSort($this->Kode, $bCtrl); // Kode
 			$this->UpdateSort($this->Nama, $bCtrl); // Nama
-			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
 			$this->setStartRecordNumber(1); // Reset start position
 		}
 	}
@@ -1010,10 +1010,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
+				$this->Urutan->setSort("");
+				$this->Nomor->setSort("");
 				$this->Kode->setSort("");
 				$this->Nama->setSort("");
-				$this->Urutan->setSort("");
 			}
 
 			// Reset start position
@@ -1090,6 +1090,14 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
 		$this->ListOptions->UseDropDownButton = FALSE;
@@ -1145,6 +1153,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 				}
 			}
 		}
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// "edit"
 		$oListOpt = &$this->ListOptions->Items["edit"];
@@ -1513,12 +1525,14 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 	function LoadDefaultValues() {
 		$this->id->CurrentValue = NULL;
 		$this->id->OldValue = $this->id->CurrentValue;
+		$this->Urutan->CurrentValue = 0;
+		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
+		$this->Nomor->CurrentValue = "-";
+		$this->Nomor->OldValue = $this->Nomor->CurrentValue;
 		$this->Kode->CurrentValue = "-";
 		$this->Kode->OldValue = $this->Kode->CurrentValue;
 		$this->Nama->CurrentValue = "-";
 		$this->Nama->OldValue = $this->Nama->CurrentValue;
-		$this->Urutan->CurrentValue = 0;
-		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
 	}
 
 	// Load form values
@@ -1526,17 +1540,20 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
+		if (!$this->Urutan->FldIsDetailKey) {
+			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
+		}
+		if (!$this->Nomor->FldIsDetailKey) {
+			$this->Nomor->setFormValue($objForm->GetValue("x_Nomor"));
+		}
 		if (!$this->Kode->FldIsDetailKey) {
 			$this->Kode->setFormValue($objForm->GetValue("x_Kode"));
 		}
 		if (!$this->Nama->FldIsDetailKey) {
 			$this->Nama->setFormValue($objForm->GetValue("x_Nama"));
 		}
-		if (!$this->Urutan->FldIsDetailKey) {
-			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
-		}
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1544,9 +1561,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		global $objForm;
 		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->CurrentValue = $this->id->FormValue;
+		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
+		$this->Nomor->CurrentValue = $this->Nomor->FormValue;
 		$this->Kode->CurrentValue = $this->Kode->FormValue;
 		$this->Nama->CurrentValue = $this->Nama->FormValue;
-		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
 	}
 
 	// Load recordset
@@ -1609,9 +1627,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Urutan->setDbValue($row['Urutan']);
+		$this->Nomor->setDbValue($row['Nomor']);
 		$this->Kode->setDbValue($row['Kode']);
 		$this->Nama->setDbValue($row['Nama']);
-		$this->Urutan->setDbValue($row['Urutan']);
 	}
 
 	// Return a row with default values
@@ -1619,9 +1638,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$this->LoadDefaultValues();
 		$row = array();
 		$row['id'] = $this->id->CurrentValue;
+		$row['Urutan'] = $this->Urutan->CurrentValue;
+		$row['Nomor'] = $this->Nomor->CurrentValue;
 		$row['Kode'] = $this->Kode->CurrentValue;
 		$row['Nama'] = $this->Nama->CurrentValue;
-		$row['Urutan'] = $this->Urutan->CurrentValue;
 		return $row;
 	}
 
@@ -1631,9 +1651,10 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Urutan->DbValue = $row['Urutan'];
+		$this->Nomor->DbValue = $row['Nomor'];
 		$this->Kode->DbValue = $row['Kode'];
 		$this->Nama->DbValue = $row['Nama'];
-		$this->Urutan->DbValue = $row['Urutan'];
 	}
 
 	// Load old record
@@ -1675,15 +1696,24 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 
 		// Common render codes for all row types
 		// id
+		// Urutan
+		// Nomor
 		// Kode
 		// Nama
-		// Urutan
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Urutan
+		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
+		$this->Urutan->ViewCustomAttributes = "";
+
+		// Nomor
+		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
+		$this->Nomor->ViewCustomAttributes = "";
 
 		// Kode
 		$this->Kode->ViewValue = $this->Kode->CurrentValue;
@@ -1693,14 +1723,15 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$this->Nama->ViewValue = $this->Nama->CurrentValue;
 		$this->Nama->ViewCustomAttributes = "";
 
-		// Urutan
-		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
-		$this->Urutan->ViewCustomAttributes = "";
+			// Urutan
+			$this->Urutan->LinkCustomAttributes = "";
+			$this->Urutan->HrefValue = "";
+			$this->Urutan->TooltipValue = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
+			// Nomor
+			$this->Nomor->LinkCustomAttributes = "";
+			$this->Nomor->HrefValue = "";
+			$this->Nomor->TooltipValue = "";
 
 			// Kode
 			$this->Kode->LinkCustomAttributes = "";
@@ -1711,16 +1742,21 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$this->Nama->LinkCustomAttributes = "";
 			$this->Nama->HrefValue = "";
 			$this->Nama->TooltipValue = "";
-
-			// Urutan
-			$this->Urutan->LinkCustomAttributes = "";
-			$this->Urutan->HrefValue = "";
-			$this->Urutan->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
-			// Kode
+			// Urutan
+			$this->Urutan->EditAttrs["class"] = "form-control";
+			$this->Urutan->EditCustomAttributes = "";
+			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
+			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
 
+			// Nomor
+			$this->Nomor->EditAttrs["class"] = "form-control";
+			$this->Nomor->EditCustomAttributes = "";
+			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->CurrentValue);
+			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
+
+			// Kode
 			$this->Kode->EditAttrs["class"] = "form-control";
 			$this->Kode->EditCustomAttributes = "";
 			$this->Kode->EditValue = ew_HtmlEncode($this->Kode->CurrentValue);
@@ -1731,18 +1767,16 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$this->Nama->EditCustomAttributes = "";
 			$this->Nama->EditValue = ew_HtmlEncode($this->Nama->CurrentValue);
 			$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
-
-			// Urutan
-			$this->Urutan->EditAttrs["class"] = "form-control";
-			$this->Urutan->EditCustomAttributes = "";
-			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
-			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
 
 			// Add refer script
-			// id
+			// Urutan
 
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
+			$this->Urutan->LinkCustomAttributes = "";
+			$this->Urutan->HrefValue = "";
+
+			// Nomor
+			$this->Nomor->LinkCustomAttributes = "";
+			$this->Nomor->HrefValue = "";
 
 			// Kode
 			$this->Kode->LinkCustomAttributes = "";
@@ -1751,17 +1785,19 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			// Nama
 			$this->Nama->LinkCustomAttributes = "";
 			$this->Nama->HrefValue = "";
-
-			// Urutan
-			$this->Urutan->LinkCustomAttributes = "";
-			$this->Urutan->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
 
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
+			// Urutan
+			$this->Urutan->EditAttrs["class"] = "form-control";
+			$this->Urutan->EditCustomAttributes = "";
+			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
+			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
+
+			// Nomor
+			$this->Nomor->EditAttrs["class"] = "form-control";
+			$this->Nomor->EditCustomAttributes = "";
+			$this->Nomor->EditValue = ew_HtmlEncode($this->Nomor->CurrentValue);
+			$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
 
 			// Kode
 			$this->Kode->EditAttrs["class"] = "form-control";
@@ -1775,17 +1811,15 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$this->Nama->EditValue = ew_HtmlEncode($this->Nama->CurrentValue);
 			$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
 
-			// Urutan
-			$this->Urutan->EditAttrs["class"] = "form-control";
-			$this->Urutan->EditCustomAttributes = "";
-			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
-			$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
-
 			// Edit refer script
-			// id
+			// Urutan
 
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
+			$this->Urutan->LinkCustomAttributes = "";
+			$this->Urutan->HrefValue = "";
+
+			// Nomor
+			$this->Nomor->LinkCustomAttributes = "";
+			$this->Nomor->HrefValue = "";
 
 			// Kode
 			$this->Kode->LinkCustomAttributes = "";
@@ -1794,10 +1828,6 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			// Nama
 			$this->Nama->LinkCustomAttributes = "";
 			$this->Nama->HrefValue = "";
-
-			// Urutan
-			$this->Urutan->LinkCustomAttributes = "";
-			$this->Urutan->HrefValue = "";
 		}
 		if ($this->RowType == EW_ROWTYPE_ADD || $this->RowType == EW_ROWTYPE_EDIT || $this->RowType == EW_ROWTYPE_SEARCH) // Add/Edit/Search row
 			$this->SetupFieldTitles();
@@ -1929,14 +1959,17 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$this->LoadDbValues($rsold);
 			$rsnew = array();
 
+			// Urutan
+			$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, $this->Urutan->ReadOnly);
+
+			// Nomor
+			$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", $this->Nomor->ReadOnly);
+
 			// Kode
 			$this->Kode->SetDbValueDef($rsnew, $this->Kode->CurrentValue, "", $this->Kode->ReadOnly);
 
 			// Nama
 			$this->Nama->SetDbValueDef($rsnew, $this->Nama->CurrentValue, "", $this->Nama->ReadOnly);
-
-			// Urutan
-			$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, $this->Urutan->ReadOnly);
 
 			// Call Row Updating event
 			$bUpdateRow = $this->Row_Updating($rsold, $rsnew);
@@ -1981,14 +2014,17 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		}
 		$rsnew = array();
 
+		// Urutan
+		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, strval($this->Urutan->CurrentValue) == "");
+
+		// Nomor
+		$this->Nomor->SetDbValueDef($rsnew, $this->Nomor->CurrentValue, "", strval($this->Nomor->CurrentValue) == "");
+
 		// Kode
 		$this->Kode->SetDbValueDef($rsnew, $this->Kode->CurrentValue, "", strval($this->Kode->CurrentValue) == "");
 
 		// Nama
 		$this->Nama->SetDbValueDef($rsnew, $this->Nama->CurrentValue, "", strval($this->Nama->CurrentValue) == "");
-
-		// Urutan
-		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, strval($this->Urutan->CurrentValue) == "");
 
 		// Call Row Inserting event
 		$rs = ($rsold == NULL) ? NULL : $rsold->fields;
@@ -2304,12 +2340,21 @@ $t03_pengeluaran_head_list->RenderListOptions();
 // Render list options (header, left)
 $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t03_pengeluaran_head->id->Visible) { // id ?>
-	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t03_pengeluaran_head->id->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></div></div></th>
+<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
+	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) == "") { ?>
+		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></div></div></th>
 	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t03_pengeluaran_head->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->id) ?>',2);"><div id="elh_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) ?>',2);"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Urutan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Urutan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+		</div></div></th>
+	<?php } ?>
+<?php } ?>
+<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
+	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nomor) == "") { ?>
+		<th data-name="Nomor" class="<?php echo $t03_pengeluaran_head->Nomor->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Nomor" class="t03_pengeluaran_head_Nomor"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Nomor->FldCaption() ?></div></div></th>
+	<?php } else { ?>
+		<th data-name="Nomor" class="<?php echo $t03_pengeluaran_head->Nomor->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nomor) ?>',2);"><div id="elh_t03_pengeluaran_head_Nomor" class="t03_pengeluaran_head_Nomor">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Nomor->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Nomor->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Nomor->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2328,15 +2373,6 @@ $t03_pengeluaran_head_list->ListOptions->Render("header", "left");
 	<?php } else { ?>
 		<th data-name="Nama" class="<?php echo $t03_pengeluaran_head->Nama->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Nama) ?>',2);"><div id="elh_t03_pengeluaran_head_Nama" class="t03_pengeluaran_head_Nama">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Nama->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Nama->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Nama->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
-	<?php if ($t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) == "") { ?>
-		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan"><div class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="Urutan" class="<?php echo $t03_pengeluaran_head->Urutan->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t03_pengeluaran_head->SortUrl($t03_pengeluaran_head->Urutan) ?>',2);"><div id="elh_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t03_pengeluaran_head->Urutan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t03_pengeluaran_head->Urutan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
 		</div></div></th>
 	<?php } ?>
 <?php } ?>
@@ -2455,22 +2491,51 @@ while ($t03_pengeluaran_head_list->RecCnt < $t03_pengeluaran_head_list->StopRec)
 // Render list options (body, left)
 $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran_head_list->RowCnt);
 ?>
-	<?php if ($t03_pengeluaran_head->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t03_pengeluaran_head->id->CellAttributes() ?>>
+	<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
+		<td data-name="Urutan"<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->OldValue) ?>">
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_id" class="form-group t03_pengeluaran_head_id">
-<span<?php echo $t03_pengeluaran_head->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t03_pengeluaran_head->id->EditValue ?></p></span>
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
 </span>
-<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->CurrentValue) ?>">
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_id" class="t03_pengeluaran_head_id">
-<span<?php echo $t03_pengeluaran_head->id->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->id->ListViewValue() ?></span>
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
+<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Urutan->ListViewValue() ?></span>
+</span>
+<?php } ?>
+</td>
+	<?php } ?>
+<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->CurrentValue) ?>">
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT || $t03_pengeluaran_head->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->CurrentValue) ?>">
+<?php } ?>
+	<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
+		<td data-name="Nomor"<?php echo $t03_pengeluaran_head->Nomor->CellAttributes() ?>>
+<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->OldValue) ?>">
+<?php } ?>
+<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+</span>
+<?php } ?>
+<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
+<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Nomor" class="t03_pengeluaran_head_Nomor">
+<span<?php echo $t03_pengeluaran_head->Nomor->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Nomor->ListViewValue() ?></span>
 </span>
 <?php } ?>
 </td>
@@ -2517,27 +2582,6 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 <?php } ?>
 </td>
 	<?php } ?>
-	<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
-		<td data-name="Urutan"<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
-<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
-<?php } ?>
-<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="t03_pengeluaran_head_Urutan">
-<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->Urutan->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
 <?php
 
 // Render list options (body, right)
@@ -2580,9 +2624,20 @@ ft03_pengeluaran_headlist.UpdateOpts(<?php echo $t03_pengeluaran_head_list->RowI
 // Render list options (body, left)
 $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran_head_list->RowIndex);
 ?>
-	<?php if ($t03_pengeluaran_head->id->Visible) { // id ?>
-		<td data-name="id">
-<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_id" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->id->OldValue) ?>">
+	<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
+		<td data-name="Urutan">
+<span id="el$rowindex$_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
+		<td data-name="Nomor">
+<span id="el$rowindex$_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->OldValue) ?>">
 </td>
 	<?php } ?>
 	<?php if ($t03_pengeluaran_head->Kode->Visible) { // Kode ?>
@@ -2599,14 +2654,6 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 <input type="text" data-table="t03_pengeluaran_head" data-field="x_Nama" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nama" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nama" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nama->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nama->EditValue ?>"<?php echo $t03_pengeluaran_head->Nama->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Nama" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nama" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nama" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nama->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
-		<td data-name="Urutan">
-<span id="el$rowindex$_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
 </td>
 	<?php } ?>
 <?php

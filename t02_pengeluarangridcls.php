@@ -313,13 +313,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
-		$this->Departemen->SetVisibility();
-		$this->HeadDetail->SetVisibility();
-		$this->NomorHead->SetVisibility();
-		$this->SubTotalFlag->SetVisibility();
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -795,14 +788,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 	// Check if empty row
 	function EmptyRow() {
 		global $objForm;
-		if ($objForm->HasValue("x_Departemen") && $objForm->HasValue("o_Departemen") && $this->Departemen->CurrentValue <> $this->Departemen->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_HeadDetail") && $objForm->HasValue("o_HeadDetail") && $this->HeadDetail->CurrentValue <> $this->HeadDetail->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_NomorHead") && $objForm->HasValue("o_NomorHead") && $this->NomorHead->CurrentValue <> $this->NomorHead->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_SubTotalFlag") && $objForm->HasValue("o_SubTotalFlag") && $this->SubTotalFlag->CurrentValue <> $this->SubTotalFlag->OldValue)
-			return FALSE;
 		if ($objForm->HasValue("x_Urutan") && $objForm->HasValue("o_Urutan") && $this->Urutan->CurrentValue <> $this->Urutan->OldValue)
 			return FALSE;
 		if ($objForm->HasValue("x_Nomor") && $objForm->HasValue("o_Nomor") && $this->Nomor->CurrentValue <> $this->Nomor->OldValue)
@@ -962,6 +947,14 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$item->OnLeft = FALSE;
 		$item->Visible = FALSE;
 
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
 		$this->ListOptions->UseDropDownButton = FALSE;
@@ -1014,6 +1007,10 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 				}
 			}
 		}
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 		if ($this->CurrentMode == "view") { // View mode
 		} // End View mode
 		if ($this->CurrentMode == "edit" && is_numeric($this->RowIndex)) {
@@ -1115,14 +1112,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 	function LoadDefaultValues() {
 		$this->id->CurrentValue = NULL;
 		$this->id->OldValue = $this->id->CurrentValue;
-		$this->Departemen->CurrentValue = "-";
-		$this->Departemen->OldValue = $this->Departemen->CurrentValue;
-		$this->HeadDetail->CurrentValue = "H";
-		$this->HeadDetail->OldValue = $this->HeadDetail->CurrentValue;
-		$this->NomorHead->CurrentValue = 0;
-		$this->NomorHead->OldValue = $this->NomorHead->CurrentValue;
-		$this->SubTotalFlag->CurrentValue = "N";
-		$this->SubTotalFlag->OldValue = $this->SubTotalFlag->CurrentValue;
 		$this->Urutan->CurrentValue = 0;
 		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
 		$this->Nomor->CurrentValue = "-";
@@ -1149,24 +1138,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// Load from form
 		global $objForm;
 		$objForm->FormName = $this->FormName;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
-		if (!$this->Departemen->FldIsDetailKey) {
-			$this->Departemen->setFormValue($objForm->GetValue("x_Departemen"));
-		}
-		$this->Departemen->setOldValue($objForm->GetValue("o_Departemen"));
-		if (!$this->HeadDetail->FldIsDetailKey) {
-			$this->HeadDetail->setFormValue($objForm->GetValue("x_HeadDetail"));
-		}
-		$this->HeadDetail->setOldValue($objForm->GetValue("o_HeadDetail"));
-		if (!$this->NomorHead->FldIsDetailKey) {
-			$this->NomorHead->setFormValue($objForm->GetValue("x_NomorHead"));
-		}
-		$this->NomorHead->setOldValue($objForm->GetValue("o_NomorHead"));
-		if (!$this->SubTotalFlag->FldIsDetailKey) {
-			$this->SubTotalFlag->setFormValue($objForm->GetValue("x_SubTotalFlag"));
-		}
-		$this->SubTotalFlag->setOldValue($objForm->GetValue("o_SubTotalFlag"));
 		if (!$this->Urutan->FldIsDetailKey) {
 			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
 		}
@@ -1203,6 +1174,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Total->setFormValue($objForm->GetValue("x_Total"));
 		}
 		$this->Total->setOldValue($objForm->GetValue("o_Total"));
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1210,10 +1183,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		global $objForm;
 		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->CurrentValue = $this->id->FormValue;
-		$this->Departemen->CurrentValue = $this->Departemen->FormValue;
-		$this->HeadDetail->CurrentValue = $this->HeadDetail->FormValue;
-		$this->NomorHead->CurrentValue = $this->NomorHead->FormValue;
-		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
 		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
 		$this->Nomor->CurrentValue = $this->Nomor->FormValue;
 		$this->Kode->CurrentValue = $this->Kode->FormValue;
@@ -1285,10 +1254,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
-		$this->Departemen->setDbValue($row['Departemen']);
-		$this->HeadDetail->setDbValue($row['HeadDetail']);
-		$this->NomorHead->setDbValue($row['NomorHead']);
-		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
 		$this->Urutan->setDbValue($row['Urutan']);
 		$this->Nomor->setDbValue($row['Nomor']);
 		$this->Kode->setDbValue($row['Kode']);
@@ -1305,10 +1270,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		$this->LoadDefaultValues();
 		$row = array();
 		$row['id'] = $this->id->CurrentValue;
-		$row['Departemen'] = $this->Departemen->CurrentValue;
-		$row['HeadDetail'] = $this->HeadDetail->CurrentValue;
-		$row['NomorHead'] = $this->NomorHead->CurrentValue;
-		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
 		$row['Urutan'] = $this->Urutan->CurrentValue;
 		$row['Nomor'] = $this->Nomor->CurrentValue;
 		$row['Kode'] = $this->Kode->CurrentValue;
@@ -1327,10 +1288,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
-		$this->Departemen->DbValue = $row['Departemen'];
-		$this->HeadDetail->DbValue = $row['HeadDetail'];
-		$this->NomorHead->DbValue = $row['NomorHead'];
-		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
 		$this->Urutan->DbValue = $row['Urutan'];
 		$this->Nomor->DbValue = $row['Nomor'];
 		$this->Kode->DbValue = $row['Kode'];
@@ -1397,10 +1354,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 
 		// Common render codes for all row types
 		// id
-		// Departemen
-		// HeadDetail
-		// NomorHead
-		// SubTotalFlag
 		// Urutan
 		// Nomor
 		// Kode
@@ -1416,41 +1369,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
-
-		// Departemen
-		if (strval($this->Departemen->CurrentValue) <> "") {
-			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-		$sWhereWrk = "";
-		$this->Departemen->LookupFilters = array();
-		ew_AddFilter($sWhereWrk, $sFilterWrk);
-		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			if ($rswrk && !$rswrk->EOF) { // Lookup values found
-				$arwrk = array();
-				$arwrk[1] = $rswrk->fields('DispFld');
-				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
-				$rswrk->Close();
-			} else {
-				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
-			}
-		} else {
-			$this->Departemen->ViewValue = NULL;
-		}
-		$this->Departemen->ViewCustomAttributes = "";
-
-		// HeadDetail
-		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
-		$this->HeadDetail->ViewCustomAttributes = "";
-
-		// NomorHead
-		$this->NomorHead->ViewValue = $this->NomorHead->CurrentValue;
-		$this->NomorHead->ViewCustomAttributes = "";
-
-		// SubTotalFlag
-		$this->SubTotalFlag->ViewValue = $this->SubTotalFlag->CurrentValue;
-		$this->SubTotalFlag->ViewCustomAttributes = "";
 
 		// Urutan
 		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
@@ -1487,31 +1405,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// Total
 		$this->Total->ViewValue = $this->Total->CurrentValue;
 		$this->Total->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-			$this->Departemen->TooltipValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-			$this->HeadDetail->TooltipValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-			$this->NomorHead->TooltipValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-			$this->SubTotalFlag->TooltipValue = "";
 
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
@@ -1558,45 +1451,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Total->HrefValue = "";
 			$this->Total->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
-
-			// id
-			// Departemen
-
-			$this->Departemen->EditAttrs["class"] = "form-control";
-			$this->Departemen->EditCustomAttributes = "";
-			if (trim(strval($this->Departemen->CurrentValue)) == "") {
-				$sFilterWrk = "0=1";
-			} else {
-				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-			}
-			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
-			$sWhereWrk = "";
-			$this->Departemen->LookupFilters = array();
-			ew_AddFilter($sWhereWrk, $sFilterWrk);
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
-			if ($rswrk) $rswrk->Close();
-			$this->Departemen->EditValue = $arwrk;
-
-			// HeadDetail
-			$this->HeadDetail->EditAttrs["class"] = "form-control";
-			$this->HeadDetail->EditCustomAttributes = "";
-			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->CurrentValue);
-			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-			// NomorHead
-			$this->NomorHead->EditAttrs["class"] = "form-control";
-			$this->NomorHead->EditCustomAttributes = "";
-			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->CurrentValue);
-			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-			// SubTotalFlag
-			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-			$this->SubTotalFlag->EditCustomAttributes = "";
-			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->CurrentValue);
-			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1672,28 +1526,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			}
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -1729,49 +1563,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->Total->LinkCustomAttributes = "";
 			$this->Total->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
-
-			// Departemen
-			$this->Departemen->EditAttrs["class"] = "form-control";
-			$this->Departemen->EditCustomAttributes = "";
-			if (trim(strval($this->Departemen->CurrentValue)) == "") {
-				$sFilterWrk = "0=1";
-			} else {
-				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-			}
-			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
-			$sWhereWrk = "";
-			$this->Departemen->LookupFilters = array();
-			ew_AddFilter($sWhereWrk, $sFilterWrk);
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
-			if ($rswrk) $rswrk->Close();
-			$this->Departemen->EditValue = $arwrk;
-
-			// HeadDetail
-			$this->HeadDetail->EditAttrs["class"] = "form-control";
-			$this->HeadDetail->EditCustomAttributes = "";
-			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->CurrentValue);
-			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-			// NomorHead
-			$this->NomorHead->EditAttrs["class"] = "form-control";
-			$this->NomorHead->EditCustomAttributes = "";
-			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->CurrentValue);
-			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-			// SubTotalFlag
-			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-			$this->SubTotalFlag->EditCustomAttributes = "";
-			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->CurrentValue);
-			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1847,28 +1638,8 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			}
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -1919,9 +1690,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		// Check if validation required
 		if (!EW_SERVER_VALIDATE)
 			return ($gsFormError == "");
-		if (!ew_CheckInteger($this->NomorHead->FormValue)) {
-			ew_AddMessage($gsFormError, $this->NomorHead->FldErrMsg());
-		}
 		if (!ew_CheckInteger($this->Urutan->FormValue)) {
 			ew_AddMessage($gsFormError, $this->Urutan->FldErrMsg());
 		}
@@ -2049,18 +1817,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 			$this->LoadDbValues($rsold);
 			$rsnew = array();
 
-			// Departemen
-			$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", $this->Departemen->ReadOnly);
-
-			// HeadDetail
-			$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", $this->HeadDetail->ReadOnly);
-
-			// NomorHead
-			$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, $this->NomorHead->ReadOnly);
-
-			// SubTotalFlag
-			$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", $this->SubTotalFlag->ReadOnly);
-
 			// Urutan
 			$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, $this->Urutan->ReadOnly);
 
@@ -2135,18 +1891,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		if ($rsold) {
 		}
 		$rsnew = array();
-
-		// Departemen
-		$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", strval($this->Departemen->CurrentValue) == "");
-
-		// HeadDetail
-		$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", strval($this->HeadDetail->CurrentValue) == "");
-
-		// NomorHead
-		$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, strval($this->NomorHead->CurrentValue) == "");
-
-		// SubTotalFlag
-		$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", strval($this->SubTotalFlag->CurrentValue) == "");
 
 		// Urutan
 		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, strval($this->Urutan->CurrentValue) == "");
@@ -2223,18 +1967,6 @@ class ct02_pengeluaran_grid extends ct02_pengeluaran {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
-		case "x_Departemen":
-			$sSqlWrk = "";
-			$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-			$sWhereWrk = "";
-			$fld->LookupFilters = array();
-			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
-			$sSqlWrk = "";
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			if ($sSqlWrk <> "")
-				$fld->LookupFilters["s"] .= $sSqlWrk;
-			break;
 		}
 	}
 

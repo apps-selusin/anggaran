@@ -728,18 +728,6 @@
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
-      <field id="departemen">
-        <phrase id="fldcaption" value="Departemen" />
-      </field>
-      <field id="headdetail">
-        <phrase id="fldcaption" value="Head Detail" />
-      </field>
-      <field id="nomorhead">
-        <phrase id="fldcaption" value="Nomor Head" />
-      </field>
-      <field id="subtotalflag">
-        <phrase id="fldcaption" value="Sub Total Flag" />
-      </field>
       <field id="urutan">
         <phrase id="fldcaption" value="Urutan" />
       </field>
@@ -773,14 +761,17 @@
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
+      <field id="urutan">
+        <phrase id="fldcaption" value="Urutan" />
+      </field>
+      <field id="nomor">
+        <phrase id="fldcaption" value="Nomor" />
+      </field>
       <field id="kode">
         <phrase id="fldcaption" value="Kode" />
       </field>
       <field id="nama">
         <phrase id="fldcaption" value="Nama" />
-      </field>
-      <field id="urutan">
-        <phrase id="fldcaption" value="Urutan" />
       </field>
     </table>
   </project>

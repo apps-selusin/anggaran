@@ -341,12 +341,10 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 		// Is modal
 		$this->IsModal = (@$_GET["modal"] == "1" || @$_POST["modal"] == "1");
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
+		$this->Urutan->SetVisibility();
+		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
 		$this->Nama->SetVisibility();
-		$this->Urutan->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
 		Page_Loading();
@@ -702,18 +700,20 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
+		$this->Urutan->setDbValue($row['Urutan']);
+		$this->Nomor->setDbValue($row['Nomor']);
 		$this->Kode->setDbValue($row['Kode']);
 		$this->Nama->setDbValue($row['Nama']);
-		$this->Urutan->setDbValue($row['Urutan']);
 	}
 
 	// Return a row with default values
 	function NewRow() {
 		$row = array();
 		$row['id'] = NULL;
+		$row['Urutan'] = NULL;
+		$row['Nomor'] = NULL;
 		$row['Kode'] = NULL;
 		$row['Nama'] = NULL;
-		$row['Urutan'] = NULL;
 		return $row;
 	}
 
@@ -723,9 +723,10 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
+		$this->Urutan->DbValue = $row['Urutan'];
+		$this->Nomor->DbValue = $row['Nomor'];
 		$this->Kode->DbValue = $row['Kode'];
 		$this->Nama->DbValue = $row['Nama'];
-		$this->Urutan->DbValue = $row['Urutan'];
 	}
 
 	// Render row values based on field settings
@@ -745,15 +746,24 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 
 		// Common render codes for all row types
 		// id
+		// Urutan
+		// Nomor
 		// Kode
 		// Nama
-		// Urutan
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Urutan
+		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
+		$this->Urutan->ViewCustomAttributes = "";
+
+		// Nomor
+		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
+		$this->Nomor->ViewCustomAttributes = "";
 
 		// Kode
 		$this->Kode->ViewValue = $this->Kode->CurrentValue;
@@ -763,14 +773,15 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 		$this->Nama->ViewValue = $this->Nama->CurrentValue;
 		$this->Nama->ViewCustomAttributes = "";
 
-		// Urutan
-		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
-		$this->Urutan->ViewCustomAttributes = "";
+			// Urutan
+			$this->Urutan->LinkCustomAttributes = "";
+			$this->Urutan->HrefValue = "";
+			$this->Urutan->TooltipValue = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
+			// Nomor
+			$this->Nomor->LinkCustomAttributes = "";
+			$this->Nomor->HrefValue = "";
+			$this->Nomor->TooltipValue = "";
 
 			// Kode
 			$this->Kode->LinkCustomAttributes = "";
@@ -781,11 +792,6 @@ class ct03_pengeluaran_head_view extends ct03_pengeluaran_head {
 			$this->Nama->LinkCustomAttributes = "";
 			$this->Nama->HrefValue = "";
 			$this->Nama->TooltipValue = "";
-
-			// Urutan
-			$this->Urutan->LinkCustomAttributes = "";
-			$this->Urutan->HrefValue = "";
-			$this->Urutan->TooltipValue = "";
 		}
 
 		// Call Row Rendered event
@@ -998,13 +1004,24 @@ $t03_pengeluaran_head_view->ShowMessage();
 <input type="hidden" name="t" value="t03_pengeluaran_head">
 <input type="hidden" name="modal" value="<?php echo intval($t03_pengeluaran_head_view->IsModal) ?>">
 <table class="table table-striped table-bordered table-hover table-condensed ewViewTable">
-<?php if ($t03_pengeluaran_head->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td class="col-sm-2"><span id="elh_t03_pengeluaran_head_id"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t03_pengeluaran_head->id->CellAttributes() ?>>
-<span id="el_t03_pengeluaran_head_id">
-<span<?php echo $t03_pengeluaran_head->id->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->id->ViewValue ?></span>
+<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
+	<tr id="r_Urutan">
+		<td class="col-sm-2"><span id="elh_t03_pengeluaran_head_Urutan"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></span></td>
+		<td data-name="Urutan"<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
+<span id="el_t03_pengeluaran_head_Urutan">
+<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Urutan->ViewValue ?></span>
+</span>
+</td>
+	</tr>
+<?php } ?>
+<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
+	<tr id="r_Nomor">
+		<td class="col-sm-2"><span id="elh_t03_pengeluaran_head_Nomor"><?php echo $t03_pengeluaran_head->Nomor->FldCaption() ?></span></td>
+		<td data-name="Nomor"<?php echo $t03_pengeluaran_head->Nomor->CellAttributes() ?>>
+<span id="el_t03_pengeluaran_head_Nomor">
+<span<?php echo $t03_pengeluaran_head->Nomor->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Nomor->ViewValue ?></span>
 </span>
 </td>
 	</tr>
@@ -1027,17 +1044,6 @@ $t03_pengeluaran_head_view->ShowMessage();
 <span id="el_t03_pengeluaran_head_Nama">
 <span<?php echo $t03_pengeluaran_head->Nama->ViewAttributes() ?>>
 <?php echo $t03_pengeluaran_head->Nama->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
-<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
-	<tr id="r_Urutan">
-		<td class="col-sm-2"><span id="elh_t03_pengeluaran_head_Urutan"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></span></td>
-		<td data-name="Urutan"<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
-<span id="el_t03_pengeluaran_head_Urutan">
-<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->Urutan->ViewValue ?></span>
 </span>
 </td>
 	</tr>

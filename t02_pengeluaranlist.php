@@ -378,13 +378,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
-		$this->Departemen->SetVisibility();
-		$this->HeadDetail->SetVisibility();
-		$this->NomorHead->SetVisibility();
-		$this->SubTotalFlag->SetVisibility();
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -913,14 +906,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	// Check if empty row
 	function EmptyRow() {
 		global $objForm;
-		if ($objForm->HasValue("x_Departemen") && $objForm->HasValue("o_Departemen") && $this->Departemen->CurrentValue <> $this->Departemen->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_HeadDetail") && $objForm->HasValue("o_HeadDetail") && $this->HeadDetail->CurrentValue <> $this->HeadDetail->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_NomorHead") && $objForm->HasValue("o_NomorHead") && $this->NomorHead->CurrentValue <> $this->NomorHead->OldValue)
-			return FALSE;
-		if ($objForm->HasValue("x_SubTotalFlag") && $objForm->HasValue("o_SubTotalFlag") && $this->SubTotalFlag->CurrentValue <> $this->SubTotalFlag->OldValue)
-			return FALSE;
 		if ($objForm->HasValue("x_Urutan") && $objForm->HasValue("o_Urutan") && $this->Urutan->CurrentValue <> $this->Urutan->OldValue)
 			return FALSE;
 		if ($objForm->HasValue("x_Nomor") && $objForm->HasValue("o_Nomor") && $this->Nomor->CurrentValue <> $this->Nomor->OldValue)
@@ -1020,11 +1005,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
-			$this->UpdateSort($this->Departemen, $bCtrl); // Departemen
-			$this->UpdateSort($this->HeadDetail, $bCtrl); // HeadDetail
-			$this->UpdateSort($this->NomorHead, $bCtrl); // NomorHead
-			$this->UpdateSort($this->SubTotalFlag, $bCtrl); // SubTotalFlag
 			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
 			$this->UpdateSort($this->Nomor, $bCtrl); // Nomor
 			$this->UpdateSort($this->Kode, $bCtrl); // Kode
@@ -1071,11 +1051,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
-				$this->Departemen->setSort("");
-				$this->HeadDetail->setSort("");
-				$this->NomorHead->setSort("");
-				$this->SubTotalFlag->setSort("");
 				$this->Urutan->setSort("");
 				$this->Nomor->setSort("");
 				$this->Kode->setSort("");
@@ -1130,6 +1105,14 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$item->Visible = FALSE;
 		$item->OnLeft = FALSE;
 		$item->Header = "<input type=\"checkbox\" name=\"key\" id=\"key\" onclick=\"ew_SelectAllKey(this);\">";
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssClass = "text-nowrap";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
@@ -1188,6 +1171,10 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 				}
 			}
 		}
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// "edit"
 		$oListOpt = &$this->ListOptions->Items["edit"];
@@ -1499,14 +1486,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 	function LoadDefaultValues() {
 		$this->id->CurrentValue = NULL;
 		$this->id->OldValue = $this->id->CurrentValue;
-		$this->Departemen->CurrentValue = "-";
-		$this->Departemen->OldValue = $this->Departemen->CurrentValue;
-		$this->HeadDetail->CurrentValue = "H";
-		$this->HeadDetail->OldValue = $this->HeadDetail->CurrentValue;
-		$this->NomorHead->CurrentValue = 0;
-		$this->NomorHead->OldValue = $this->NomorHead->CurrentValue;
-		$this->SubTotalFlag->CurrentValue = "N";
-		$this->SubTotalFlag->OldValue = $this->SubTotalFlag->CurrentValue;
 		$this->Urutan->CurrentValue = 0;
 		$this->Urutan->OldValue = $this->Urutan->CurrentValue;
 		$this->Nomor->CurrentValue = "-";
@@ -1532,20 +1511,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
-		if (!$this->Departemen->FldIsDetailKey) {
-			$this->Departemen->setFormValue($objForm->GetValue("x_Departemen"));
-		}
-		if (!$this->HeadDetail->FldIsDetailKey) {
-			$this->HeadDetail->setFormValue($objForm->GetValue("x_HeadDetail"));
-		}
-		if (!$this->NomorHead->FldIsDetailKey) {
-			$this->NomorHead->setFormValue($objForm->GetValue("x_NomorHead"));
-		}
-		if (!$this->SubTotalFlag->FldIsDetailKey) {
-			$this->SubTotalFlag->setFormValue($objForm->GetValue("x_SubTotalFlag"));
-		}
 		if (!$this->Urutan->FldIsDetailKey) {
 			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
 		}
@@ -1573,6 +1538,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if (!$this->Total->FldIsDetailKey) {
 			$this->Total->setFormValue($objForm->GetValue("x_Total"));
 		}
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1580,10 +1547,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		global $objForm;
 		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->CurrentValue = $this->id->FormValue;
-		$this->Departemen->CurrentValue = $this->Departemen->FormValue;
-		$this->HeadDetail->CurrentValue = $this->HeadDetail->FormValue;
-		$this->NomorHead->CurrentValue = $this->NomorHead->FormValue;
-		$this->SubTotalFlag->CurrentValue = $this->SubTotalFlag->FormValue;
 		$this->Urutan->CurrentValue = $this->Urutan->FormValue;
 		$this->Nomor->CurrentValue = $this->Nomor->FormValue;
 		$this->Kode->CurrentValue = $this->Kode->FormValue;
@@ -1655,10 +1618,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if (!$rs || $rs->EOF)
 			return;
 		$this->id->setDbValue($row['id']);
-		$this->Departemen->setDbValue($row['Departemen']);
-		$this->HeadDetail->setDbValue($row['HeadDetail']);
-		$this->NomorHead->setDbValue($row['NomorHead']);
-		$this->SubTotalFlag->setDbValue($row['SubTotalFlag']);
 		$this->Urutan->setDbValue($row['Urutan']);
 		$this->Nomor->setDbValue($row['Nomor']);
 		$this->Kode->setDbValue($row['Kode']);
@@ -1675,10 +1634,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		$this->LoadDefaultValues();
 		$row = array();
 		$row['id'] = $this->id->CurrentValue;
-		$row['Departemen'] = $this->Departemen->CurrentValue;
-		$row['HeadDetail'] = $this->HeadDetail->CurrentValue;
-		$row['NomorHead'] = $this->NomorHead->CurrentValue;
-		$row['SubTotalFlag'] = $this->SubTotalFlag->CurrentValue;
 		$row['Urutan'] = $this->Urutan->CurrentValue;
 		$row['Nomor'] = $this->Nomor->CurrentValue;
 		$row['Kode'] = $this->Kode->CurrentValue;
@@ -1697,10 +1652,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			return;
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
-		$this->Departemen->DbValue = $row['Departemen'];
-		$this->HeadDetail->DbValue = $row['HeadDetail'];
-		$this->NomorHead->DbValue = $row['NomorHead'];
-		$this->SubTotalFlag->DbValue = $row['SubTotalFlag'];
 		$this->Urutan->DbValue = $row['Urutan'];
 		$this->Nomor->DbValue = $row['Nomor'];
 		$this->Kode->DbValue = $row['Kode'];
@@ -1763,10 +1714,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 
 		// Common render codes for all row types
 		// id
-		// Departemen
-		// HeadDetail
-		// NomorHead
-		// SubTotalFlag
 		// Urutan
 		// Nomor
 		// Kode
@@ -1782,41 +1729,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// id
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
-
-		// Departemen
-		if (strval($this->Departemen->CurrentValue) <> "") {
-			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-		$sWhereWrk = "";
-		$this->Departemen->LookupFilters = array();
-		ew_AddFilter($sWhereWrk, $sFilterWrk);
-		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			if ($rswrk && !$rswrk->EOF) { // Lookup values found
-				$arwrk = array();
-				$arwrk[1] = $rswrk->fields('DispFld');
-				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
-				$rswrk->Close();
-			} else {
-				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
-			}
-		} else {
-			$this->Departemen->ViewValue = NULL;
-		}
-		$this->Departemen->ViewCustomAttributes = "";
-
-		// HeadDetail
-		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
-		$this->HeadDetail->ViewCustomAttributes = "";
-
-		// NomorHead
-		$this->NomorHead->ViewValue = $this->NomorHead->CurrentValue;
-		$this->NomorHead->ViewCustomAttributes = "";
-
-		// SubTotalFlag
-		$this->SubTotalFlag->ViewValue = $this->SubTotalFlag->CurrentValue;
-		$this->SubTotalFlag->ViewCustomAttributes = "";
 
 		// Urutan
 		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
@@ -1853,31 +1765,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Total
 		$this->Total->ViewValue = $this->Total->CurrentValue;
 		$this->Total->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-			$this->Departemen->TooltipValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-			$this->HeadDetail->TooltipValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-			$this->NomorHead->TooltipValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-			$this->SubTotalFlag->TooltipValue = "";
 
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
@@ -1924,45 +1811,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Total->HrefValue = "";
 			$this->Total->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
-
-			// id
-			// Departemen
-
-			$this->Departemen->EditAttrs["class"] = "form-control";
-			$this->Departemen->EditCustomAttributes = "";
-			if (trim(strval($this->Departemen->CurrentValue)) == "") {
-				$sFilterWrk = "0=1";
-			} else {
-				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-			}
-			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
-			$sWhereWrk = "";
-			$this->Departemen->LookupFilters = array();
-			ew_AddFilter($sWhereWrk, $sFilterWrk);
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
-			if ($rswrk) $rswrk->Close();
-			$this->Departemen->EditValue = $arwrk;
-
-			// HeadDetail
-			$this->HeadDetail->EditAttrs["class"] = "form-control";
-			$this->HeadDetail->EditCustomAttributes = "";
-			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->CurrentValue);
-			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-			// NomorHead
-			$this->NomorHead->EditAttrs["class"] = "form-control";
-			$this->NomorHead->EditCustomAttributes = "";
-			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->CurrentValue);
-			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-			// SubTotalFlag
-			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-			$this->SubTotalFlag->EditCustomAttributes = "";
-			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->CurrentValue);
-			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -2028,28 +1876,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) $this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -2085,49 +1913,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->Total->LinkCustomAttributes = "";
 			$this->Total->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
-
-			// Departemen
-			$this->Departemen->EditAttrs["class"] = "form-control";
-			$this->Departemen->EditCustomAttributes = "";
-			if (trim(strval($this->Departemen->CurrentValue)) == "") {
-				$sFilterWrk = "0=1";
-			} else {
-				$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-			}
-			$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `departemen`";
-			$sWhereWrk = "";
-			$this->Departemen->LookupFilters = array();
-			ew_AddFilter($sWhereWrk, $sFilterWrk);
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
-			if ($rswrk) $rswrk->Close();
-			$this->Departemen->EditValue = $arwrk;
-
-			// HeadDetail
-			$this->HeadDetail->EditAttrs["class"] = "form-control";
-			$this->HeadDetail->EditCustomAttributes = "";
-			$this->HeadDetail->EditValue = ew_HtmlEncode($this->HeadDetail->CurrentValue);
-			$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-			// NomorHead
-			$this->NomorHead->EditAttrs["class"] = "form-control";
-			$this->NomorHead->EditCustomAttributes = "";
-			$this->NomorHead->EditValue = ew_HtmlEncode($this->NomorHead->CurrentValue);
-			$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-			// SubTotalFlag
-			$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-			$this->SubTotalFlag->EditCustomAttributes = "";
-			$this->SubTotalFlag->EditValue = ew_HtmlEncode($this->SubTotalFlag->CurrentValue);
-			$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -2193,28 +1978,8 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			if (strval($this->Total->EditValue) <> "" && is_numeric($this->Total->EditValue)) $this->Total->EditValue = ew_FormatNumber($this->Total->EditValue, -2, -1, -2, 0);
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
-			// Departemen
-			$this->Departemen->LinkCustomAttributes = "";
-			$this->Departemen->HrefValue = "";
-
-			// HeadDetail
-			$this->HeadDetail->LinkCustomAttributes = "";
-			$this->HeadDetail->HrefValue = "";
-
-			// NomorHead
-			$this->NomorHead->LinkCustomAttributes = "";
-			$this->NomorHead->HrefValue = "";
-
-			// SubTotalFlag
-			$this->SubTotalFlag->LinkCustomAttributes = "";
-			$this->SubTotalFlag->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -2268,9 +2033,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		// Check if validation required
 		if (!EW_SERVER_VALIDATE)
 			return ($gsFormError == "");
-		if (!ew_CheckInteger($this->NomorHead->FormValue)) {
-			ew_AddMessage($gsFormError, $this->NomorHead->FldErrMsg());
-		}
 		if (!ew_CheckInteger($this->Urutan->FormValue)) {
 			ew_AddMessage($gsFormError, $this->Urutan->FldErrMsg());
 		}
@@ -2398,18 +2160,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 			$this->LoadDbValues($rsold);
 			$rsnew = array();
 
-			// Departemen
-			$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", $this->Departemen->ReadOnly);
-
-			// HeadDetail
-			$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", $this->HeadDetail->ReadOnly);
-
-			// NomorHead
-			$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, $this->NomorHead->ReadOnly);
-
-			// SubTotalFlag
-			$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", $this->SubTotalFlag->ReadOnly);
-
 			// Urutan
 			$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, $this->Urutan->ReadOnly);
 
@@ -2479,18 +2229,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		if ($rsold) {
 		}
 		$rsnew = array();
-
-		// Departemen
-		$this->Departemen->SetDbValueDef($rsnew, $this->Departemen->CurrentValue, "", strval($this->Departemen->CurrentValue) == "");
-
-		// HeadDetail
-		$this->HeadDetail->SetDbValueDef($rsnew, $this->HeadDetail->CurrentValue, "", strval($this->HeadDetail->CurrentValue) == "");
-
-		// NomorHead
-		$this->NomorHead->SetDbValueDef($rsnew, $this->NomorHead->CurrentValue, 0, strval($this->NomorHead->CurrentValue) == "");
-
-		// SubTotalFlag
-		$this->SubTotalFlag->SetDbValueDef($rsnew, $this->SubTotalFlag->CurrentValue, "", strval($this->SubTotalFlag->CurrentValue) == "");
 
 		// Urutan
 		$this->Urutan->SetDbValueDef($rsnew, $this->Urutan->CurrentValue, 0, strval($this->Urutan->CurrentValue) == "");
@@ -2629,18 +2367,6 @@ class ct02_pengeluaran_list extends ct02_pengeluaran {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
-		case "x_Departemen":
-			$sSqlWrk = "";
-			$sSqlWrk = "SELECT `departemen` AS `LinkFld`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-			$sWhereWrk = "";
-			$fld->LookupFilters = array();
-			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "jbsakad", "f0" => '`departemen` IN ({filter_value})', "t0" => "200", "fn0" => "");
-			$sSqlWrk = "";
-			$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			if ($sSqlWrk <> "")
-				$fld->LookupFilters["s"] .= $sSqlWrk;
-			break;
 		}
 	}
 
@@ -2822,9 +2548,6 @@ ft02_pengeluaranlist.Validate = function() {
 	for (var i = startcnt; i <= rowcnt; i++) {
 		var infix = ($k[0]) ? String(i) : "";
 		$fobj.data("rowindex", infix);
-			elm = this.GetElements("x" + infix + "_NomorHead");
-			if (elm && !ew_CheckInteger(elm.value))
-				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->NomorHead->FldErrMsg()) ?>");
 			elm = this.GetElements("x" + infix + "_Urutan");
 			if (elm && !ew_CheckInteger(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Urutan->FldErrMsg()) ?>");
@@ -2863,10 +2586,8 @@ ft02_pengeluaranlist.Form_CustomValidate =
 ft02_pengeluaranlist.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-ft02_pengeluaranlist.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
-ft02_pengeluaranlist.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluaran_list->Departemen->LookupFilterQuery(FALSE, "list") ?>";
-
 // Form object for search
+
 </script>
 <script type="text/javascript">
 
@@ -2946,51 +2667,6 @@ $t02_pengeluaran_list->RenderListOptions();
 // Render list options (header, left)
 $t02_pengeluaran_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->id) ?>',2);"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) == "") { ?>
-		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) ?>',2);"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Departemen->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Departemen->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) == "") { ?>
-		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) ?>',2);"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->HeadDetail->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->HeadDetail->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) == "") { ?>
-		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) ?>',2);"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->NomorHead->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->NomorHead->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) == "") { ?>
-		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) ?>',2);"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->SubTotalFlag->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->SubTotalFlag->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t02_pengeluaran->Urutan->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Urutan" class="t02_pengeluaran_Urutan"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Urutan->FldCaption() ?></div></div></th>
@@ -3187,114 +2863,6 @@ while ($t02_pengeluaran_list->RecCnt < $t02_pengeluaran_list->StopRec) {
 // Render list options (body, left)
 $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list->RowCnt);
 ?>
-	<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t02_pengeluaran->id->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_id" class="form-group t02_pengeluaran_id">
-<span<?php echo $t02_pengeluaran->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_id" class="t02_pengeluaran_id">
-<span<?php echo $t02_pengeluaran->id->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->id->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-		<td data-name="Departemen"<?php echo $t02_pengeluaran->Departemen->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
-<span<?php echo $t02_pengeluaran->Departemen->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-		<td data-name="HeadDetail"<?php echo $t02_pengeluaran->HeadDetail->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
-<span<?php echo $t02_pengeluaran->HeadDetail->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->HeadDetail->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-		<td data-name="NomorHead"<?php echo $t02_pengeluaran->NomorHead->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
-<span<?php echo $t02_pengeluaran->NomorHead->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->NomorHead->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-		<td data-name="SubTotalFlag"<?php echo $t02_pengeluaran->SubTotalFlag->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_list->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
-<span<?php echo $t02_pengeluaran->SubTotalFlag->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->SubTotalFlag->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
 	<?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan"<?php echo $t02_pengeluaran->Urutan->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -3316,6 +2884,13 @@ $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list
 <?php } ?>
 </td>
 	<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT || $t02_pengeluaran->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t02_pengeluaran->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor"<?php echo $t02_pengeluaran->Nomor->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -3542,45 +3117,6 @@ ft02_pengeluaranlist.UpdateOpts(<?php echo $t02_pengeluaran_list->RowIndex ?>);
 // Render list options (body, left)
 $t02_pengeluaran_list->ListOptions->Render("body", "left", $t02_pengeluaran_list->RowIndex);
 ?>
-	<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-		<td data-name="id">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-		<td data-name="Departemen">
-<span id="el$rowindex$_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-		<td data-name="HeadDetail">
-<span id="el$rowindex$_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-		<td data-name="NomorHead">
-<span id="el$rowindex$_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-		<td data-name="SubTotalFlag">
-<span id="el$rowindex$_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="o<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" id="o<?php echo $t02_pengeluaran_list->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-</td>
-	<?php } ?>
 	<?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <span id="el$rowindex$_t02_pengeluaran_Urutan" class="form-group t02_pengeluaran_Urutan">

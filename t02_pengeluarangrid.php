@@ -41,9 +41,6 @@ ft02_pengeluarangrid.Validate = function() {
 		var checkrow = (gridinsert) ? !this.EmptyRow(infix) : true;
 		if (checkrow) {
 			addcnt++;
-			elm = this.GetElements("x" + infix + "_NomorHead");
-			if (elm && !ew_CheckInteger(elm.value))
-				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->NomorHead->FldErrMsg()) ?>");
 			elm = this.GetElements("x" + infix + "_Urutan");
 			if (elm && !ew_CheckInteger(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t02_pengeluaran->Urutan->FldErrMsg()) ?>");
@@ -74,10 +71,6 @@ ft02_pengeluarangrid.Validate = function() {
 // Check empty row
 ft02_pengeluarangrid.EmptyRow = function(infix) {
 	var fobj = this.Form;
-	if (ew_ValueChanged(fobj, infix, "Departemen", false)) return false;
-	if (ew_ValueChanged(fobj, infix, "HeadDetail", false)) return false;
-	if (ew_ValueChanged(fobj, infix, "NomorHead", false)) return false;
-	if (ew_ValueChanged(fobj, infix, "SubTotalFlag", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Urutan", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Nomor", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Kode", false)) return false;
@@ -102,10 +95,8 @@ ft02_pengeluarangrid.Form_CustomValidate =
 ft02_pengeluarangrid.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-ft02_pengeluarangrid.Lists["x_Departemen"] = {"LinkField":"x_departemen","Ajax":true,"AutoFill":false,"DisplayFields":["x_departemen","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"departemen"};
-ft02_pengeluarangrid.Lists["x_Departemen"].Data = "<?php echo $t02_pengeluaran_grid->Departemen->LookupFilterQuery(FALSE, "grid") ?>";
-
 // Form object for search
+
 </script>
 <?php } ?>
 <?php
@@ -174,51 +165,6 @@ $t02_pengeluaran_grid->RenderListOptions();
 // Render list options (header, left)
 $t02_pengeluaran_grid->ListOptions->Render("header", "left");
 ?>
-<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t02_pengeluaran->id->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_id" class="t02_pengeluaran_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Departemen) == "") { ?>
-		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="Departemen" class="<?php echo $t02_pengeluaran->Departemen->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Departemen->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->Departemen->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->Departemen->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->HeadDetail) == "") { ?>
-		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="HeadDetail" class="<?php echo $t02_pengeluaran->HeadDetail->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->HeadDetail->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->HeadDetail->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->HeadDetail->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->NomorHead) == "") { ?>
-		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="NomorHead" class="<?php echo $t02_pengeluaran->NomorHead->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->NomorHead->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->NomorHead->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->NomorHead->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
-<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->SubTotalFlag) == "") { ?>
-		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="SubTotalFlag" class="<?php echo $t02_pengeluaran->SubTotalFlag->HeaderCellClass() ?>"><div><div id="elh_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->SubTotalFlag->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_pengeluaran->SubTotalFlag->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_pengeluaran->SubTotalFlag->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 	<?php if ($t02_pengeluaran->SortUrl($t02_pengeluaran->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t02_pengeluaran->Urutan->HeaderCellClass() ?>"><div id="elh_t02_pengeluaran_Urutan" class="t02_pengeluaran_Urutan"><div class="ewTableHeaderCaption"><?php echo $t02_pengeluaran->Urutan->FldCaption() ?></div></div></th>
@@ -409,149 +355,6 @@ while ($t02_pengeluaran_grid->RecCnt < $t02_pengeluaran_grid->StopRec) {
 // Render list options (body, left)
 $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid->RowCnt);
 ?>
-	<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t02_pengeluaran->id->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_id" class="form-group t02_pengeluaran_id">
-<span<?php echo $t02_pengeluaran->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_id" class="t02_pengeluaran_id">
-<span<?php echo $t02_pengeluaran->id->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->id->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-		<td data-name="Departemen"<?php echo $t02_pengeluaran->Departemen->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_Departemen" class="t02_pengeluaran_Departemen">
-<span<?php echo $t02_pengeluaran->Departemen->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-		<td data-name="HeadDetail"<?php echo $t02_pengeluaran->HeadDetail->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_HeadDetail" class="t02_pengeluaran_HeadDetail">
-<span<?php echo $t02_pengeluaran->HeadDetail->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->HeadDetail->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-		<td data-name="NomorHead"<?php echo $t02_pengeluaran->NomorHead->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_NomorHead" class="t02_pengeluaran_NomorHead">
-<span<?php echo $t02_pengeluaran->NomorHead->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->NomorHead->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-		<td data-name="SubTotalFlag"<?php echo $t02_pengeluaran->SubTotalFlag->CellAttributes() ?>>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<?php } ?>
-<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_pengeluaran_grid->RowCnt ?>_t02_pengeluaran_SubTotalFlag" class="t02_pengeluaran_SubTotalFlag">
-<span<?php echo $t02_pengeluaran->SubTotalFlag->ViewAttributes() ?>>
-<?php echo $t02_pengeluaran->SubTotalFlag->ListViewValue() ?></span>
-</span>
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="ft02_pengeluarangrid$x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->FormValue) ?>">
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="ft02_pengeluarangrid$o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-</td>
-	<?php } ?>
 	<?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan"<?php echo $t02_pengeluaran->Urutan->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -580,6 +383,13 @@ $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid
 <?php } ?>
 </td>
 	<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_EDIT || $t02_pengeluaran->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t02_pengeluaran->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor"<?php echo $t02_pengeluaran->Nomor->CellAttributes() ?>>
 <?php if ($t02_pengeluaran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -862,85 +672,6 @@ ft02_pengeluarangrid.UpdateOpts(<?php echo $t02_pengeluaran_grid->RowIndex ?>);
 // Render list options (body, left)
 $t02_pengeluaran_grid->ListOptions->Render("body", "left", $t02_pengeluaran_grid->RowIndex);
 ?>
-	<?php if ($t02_pengeluaran->id->Visible) { // id ?>
-		<td data-name="id">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_id" class="form-group t02_pengeluaran_id">
-<span<?php echo $t02_pengeluaran->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->id->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_id" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_pengeluaran->id->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->Departemen->Visible) { // Departemen ?>
-		<td data-name="Departemen">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<span id="el$rowindex$_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<select data-table="t02_pengeluaran" data-field="x_Departemen" data-value-separator="<?php echo $t02_pengeluaran->Departemen->DisplayValueSeparatorAttribute() ?>" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen"<?php echo $t02_pengeluaran->Departemen->EditAttributes() ?>>
-<?php echo $t02_pengeluaran->Departemen->SelectOptionListHtml("x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen") ?>
-</select>
-</span>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_Departemen" class="form-group t02_pengeluaran_Departemen">
-<span<?php echo $t02_pengeluaran->Departemen->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->Departemen->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_Departemen" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_Departemen" value="<?php echo ew_HtmlEncode($t02_pengeluaran->Departemen->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->HeadDetail->Visible) { // HeadDetail ?>
-		<td data-name="HeadDetail">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<span id="el$rowindex$_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<input type="text" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" size="30" maxlength="1" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->HeadDetail->EditValue ?>"<?php echo $t02_pengeluaran->HeadDetail->EditAttributes() ?>>
-</span>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_HeadDetail" class="form-group t02_pengeluaran_HeadDetail">
-<span<?php echo $t02_pengeluaran->HeadDetail->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->HeadDetail->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_HeadDetail" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_HeadDetail" value="<?php echo ew_HtmlEncode($t02_pengeluaran->HeadDetail->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->NomorHead->Visible) { // NomorHead ?>
-		<td data-name="NomorHead">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<span id="el$rowindex$_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<input type="text" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" size="30" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->NomorHead->EditValue ?>"<?php echo $t02_pengeluaran->NomorHead->EditAttributes() ?>>
-</span>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_NomorHead" class="form-group t02_pengeluaran_NomorHead">
-<span<?php echo $t02_pengeluaran->NomorHead->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->NomorHead->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_NomorHead" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_NomorHead" value="<?php echo ew_HtmlEncode($t02_pengeluaran->NomorHead->OldValue) ?>">
-</td>
-	<?php } ?>
-	<?php if ($t02_pengeluaran->SubTotalFlag->Visible) { // SubTotalFlag ?>
-		<td data-name="SubTotalFlag">
-<?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>
-<span id="el$rowindex$_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<input type="text" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->getPlaceHolder()) ?>" value="<?php echo $t02_pengeluaran->SubTotalFlag->EditValue ?>"<?php echo $t02_pengeluaran->SubTotalFlag->EditAttributes() ?>>
-</span>
-<?php } else { ?>
-<span id="el$rowindex$_t02_pengeluaran_SubTotalFlag" class="form-group t02_pengeluaran_SubTotalFlag">
-<span<?php echo $t02_pengeluaran->SubTotalFlag->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_pengeluaran->SubTotalFlag->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="x<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_pengeluaran" data-field="x_SubTotalFlag" name="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" id="o<?php echo $t02_pengeluaran_grid->RowIndex ?>_SubTotalFlag" value="<?php echo ew_HtmlEncode($t02_pengeluaran->SubTotalFlag->OldValue) ?>">
-</td>
-	<?php } ?>
 	<?php if ($t02_pengeluaran->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <?php if ($t02_pengeluaran->CurrentAction <> "F") { ?>

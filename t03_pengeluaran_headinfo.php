@@ -8,9 +8,10 @@ $t03_pengeluaran_head = NULL;
 //
 class ct03_pengeluaran_head extends cTable {
 	var $id;
+	var $Urutan;
+	var $Nomor;
 	var $Kode;
 	var $Nama;
-	var $Urutan;
 
 	//
 	// Table class constructor
@@ -50,6 +51,17 @@ class ct03_pengeluaran_head extends cTable {
 		$this->id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['id'] = &$this->id;
 
+		// Urutan
+		$this->Urutan = new cField('t03_pengeluaran_head', 't03_pengeluaran_head', 'x_Urutan', 'Urutan', '`Urutan`', '`Urutan`', 16, -1, FALSE, '`Urutan`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Urutan->Sortable = TRUE; // Allow sort
+		$this->Urutan->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
+		$this->fields['Urutan'] = &$this->Urutan;
+
+		// Nomor
+		$this->Nomor = new cField('t03_pengeluaran_head', 't03_pengeluaran_head', 'x_Nomor', 'Nomor', '`Nomor`', '`Nomor`', 200, -1, FALSE, '`Nomor`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Nomor->Sortable = TRUE; // Allow sort
+		$this->fields['Nomor'] = &$this->Nomor;
+
 		// Kode
 		$this->Kode = new cField('t03_pengeluaran_head', 't03_pengeluaran_head', 'x_Kode', 'Kode', '`Kode`', '`Kode`', 200, -1, FALSE, '`Kode`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->Kode->Sortable = TRUE; // Allow sort
@@ -59,12 +71,6 @@ class ct03_pengeluaran_head extends cTable {
 		$this->Nama = new cField('t03_pengeluaran_head', 't03_pengeluaran_head', 'x_Nama', 'Nama', '`Nama`', '`Nama`', 200, -1, FALSE, '`Nama`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->Nama->Sortable = TRUE; // Allow sort
 		$this->fields['Nama'] = &$this->Nama;
-
-		// Urutan
-		$this->Urutan = new cField('t03_pengeluaran_head', 't03_pengeluaran_head', 'x_Urutan', 'Urutan', '`Urutan`', '`Urutan`', 16, -1, FALSE, '`Urutan`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->Urutan->Sortable = TRUE; // Allow sort
-		$this->Urutan->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
-		$this->fields['Urutan'] = &$this->Urutan;
 	}
 
 	// Field Visibility
@@ -634,9 +640,10 @@ class ct03_pengeluaran_head extends cTable {
 	// Load row values from recordset
 	function LoadListRowValues(&$rs) {
 		$this->id->setDbValue($rs->fields('id'));
+		$this->Urutan->setDbValue($rs->fields('Urutan'));
+		$this->Nomor->setDbValue($rs->fields('Nomor'));
 		$this->Kode->setDbValue($rs->fields('Kode'));
 		$this->Nama->setDbValue($rs->fields('Nama'));
-		$this->Urutan->setDbValue($rs->fields('Urutan'));
 	}
 
 	// Render list row values
@@ -648,13 +655,22 @@ class ct03_pengeluaran_head extends cTable {
 
 	// Common render codes
 		// id
+		// Urutan
+		// Nomor
 		// Kode
 		// Nama
-		// Urutan
 		// id
 
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
+
+		// Urutan
+		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
+		$this->Urutan->ViewCustomAttributes = "";
+
+		// Nomor
+		$this->Nomor->ViewValue = $this->Nomor->CurrentValue;
+		$this->Nomor->ViewCustomAttributes = "";
 
 		// Kode
 		$this->Kode->ViewValue = $this->Kode->CurrentValue;
@@ -664,14 +680,20 @@ class ct03_pengeluaran_head extends cTable {
 		$this->Nama->ViewValue = $this->Nama->CurrentValue;
 		$this->Nama->ViewCustomAttributes = "";
 
-		// Urutan
-		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
-		$this->Urutan->ViewCustomAttributes = "";
-
 		// id
 		$this->id->LinkCustomAttributes = "";
 		$this->id->HrefValue = "";
 		$this->id->TooltipValue = "";
+
+		// Urutan
+		$this->Urutan->LinkCustomAttributes = "";
+		$this->Urutan->HrefValue = "";
+		$this->Urutan->TooltipValue = "";
+
+		// Nomor
+		$this->Nomor->LinkCustomAttributes = "";
+		$this->Nomor->HrefValue = "";
+		$this->Nomor->TooltipValue = "";
 
 		// Kode
 		$this->Kode->LinkCustomAttributes = "";
@@ -682,11 +704,6 @@ class ct03_pengeluaran_head extends cTable {
 		$this->Nama->LinkCustomAttributes = "";
 		$this->Nama->HrefValue = "";
 		$this->Nama->TooltipValue = "";
-
-		// Urutan
-		$this->Urutan->LinkCustomAttributes = "";
-		$this->Urutan->HrefValue = "";
-		$this->Urutan->TooltipValue = "";
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -708,6 +725,18 @@ class ct03_pengeluaran_head extends cTable {
 		$this->id->EditValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
 
+		// Urutan
+		$this->Urutan->EditAttrs["class"] = "form-control";
+		$this->Urutan->EditCustomAttributes = "";
+		$this->Urutan->EditValue = $this->Urutan->CurrentValue;
+		$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
+
+		// Nomor
+		$this->Nomor->EditAttrs["class"] = "form-control";
+		$this->Nomor->EditCustomAttributes = "";
+		$this->Nomor->EditValue = $this->Nomor->CurrentValue;
+		$this->Nomor->PlaceHolder = ew_RemoveHtml($this->Nomor->FldCaption());
+
 		// Kode
 		$this->Kode->EditAttrs["class"] = "form-control";
 		$this->Kode->EditCustomAttributes = "";
@@ -719,12 +748,6 @@ class ct03_pengeluaran_head extends cTable {
 		$this->Nama->EditCustomAttributes = "";
 		$this->Nama->EditValue = $this->Nama->CurrentValue;
 		$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
-
-		// Urutan
-		$this->Urutan->EditAttrs["class"] = "form-control";
-		$this->Urutan->EditCustomAttributes = "";
-		$this->Urutan->EditValue = $this->Urutan->CurrentValue;
-		$this->Urutan->PlaceHolder = ew_RemoveHtml($this->Urutan->FldCaption());
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -753,15 +776,16 @@ class ct03_pengeluaran_head extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
+					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
+					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
 					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
 					if ($this->Nama->Exportable) $Doc->ExportCaption($this->Nama);
-					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 				} else {
 					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
+					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
+					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
 					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
 					if ($this->Nama->Exportable) $Doc->ExportCaption($this->Nama);
-					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 				}
 				$Doc->EndExportRow();
 			}
@@ -793,15 +817,16 @@ class ct03_pengeluaran_head extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
+						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
+						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
 						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
 						if ($this->Nama->Exportable) $Doc->ExportField($this->Nama);
-						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 					} else {
 						if ($this->id->Exportable) $Doc->ExportField($this->id);
+						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
+						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
 						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
 						if ($this->Nama->Exportable) $Doc->ExportField($this->Nama);
-						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 					}
 					$Doc->EndExportRow($RowCnt);
 				}

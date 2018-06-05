@@ -8,10 +8,6 @@ $t02_pengeluaran = NULL;
 //
 class ct02_pengeluaran extends cTable {
 	var $id;
-	var $Departemen;
-	var $HeadDetail;
-	var $NomorHead;
-	var $SubTotalFlag;
 	var $Urutan;
 	var $Nomor;
 	var $Kode;
@@ -59,29 +55,6 @@ class ct02_pengeluaran extends cTable {
 		$this->id->Sortable = TRUE; // Allow sort
 		$this->id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['id'] = &$this->id;
-
-		// Departemen
-		$this->Departemen = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Departemen', 'Departemen', '`Departemen`', '`Departemen`', 200, -1, FALSE, '`Departemen`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'SELECT');
-		$this->Departemen->Sortable = TRUE; // Allow sort
-		$this->Departemen->UsePleaseSelect = TRUE; // Use PleaseSelect by default
-		$this->Departemen->PleaseSelectText = $Language->Phrase("PleaseSelect"); // PleaseSelect text
-		$this->fields['Departemen'] = &$this->Departemen;
-
-		// HeadDetail
-		$this->HeadDetail = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_HeadDetail', 'HeadDetail', '`HeadDetail`', '`HeadDetail`', 200, -1, FALSE, '`HeadDetail`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->HeadDetail->Sortable = TRUE; // Allow sort
-		$this->fields['HeadDetail'] = &$this->HeadDetail;
-
-		// NomorHead
-		$this->NomorHead = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_NomorHead', 'NomorHead', '`NomorHead`', '`NomorHead`', 16, -1, FALSE, '`NomorHead`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->NomorHead->Sortable = TRUE; // Allow sort
-		$this->NomorHead->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
-		$this->fields['NomorHead'] = &$this->NomorHead;
-
-		// SubTotalFlag
-		$this->SubTotalFlag = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_SubTotalFlag', 'SubTotalFlag', '`SubTotalFlag`', '`SubTotalFlag`', 200, -1, FALSE, '`SubTotalFlag`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
-		$this->SubTotalFlag->Sortable = TRUE; // Allow sort
-		$this->fields['SubTotalFlag'] = &$this->SubTotalFlag;
 
 		// Urutan
 		$this->Urutan = new cField('t02_pengeluaran', 't02_pengeluaran', 'x_Urutan', 'Urutan', '`Urutan`', '`Urutan`', 16, -1, FALSE, '`Urutan`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
@@ -723,10 +696,6 @@ class ct02_pengeluaran extends cTable {
 	// Load row values from recordset
 	function LoadListRowValues(&$rs) {
 		$this->id->setDbValue($rs->fields('id'));
-		$this->Departemen->setDbValue($rs->fields('Departemen'));
-		$this->HeadDetail->setDbValue($rs->fields('HeadDetail'));
-		$this->NomorHead->setDbValue($rs->fields('NomorHead'));
-		$this->SubTotalFlag->setDbValue($rs->fields('SubTotalFlag'));
 		$this->Urutan->setDbValue($rs->fields('Urutan'));
 		$this->Nomor->setDbValue($rs->fields('Nomor'));
 		$this->Kode->setDbValue($rs->fields('Kode'));
@@ -747,10 +716,6 @@ class ct02_pengeluaran extends cTable {
 
 	// Common render codes
 		// id
-		// Departemen
-		// HeadDetail
-		// NomorHead
-		// SubTotalFlag
 		// Urutan
 		// Nomor
 		// Kode
@@ -764,41 +729,6 @@ class ct02_pengeluaran extends cTable {
 
 		$this->id->ViewValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
-
-		// Departemen
-		if (strval($this->Departemen->CurrentValue) <> "") {
-			$sFilterWrk = "`departemen`" . ew_SearchString("=", $this->Departemen->CurrentValue, EW_DATATYPE_STRING, "jbsakad");
-		$sSqlWrk = "SELECT `departemen`, `departemen` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `departemen`";
-		$sWhereWrk = "";
-		$this->Departemen->LookupFilters = array();
-		ew_AddFilter($sWhereWrk, $sFilterWrk);
-		$this->Lookup_Selecting($this->Departemen, $sWhereWrk); // Call Lookup Selecting
-		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
-			$rswrk = Conn("jbsakad")->Execute($sSqlWrk);
-			if ($rswrk && !$rswrk->EOF) { // Lookup values found
-				$arwrk = array();
-				$arwrk[1] = $rswrk->fields('DispFld');
-				$this->Departemen->ViewValue = $this->Departemen->DisplayValue($arwrk);
-				$rswrk->Close();
-			} else {
-				$this->Departemen->ViewValue = $this->Departemen->CurrentValue;
-			}
-		} else {
-			$this->Departemen->ViewValue = NULL;
-		}
-		$this->Departemen->ViewCustomAttributes = "";
-
-		// HeadDetail
-		$this->HeadDetail->ViewValue = $this->HeadDetail->CurrentValue;
-		$this->HeadDetail->ViewCustomAttributes = "";
-
-		// NomorHead
-		$this->NomorHead->ViewValue = $this->NomorHead->CurrentValue;
-		$this->NomorHead->ViewCustomAttributes = "";
-
-		// SubTotalFlag
-		$this->SubTotalFlag->ViewValue = $this->SubTotalFlag->CurrentValue;
-		$this->SubTotalFlag->ViewCustomAttributes = "";
 
 		// Urutan
 		$this->Urutan->ViewValue = $this->Urutan->CurrentValue;
@@ -840,26 +770,6 @@ class ct02_pengeluaran extends cTable {
 		$this->id->LinkCustomAttributes = "";
 		$this->id->HrefValue = "";
 		$this->id->TooltipValue = "";
-
-		// Departemen
-		$this->Departemen->LinkCustomAttributes = "";
-		$this->Departemen->HrefValue = "";
-		$this->Departemen->TooltipValue = "";
-
-		// HeadDetail
-		$this->HeadDetail->LinkCustomAttributes = "";
-		$this->HeadDetail->HrefValue = "";
-		$this->HeadDetail->TooltipValue = "";
-
-		// NomorHead
-		$this->NomorHead->LinkCustomAttributes = "";
-		$this->NomorHead->HrefValue = "";
-		$this->NomorHead->TooltipValue = "";
-
-		// SubTotalFlag
-		$this->SubTotalFlag->LinkCustomAttributes = "";
-		$this->SubTotalFlag->HrefValue = "";
-		$this->SubTotalFlag->TooltipValue = "";
 
 		// Urutan
 		$this->Urutan->LinkCustomAttributes = "";
@@ -925,28 +835,6 @@ class ct02_pengeluaran extends cTable {
 		$this->id->EditCustomAttributes = "";
 		$this->id->EditValue = $this->id->CurrentValue;
 		$this->id->ViewCustomAttributes = "";
-
-		// Departemen
-		$this->Departemen->EditAttrs["class"] = "form-control";
-		$this->Departemen->EditCustomAttributes = "";
-
-		// HeadDetail
-		$this->HeadDetail->EditAttrs["class"] = "form-control";
-		$this->HeadDetail->EditCustomAttributes = "";
-		$this->HeadDetail->EditValue = $this->HeadDetail->CurrentValue;
-		$this->HeadDetail->PlaceHolder = ew_RemoveHtml($this->HeadDetail->FldCaption());
-
-		// NomorHead
-		$this->NomorHead->EditAttrs["class"] = "form-control";
-		$this->NomorHead->EditCustomAttributes = "";
-		$this->NomorHead->EditValue = $this->NomorHead->CurrentValue;
-		$this->NomorHead->PlaceHolder = ew_RemoveHtml($this->NomorHead->FldCaption());
-
-		// SubTotalFlag
-		$this->SubTotalFlag->EditAttrs["class"] = "form-control";
-		$this->SubTotalFlag->EditCustomAttributes = "";
-		$this->SubTotalFlag->EditValue = $this->SubTotalFlag->CurrentValue;
-		$this->SubTotalFlag->PlaceHolder = ew_RemoveHtml($this->SubTotalFlag->FldCaption());
 
 		// Urutan
 		$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1038,11 +926,6 @@ class ct02_pengeluaran extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
-					if ($this->Departemen->Exportable) $Doc->ExportCaption($this->Departemen);
-					if ($this->HeadDetail->Exportable) $Doc->ExportCaption($this->HeadDetail);
-					if ($this->NomorHead->Exportable) $Doc->ExportCaption($this->NomorHead);
-					if ($this->SubTotalFlag->Exportable) $Doc->ExportCaption($this->SubTotalFlag);
 					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
 					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
@@ -1054,10 +937,6 @@ class ct02_pengeluaran extends cTable {
 					if ($this->Total->Exportable) $Doc->ExportCaption($this->Total);
 				} else {
 					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
-					if ($this->Departemen->Exportable) $Doc->ExportCaption($this->Departemen);
-					if ($this->HeadDetail->Exportable) $Doc->ExportCaption($this->HeadDetail);
-					if ($this->NomorHead->Exportable) $Doc->ExportCaption($this->NomorHead);
-					if ($this->SubTotalFlag->Exportable) $Doc->ExportCaption($this->SubTotalFlag);
 					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
 					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
@@ -1098,11 +977,6 @@ class ct02_pengeluaran extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
-						if ($this->Departemen->Exportable) $Doc->ExportField($this->Departemen);
-						if ($this->HeadDetail->Exportable) $Doc->ExportField($this->HeadDetail);
-						if ($this->NomorHead->Exportable) $Doc->ExportField($this->NomorHead);
-						if ($this->SubTotalFlag->Exportable) $Doc->ExportField($this->SubTotalFlag);
 						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
 						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);
@@ -1114,10 +988,6 @@ class ct02_pengeluaran extends cTable {
 						if ($this->Total->Exportable) $Doc->ExportField($this->Total);
 					} else {
 						if ($this->id->Exportable) $Doc->ExportField($this->id);
-						if ($this->Departemen->Exportable) $Doc->ExportField($this->Departemen);
-						if ($this->HeadDetail->Exportable) $Doc->ExportField($this->HeadDetail);
-						if ($this->NomorHead->Exportable) $Doc->ExportField($this->NomorHead);
-						if ($this->SubTotalFlag->Exportable) $Doc->ExportField($this->SubTotalFlag);
 						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
 						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);

@@ -1,22 +1,33 @@
 <?php
 
-// id
+// Urutan
+// Nomor
 // Kode
 // Nama
-// Urutan
 
 ?>
 <?php if ($t03_pengeluaran_head->Visible) { ?>
 <div class="ewMasterDiv">
 <table id="tbl_t03_pengeluaran_headmaster" class="table ewViewTable ewMasterTable ewVertical">
 	<tbody>
-<?php if ($t03_pengeluaran_head->id->Visible) { // id ?>
-		<tr id="r_id">
-			<td class="col-sm-2"><?php echo $t03_pengeluaran_head->id->FldCaption() ?></td>
-			<td<?php echo $t03_pengeluaran_head->id->CellAttributes() ?>>
-<span id="el_t03_pengeluaran_head_id">
-<span<?php echo $t03_pengeluaran_head->id->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->id->ListViewValue() ?></span>
+<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
+		<tr id="r_Urutan">
+			<td class="col-sm-2"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></td>
+			<td<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
+<span id="el_t03_pengeluaran_head_Urutan">
+<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Urutan->ListViewValue() ?></span>
+</span>
+</td>
+		</tr>
+<?php } ?>
+<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
+		<tr id="r_Nomor">
+			<td class="col-sm-2"><?php echo $t03_pengeluaran_head->Nomor->FldCaption() ?></td>
+			<td<?php echo $t03_pengeluaran_head->Nomor->CellAttributes() ?>>
+<span id="el_t03_pengeluaran_head_Nomor">
+<span<?php echo $t03_pengeluaran_head->Nomor->ViewAttributes() ?>>
+<?php echo $t03_pengeluaran_head->Nomor->ListViewValue() ?></span>
 </span>
 </td>
 		</tr>
@@ -39,17 +50,6 @@
 <span id="el_t03_pengeluaran_head_Nama">
 <span<?php echo $t03_pengeluaran_head->Nama->ViewAttributes() ?>>
 <?php echo $t03_pengeluaran_head->Nama->ListViewValue() ?></span>
-</span>
-</td>
-		</tr>
-<?php } ?>
-<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
-		<tr id="r_Urutan">
-			<td class="col-sm-2"><?php echo $t03_pengeluaran_head->Urutan->FldCaption() ?></td>
-			<td<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
-<span id="el_t03_pengeluaran_head_Urutan">
-<span<?php echo $t03_pengeluaran_head->Urutan->ViewAttributes() ?>>
-<?php echo $t03_pengeluaran_head->Urutan->ListViewValue() ?></span>
 </span>
 </td>
 		</tr>
