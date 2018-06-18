@@ -617,15 +617,12 @@
   </global>
   <project>
     <phrase id="bodytitle" value="Rencana Anggaran" />
-    <phrase id="footertext" value="&amp;copy;2018 MINU. All rights reserved." />
-    <menu id="2">
+    <phrase id="footertext" value="Rencana Anggaran. &amp;copy;2018 MINU. All rights reserved." />
+    <menu id="10009">
       <phrase id="menutext" value="Beranda" />
     </menu>
-    <menu id="10007">
-      <phrase id="menutext" value="Log" />
-    </menu>
-    <menu id="10008">
-      <phrase id="menutext" value="Log Status" />
+    <menu id="2">
+      <phrase id="menutext" value="Beranda" />
     </menu>
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
@@ -633,14 +630,23 @@
     <menu id="10005">
       <phrase id="menutext" value="Pengeluaran" />
     </menu>
-    <menu id="10006">
-      <phrase id="menutext" value="Satuan" />
-    </menu>
     <menu id="10003">
       <phrase id="menutext" value="departemen" />
     </menu>
     <menu id="10004">
       <phrase id="menutext" value="Pengeluaran (Detail)" />
+    </menu>
+    <menu id="10017">
+      <phrase id="menutext" value="Setup" />
+    </menu>
+    <menu id="10006">
+      <phrase id="menutext" value="Satuan" />
+    </menu>
+    <menu id="10007">
+      <phrase id="menutext" value="Log" />
+    </menu>
+    <menu id="10008">
+      <phrase id="menutext" value="Log Status" />
     </menu>
     <menu id="10001">
       <phrase id="menutext" value="t 01 penerimaan" />
@@ -818,6 +824,9 @@
       <field id="status">
         <phrase id="fldcaption" value="Status" />
       </field>
+    </table>
+    <table id="cf02_home_php">
+      <phrase id="tblcaption" value="Beranda" />
     </table>
   </project>
 </ew-language>

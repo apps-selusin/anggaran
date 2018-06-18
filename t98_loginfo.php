@@ -69,13 +69,15 @@ class ct98_log extends cTable {
 		$this->fields['Keterangan2'] = &$this->Keterangan2;
 
 		// Status
-		$this->Status = new cField('t98_log', 't98_log', 'x_Status', 'Status', '`Status`', '`Status`', 3, -1, FALSE, '`Status`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Status = new cField('t98_log', 't98_log', 'x_Status', 'Status', '`Status`', '`Status`', 3, -1, FALSE, '`Status`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'SELECT');
 		$this->Status->Sortable = TRUE; // Allow sort
+		$this->Status->UsePleaseSelect = TRUE; // Use PleaseSelect by default
+		$this->Status->PleaseSelectText = $Language->Phrase("PleaseSelect"); // PleaseSelect text
 		$this->Status->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['Status'] = &$this->Status;
 
 		// TanggalJam
-		$this->TanggalJam = new cField('t98_log', 't98_log', 'x_TanggalJam', 'TanggalJam', '`TanggalJam`', ew_CastDateFieldForLike('`TanggalJam`', 0, "DB"), 135, 0, FALSE, '`TanggalJam`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->TanggalJam = new cField('t98_log', 't98_log', 'x_TanggalJam', 'TanggalJam', '`TanggalJam`', ew_CastDateFieldForLike('`TanggalJam`', 1, "DB"), 135, 1, FALSE, '`TanggalJam`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->TanggalJam->Sortable = TRUE; // Allow sort
 		$this->TanggalJam->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_FORMAT"], $Language->Phrase("IncorrectDate"));
 		$this->fields['TanggalJam'] = &$this->TanggalJam;
@@ -657,12 +659,31 @@ class ct98_log extends cTable {
 		$this->Keterangan2->ViewCustomAttributes = "";
 
 		// Status
-		$this->Status->ViewValue = $this->Status->CurrentValue;
+		if (strval($this->Status->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Status->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t99_log_status`";
+		$sWhereWrk = "";
+		$this->Status->LookupFilters = array("dx1" => '`Status`');
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Status->ViewValue = $this->Status->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Status->ViewValue = $this->Status->CurrentValue;
+			}
+		} else {
+			$this->Status->ViewValue = NULL;
+		}
 		$this->Status->ViewCustomAttributes = "";
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 0);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 		// id
@@ -736,8 +757,6 @@ class ct98_log extends cTable {
 		// Status
 		$this->Status->EditAttrs["class"] = "form-control";
 		$this->Status->EditCustomAttributes = "";
-		$this->Status->EditValue = $this->Status->CurrentValue;
-		$this->Status->PlaceHolder = ew_RemoveHtml($this->Status->FldCaption());
 
 		// TanggalJam
 		$this->TanggalJam->EditAttrs["class"] = "form-control";
@@ -781,6 +800,8 @@ class ct98_log extends cTable {
 				} else {
 					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->No->Exportable) $Doc->ExportCaption($this->No);
+					if ($this->Keterangan->Exportable) $Doc->ExportCaption($this->Keterangan);
+					if ($this->Keterangan2->Exportable) $Doc->ExportCaption($this->Keterangan2);
 					if ($this->Status->Exportable) $Doc->ExportCaption($this->Status);
 					if ($this->TanggalJam->Exportable) $Doc->ExportCaption($this->TanggalJam);
 				}
@@ -823,6 +844,8 @@ class ct98_log extends cTable {
 					} else {
 						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->No->Exportable) $Doc->ExportField($this->No);
+						if ($this->Keterangan->Exportable) $Doc->ExportField($this->Keterangan);
+						if ($this->Keterangan2->Exportable) $Doc->ExportField($this->Keterangan2);
 						if ($this->Status->Exportable) $Doc->ExportField($this->Status);
 						if ($this->TanggalJam->Exportable) $Doc->ExportField($this->TanggalJam);
 					}

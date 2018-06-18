@@ -284,6 +284,8 @@ class ct98_log_delete extends ct98_log {
 		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
 			$this->id->Visible = FALSE;
 		$this->No->SetVisibility();
+		$this->Keterangan->SetVisibility();
+		$this->Keterangan2->SetVisibility();
 		$this->Status->SetVisibility();
 		$this->TanggalJam->SetVisibility();
 
@@ -525,13 +527,40 @@ class ct98_log_delete extends ct98_log {
 		$this->No->ViewValue = $this->No->CurrentValue;
 		$this->No->ViewCustomAttributes = "";
 
+		// Keterangan
+		$this->Keterangan->ViewValue = $this->Keterangan->CurrentValue;
+		$this->Keterangan->ViewCustomAttributes = "";
+
+		// Keterangan2
+		$this->Keterangan2->ViewValue = $this->Keterangan2->CurrentValue;
+		$this->Keterangan2->ViewCustomAttributes = "";
+
 		// Status
-		$this->Status->ViewValue = $this->Status->CurrentValue;
+		if (strval($this->Status->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Status->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t99_log_status`";
+		$sWhereWrk = "";
+		$this->Status->LookupFilters = array("dx1" => '`Status`');
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Status->ViewValue = $this->Status->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Status->ViewValue = $this->Status->CurrentValue;
+			}
+		} else {
+			$this->Status->ViewValue = NULL;
+		}
 		$this->Status->ViewCustomAttributes = "";
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 0);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// id
@@ -543,6 +572,16 @@ class ct98_log_delete extends ct98_log {
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
 			$this->No->TooltipValue = "";
+
+			// Keterangan
+			$this->Keterangan->LinkCustomAttributes = "";
+			$this->Keterangan->HrefValue = "";
+			$this->Keterangan->TooltipValue = "";
+
+			// Keterangan2
+			$this->Keterangan2->LinkCustomAttributes = "";
+			$this->Keterangan2->HrefValue = "";
+			$this->Keterangan2->TooltipValue = "";
 
 			// Status
 			$this->Status->LinkCustomAttributes = "";
@@ -760,8 +799,10 @@ ft98_logdelete.Form_CustomValidate =
 ft98_logdelete.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft98_logdelete.Lists["x_Status"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_Status","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t99_log_status"};
+ft98_logdelete.Lists["x_Status"].Data = "<?php echo $t98_log_delete->Status->LookupFilterQuery(FALSE, "delete") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -791,6 +832,12 @@ $t98_log_delete->ShowMessage();
 <?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 		<th class="<?php echo $t98_log->No->HeaderCellClass() ?>"><span id="elh_t98_log_No" class="t98_log_No"><?php echo $t98_log->No->FldCaption() ?></span></th>
+<?php } ?>
+<?php if ($t98_log->Keterangan->Visible) { // Keterangan ?>
+		<th class="<?php echo $t98_log->Keterangan->HeaderCellClass() ?>"><span id="elh_t98_log_Keterangan" class="t98_log_Keterangan"><?php echo $t98_log->Keterangan->FldCaption() ?></span></th>
+<?php } ?>
+<?php if ($t98_log->Keterangan2->Visible) { // Keterangan2 ?>
+		<th class="<?php echo $t98_log->Keterangan2->HeaderCellClass() ?>"><span id="elh_t98_log_Keterangan2" class="t98_log_Keterangan2"><?php echo $t98_log->Keterangan2->FldCaption() ?></span></th>
 <?php } ?>
 <?php if ($t98_log->Status->Visible) { // Status ?>
 		<th class="<?php echo $t98_log->Status->HeaderCellClass() ?>"><span id="elh_t98_log_Status" class="t98_log_Status"><?php echo $t98_log->Status->FldCaption() ?></span></th>
@@ -832,6 +879,22 @@ while (!$t98_log_delete->Recordset->EOF) {
 <span id="el<?php echo $t98_log_delete->RowCnt ?>_t98_log_No" class="t98_log_No">
 <span<?php echo $t98_log->No->ViewAttributes() ?>>
 <?php echo $t98_log->No->ListViewValue() ?></span>
+</span>
+</td>
+<?php } ?>
+<?php if ($t98_log->Keterangan->Visible) { // Keterangan ?>
+		<td<?php echo $t98_log->Keterangan->CellAttributes() ?>>
+<span id="el<?php echo $t98_log_delete->RowCnt ?>_t98_log_Keterangan" class="t98_log_Keterangan">
+<span<?php echo $t98_log->Keterangan->ViewAttributes() ?>>
+<?php echo $t98_log->Keterangan->ListViewValue() ?></span>
+</span>
+</td>
+<?php } ?>
+<?php if ($t98_log->Keterangan2->Visible) { // Keterangan2 ?>
+		<td<?php echo $t98_log->Keterangan2->CellAttributes() ?>>
+<span id="el<?php echo $t98_log_delete->RowCnt ?>_t98_log_Keterangan2" class="t98_log_Keterangan2">
+<span<?php echo $t98_log->Keterangan2->ViewAttributes() ?>>
+<?php echo $t98_log->Keterangan2->ListViewValue() ?></span>
 </span>
 </td>
 <?php } ?>

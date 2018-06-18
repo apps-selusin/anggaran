@@ -744,12 +744,31 @@ class ct98_log_view extends ct98_log {
 		$this->Keterangan2->ViewCustomAttributes = "";
 
 		// Status
-		$this->Status->ViewValue = $this->Status->CurrentValue;
+		if (strval($this->Status->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Status->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t99_log_status`";
+		$sWhereWrk = "";
+		$this->Status->LookupFilters = array("dx1" => '`Status`');
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Status->ViewValue = $this->Status->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Status->ViewValue = $this->Status->CurrentValue;
+			}
+		} else {
+			$this->Status->ViewValue = NULL;
+		}
 		$this->Status->ViewCustomAttributes = "";
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 0);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// id
@@ -938,8 +957,10 @@ ft98_logview.Form_CustomValidate =
 ft98_logview.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft98_logview.Lists["x_Status"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_Status","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t99_log_status"};
+ft98_logview.Lists["x_Status"].Data = "<?php echo $t98_log_view->Status->LookupFilterQuery(FALSE, "view") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 

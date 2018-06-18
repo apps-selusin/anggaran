@@ -523,7 +523,7 @@ class ct98_log_add extends ct98_log {
 		}
 		if (!$this->TanggalJam->FldIsDetailKey) {
 			$this->TanggalJam->setFormValue($objForm->GetValue("x_TanggalJam"));
-			$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 0);
+			$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1);
 		}
 	}
 
@@ -535,7 +535,7 @@ class ct98_log_add extends ct98_log {
 		$this->Keterangan2->CurrentValue = $this->Keterangan2->FormValue;
 		$this->Status->CurrentValue = $this->Status->FormValue;
 		$this->TanggalJam->CurrentValue = $this->TanggalJam->FormValue;
-		$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 0);
+		$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1);
 	}
 
 	// Load row based on key values
@@ -663,12 +663,31 @@ class ct98_log_add extends ct98_log {
 		$this->Keterangan2->ViewCustomAttributes = "";
 
 		// Status
-		$this->Status->ViewValue = $this->Status->CurrentValue;
+		if (strval($this->Status->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->Status->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t99_log_status`";
+		$sWhereWrk = "";
+		$this->Status->LookupFilters = array("dx1" => '`Status`');
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->Status->ViewValue = $this->Status->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->Status->ViewValue = $this->Status->CurrentValue;
+			}
+		} else {
+			$this->Status->ViewValue = NULL;
+		}
 		$this->Status->ViewCustomAttributes = "";
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 0);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// No
@@ -716,10 +735,29 @@ class ct98_log_add extends ct98_log {
 			$this->Keterangan2->PlaceHolder = ew_RemoveHtml($this->Keterangan2->FldCaption());
 
 			// Status
-			$this->Status->EditAttrs["class"] = "form-control";
 			$this->Status->EditCustomAttributes = "";
-			$this->Status->EditValue = ew_HtmlEncode($this->Status->CurrentValue);
-			$this->Status->PlaceHolder = ew_RemoveHtml($this->Status->FldCaption());
+			if (trim(strval($this->Status->CurrentValue)) == "") {
+				$sFilterWrk = "0=1";
+			} else {
+				$sFilterWrk = "`id`" . ew_SearchString("=", $this->Status->CurrentValue, EW_DATATYPE_NUMBER, "");
+			}
+			$sSqlWrk = "SELECT `id`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld`, '' AS `SelectFilterFld`, '' AS `SelectFilterFld2`, '' AS `SelectFilterFld3`, '' AS `SelectFilterFld4` FROM `t99_log_status`";
+			$sWhereWrk = "";
+			$this->Status->LookupFilters = array("dx1" => '`Status`');
+			ew_AddFilter($sWhereWrk, $sFilterWrk);
+			$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = ew_HtmlEncode($rswrk->fields('DispFld'));
+				$this->Status->ViewValue = $this->Status->DisplayValue($arwrk);
+			} else {
+				$this->Status->ViewValue = $Language->Phrase("PleaseSelect");
+			}
+			$arwrk = ($rswrk) ? $rswrk->GetRows() : array();
+			if ($rswrk) $rswrk->Close();
+			$this->Status->EditValue = $arwrk;
 
 			// TanggalJam
 			$this->TanggalJam->EditAttrs["class"] = "form-control";
@@ -773,9 +811,6 @@ class ct98_log_add extends ct98_log {
 		if (!$this->Keterangan->FldIsDetailKey && !is_null($this->Keterangan->FormValue) && $this->Keterangan->FormValue == "") {
 			ew_AddMessage($gsFormError, str_replace("%s", $this->Keterangan->FldCaption(), $this->Keterangan->ReqErrMsg));
 		}
-		if (!ew_CheckInteger($this->Status->FormValue)) {
-			ew_AddMessage($gsFormError, $this->Status->FldErrMsg());
-		}
 		if (!ew_CheckDateDef($this->TanggalJam->FormValue)) {
 			ew_AddMessage($gsFormError, $this->TanggalJam->FldErrMsg());
 		}
@@ -816,7 +851,7 @@ class ct98_log_add extends ct98_log {
 		$this->Status->SetDbValueDef($rsnew, $this->Status->CurrentValue, 0, strval($this->Status->CurrentValue) == "");
 
 		// TanggalJam
-		$this->TanggalJam->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 0), NULL, FALSE);
+		$this->TanggalJam->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1), NULL, FALSE);
 
 		// Call Row Inserting event
 		$rs = ($rsold == NULL) ? NULL : $rsold->fields;
@@ -863,6 +898,18 @@ class ct98_log_add extends ct98_log {
 		global $gsLanguage;
 		$pageId = $pageId ?: $this->PageID;
 		switch ($fld->FldVar) {
+		case "x_Status":
+			$sSqlWrk = "";
+			$sSqlWrk = "SELECT `id` AS `LinkFld`, `Status` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t99_log_status`";
+			$sWhereWrk = "{filter}";
+			$fld->LookupFilters = array("dx1" => '`Status`');
+			$fld->LookupFilters += array("s" => $sSqlWrk, "d" => "", "f0" => '`id` IN ({filter_value})', "t0" => "3", "fn0" => "");
+			$sSqlWrk = "";
+			$this->Lookup_Selecting($this->Status, $sWhereWrk); // Call Lookup Selecting
+			if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			if ($sSqlWrk <> "")
+				$fld->LookupFilters["s"] .= $sSqlWrk;
+			break;
 		}
 	}
 
@@ -988,9 +1035,6 @@ ft98_logadd.Validate = function() {
 			elm = this.GetElements("x" + infix + "_Keterangan");
 			if (elm && !ew_IsHidden(elm) && !ew_HasValue(elm))
 				return this.OnError(elm, "<?php echo ew_JsEncode2(str_replace("%s", $t98_log->Keterangan->FldCaption(), $t98_log->Keterangan->ReqErrMsg)) ?>");
-			elm = this.GetElements("x" + infix + "_Status");
-			if (elm && !ew_CheckInteger(elm.value))
-				return this.OnError(elm, "<?php echo ew_JsEncode2($t98_log->Status->FldErrMsg()) ?>");
 			elm = this.GetElements("x" + infix + "_TanggalJam");
 			if (elm && !ew_CheckDateDef(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t98_log->TanggalJam->FldErrMsg()) ?>");
@@ -1023,8 +1067,10 @@ ft98_logadd.Form_CustomValidate =
 ft98_logadd.ValidateRequired = <?php echo json_encode(EW_CLIENT_VALIDATE) ?>;
 
 // Dynamic selection lists
-// Form object for search
+ft98_logadd.Lists["x_Status"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_Status","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t99_log_status"};
+ft98_logadd.Lists["x_Status"].Data = "<?php echo $t98_log_add->Status->LookupFilterQuery(FALSE, "add") ?>";
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -1077,7 +1123,11 @@ $t98_log_add->ShowMessage();
 		<label id="elh_t98_log_Status" for="x_Status" class="<?php echo $t98_log_add->LeftColumnClass ?>"><?php echo $t98_log->Status->FldCaption() ?></label>
 		<div class="<?php echo $t98_log_add->RightColumnClass ?>"><div<?php echo $t98_log->Status->CellAttributes() ?>>
 <span id="el_t98_log_Status">
-<input type="text" data-table="t98_log" data-field="x_Status" name="x_Status" id="x_Status" size="30" placeholder="<?php echo ew_HtmlEncode($t98_log->Status->getPlaceHolder()) ?>" value="<?php echo $t98_log->Status->EditValue ?>"<?php echo $t98_log->Status->EditAttributes() ?>>
+<span class="ewLookupList">
+	<span onclick="jQuery(this).parent().next().click();" tabindex="-1" class="form-control ewLookupText" id="lu_x_Status"><?php echo (strval($t98_log->Status->ViewValue) == "" ? $Language->Phrase("PleaseSelect") : $t98_log->Status->ViewValue); ?></span>
+</span>
+<button type="button" title="<?php echo ew_HtmlEncode(str_replace("%s", ew_RemoveHtml($t98_log->Status->FldCaption()), $Language->Phrase("LookupLink", TRUE))) ?>" onclick="ew_ModalLookupShow({lnk:this,el:'x_Status',m:0,n:10});" class="ewLookupBtn btn btn-default btn-sm"<?php echo (($t98_log->Status->ReadOnly || $t98_log->Status->Disabled) ? " disabled" : "")?>><span class="glyphicon glyphicon-search ewIcon"></span></button>
+<input type="hidden" data-table="t98_log" data-field="x_Status" data-multiple="0" data-lookup="1" data-value-separator="<?php echo $t98_log->Status->DisplayValueSeparatorAttribute() ?>" name="x_Status" id="x_Status" value="<?php echo $t98_log->Status->CurrentValue ?>"<?php echo $t98_log->Status->EditAttributes() ?>>
 </span>
 <?php echo $t98_log->Status->CustomMsg ?></div></div>
 	</div>
@@ -1087,7 +1137,12 @@ $t98_log_add->ShowMessage();
 		<label id="elh_t98_log_TanggalJam" for="x_TanggalJam" class="<?php echo $t98_log_add->LeftColumnClass ?>"><?php echo $t98_log->TanggalJam->FldCaption() ?></label>
 		<div class="<?php echo $t98_log_add->RightColumnClass ?>"><div<?php echo $t98_log->TanggalJam->CellAttributes() ?>>
 <span id="el_t98_log_TanggalJam">
-<input type="text" data-table="t98_log" data-field="x_TanggalJam" name="x_TanggalJam" id="x_TanggalJam" placeholder="<?php echo ew_HtmlEncode($t98_log->TanggalJam->getPlaceHolder()) ?>" value="<?php echo $t98_log->TanggalJam->EditValue ?>"<?php echo $t98_log->TanggalJam->EditAttributes() ?>>
+<input type="text" data-table="t98_log" data-field="x_TanggalJam" data-format="1" name="x_TanggalJam" id="x_TanggalJam" placeholder="<?php echo ew_HtmlEncode($t98_log->TanggalJam->getPlaceHolder()) ?>" value="<?php echo $t98_log->TanggalJam->EditValue ?>"<?php echo $t98_log->TanggalJam->EditAttributes() ?>>
+<?php if (!$t98_log->TanggalJam->ReadOnly && !$t98_log->TanggalJam->Disabled && !isset($t98_log->TanggalJam->EditAttrs["readonly"]) && !isset($t98_log->TanggalJam->EditAttrs["disabled"])) { ?>
+<script type="text/javascript">
+ew_CreateDateTimePicker("ft98_logadd", "x_TanggalJam", {"ignoreReadonly":true,"useCurrent":false,"format":1});
+</script>
+<?php } ?>
 </span>
 <?php echo $t98_log->TanggalJam->CustomMsg ?></div></div>
 	</div>

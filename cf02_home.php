@@ -3,6 +3,7 @@ if (session_id() == "") session_start(); // Init session data
 ob_start(); // Turn on output buffering
 ?>
 <?php include_once "ewcfg14.php" ?>
+<?php $EW_ROOT_RELATIVE_PATH = ""; ?>
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql14.php") ?>
 <?php include_once "phpfn14.php" ?>
 <?php include_once "userfn14.php" ?>
@@ -12,18 +13,21 @@ ob_start(); // Turn on output buffering
 // Page class
 //
 
-$default = NULL; // Initialize page object first
+$cf02_home_php = NULL; // Initialize page object first
 
-class cdefault {
+class ccf02_home_php {
 
 	// Page ID
-	var $PageID = 'default';
+	var $PageID = 'custom';
 
 	// Project ID
 	var $ProjectID = '{EA1CE07B-E03E-4EC9-BC42-48D490D73F97}';
 
+	// Table name
+	var $TableName = 'cf02_home.php';
+
 	// Page object name
-	var $PageObjName = 'default';
+	var $PageObjName = 'cf02_home_php';
 
 	// Page headings
 	var $Heading = '';
@@ -207,7 +211,11 @@ class cdefault {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'default', TRUE);
+			define("EW_PAGE_ID", 'custom', TRUE);
+
+		// Table name (for backward compatibility)
+		if (!defined("EW_TABLE_NAME"))
+			define("EW_TABLE_NAME", 'cf02_home.php', TRUE);
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"]))
@@ -226,12 +234,11 @@ class cdefault {
 	//
 	function Page_Init() {
 		global $gsExport, $gsCustomExport, $gsExportFile, $UserProfile, $Language, $Security, $objForm;
+		if (@$_GET["export"] <> "")
+			$gsExport = $_GET["export"]; // Get export parameter, used in header
 
 		// Global Page Loading event (in userfn*.php)
 		Page_Loading();
-
-		// Page Load event
-		$this->Page_Load();
 
 		// Check token
 		if (!$this->ValidPost()) {
@@ -250,16 +257,12 @@ class cdefault {
 	function Page_Terminate($url = "") {
 		global $gsExportFile, $gTmpImages;
 
-		// Page Unload event
-		$this->Page_Unload();
-
 		// Global Page Unloaded event (in userfn*.php)
 		Page_Unloaded();
 
 		// Export
-		$this->Page_Redirecting($url);
-
 		// Close connection
+
 		ew_CloseConn();
 
 		// Go to URL if specified
@@ -276,42 +279,18 @@ class cdefault {
 	// Page main
 	//
 	function Page_Main() {
-		global $Security, $Language, $Breadcrumb;
+
+		// Set up Breadcrumb
+		$this->SetupBreadcrumb();
+	}
+
+	// Set up Breadcrumb
+	function SetupBreadcrumb() {
+		global $Breadcrumb, $Language;
 		$Breadcrumb = new cBreadcrumb();
-
-		// If session expired, show session expired message
-		if (@$_GET["expired"] == "1")
-			$this->setFailureMessage($Language->Phrase("SessionExpired"));
-		$this->Page_Terminate("cf02_home.php"); // Exit and go to default page
-	}
-
-	// Page Load event
-	function Page_Load() {
-
-		//echo "Page Load";
-	}
-
-	// Page Unload event
-	function Page_Unload() {
-
-		//echo "Page Unload";
-	}
-
-	// Page Redirecting event
-	function Page_Redirecting(&$url) {
-
-		// Example:
-		//$url = "your URL";
-
-	}
-
-	// Message Showing event
-	// $type = ''|'success'|'failure'
-	function Message_Showing(&$msg, $type) {
-
-		// Example:
-		//if ($type == 'success') $msg = "your success message";
-
+		$url = substr(ew_CurrentUrl(), strrpos(ew_CurrentUrl(), "/")+1);
+		$Breadcrumb->Add("custom", "cf02_home_php", $url, "", "cf02_home_php", TRUE);
+		$this->Heading = $Language->TablePhrase("cf02_home_php", "TblCaption"); 
 	}
 }
 ?>
@@ -319,19 +298,94 @@ class cdefault {
 <?php
 
 // Create page object
-if (!isset($default)) $default = new cdefault();
+if (!isset($cf02_home_php)) $cf02_home_php = new ccf02_home_php();
 
 // Page init
-$default->Page_Init();
+$cf02_home_php->Page_Init();
 
 // Page main
-$default->Page_Main();
+$cf02_home_php->Page_Main();
+
+// Global Page Rendering event (in userfn*.php)
+Page_Rendering();
 ?>
 <?php include_once "header.php" ?>
 <?php
-$default->ShowMessage();
+
+$db =& DbHelper(); 
+
+function show_table($r) {
+	echo "<table class='table table-striped table-bordered table-hover table-condensed'>";
+	echo "<tr><th>No.</th><th colspan='4'>Keterangan</th></tr>";
+	while (!$r->EOF) {
+		$no = $r->fields["No"];
+		echo "<tr><td>".$no.".</td><td colspan='4'>".$r->fields["Keterangan"]."</td></tr>";
+		while ($no == $r->fields["No"]) {
+			echo "
+			<tr>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>".$r->fields["TanggalJam"]."</td>
+				<td>".$r->fields["Status2"]."</td>
+				<td>".$r->fields["Keterangan2"]."</td>
+			</tr>";
+			$r->MoveNext();
+		}
+		echo "<tr><td colspan='5'>&nbsp;</td></tr>";
+	}
+	echo "</table>";
+}
 ?>
+
+<style>
+.panel-heading a{
+  display:block;
+}
+
+.panel-heading a.collapsed {
+  background: url(http://upload.wikimedia.org/wikipedia/commons/3/36/Vector_skin_right_arrow.png) center right no-repeat;
+}
+
+.panel-heading a {
+  background: url(http://www.useragentman.com/blog/wp-content/themes/useragentman/images/widgets/downArrow.png) center right no-repeat;
+}
+</style>
+
+<div class="row">
+
+	<div class="col-lg-12 col-md-12 col-sm-12">
+		<div class="panel panel-default">
+			<div class="panel-heading"><strong><a class='collapsed' data-toggle="collapse" href="#log">Log</a></strong></div>
+			<div id="log" class="panel-collapse collapse in">
+			<div class="panel-body">
+				<?php
+				$q = "
+					select distinct
+						a.No,
+						a.Keterangan,
+						a.TanggalJam,
+						b.Status as Status2,
+						a.Keterangan2
+					from
+						t98_log a
+						left join t99_log_status b on a.Status = b.id
+					order by
+						no desc,
+						tanggaljam asc";
+				$r = Conn()->Execute($q);
+				show_table($r);
+				?>
+			</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<!-- <div>
+Rencana Anggaran. &copy;2018 MINU. All rights reserved.
+</div> -->
+<?php if (EW_DEBUG_ENABLED) echo ew_DebugMsg(); ?>
 <?php include_once "footer.php" ?>
 <?php
-$default->Page_Terminate();
+$cf02_home_php->Page_Terminate();
 ?>
