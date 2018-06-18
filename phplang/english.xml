@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<ew-language date="2018/6/5" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
+<ew-language date="2018/6/18" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
   <!-- 
 	*** Important Notes:
 	1. Language ID should follow: https://developers.google.com/recaptcha/docs/language,
@@ -621,6 +621,12 @@
     <menu id="2">
       <phrase id="menutext" value="Beranda" />
     </menu>
+    <menu id="10007">
+      <phrase id="menutext" value="Log" />
+    </menu>
+    <menu id="10008">
+      <phrase id="menutext" value="Log Status" />
+    </menu>
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
     </menu>
@@ -642,48 +648,6 @@
     <menu id="10002">
       <phrase id="menutext" value="Laporan Data Penerimaan" />
     </menu>
-    <table id="t01_penerimaan">
-      <phrase id="tblcaption" value="Penerimaan" />
-      <field id="id">
-        <phrase id="fldcaption" value="id" />
-      </field>
-      <field id="departemen">
-        <phrase id="fldcaption" value="Departemen" />
-      </field>
-      <field id="headdetail">
-        <phrase id="fldcaption" value="Head Detail" />
-      </field>
-      <field id="nomorhead">
-        <phrase id="fldcaption" value="Nomor Head" />
-      </field>
-      <field id="subtotalflag">
-        <phrase id="fldcaption" value="Sub Total Flag" />
-      </field>
-      <field id="urutan">
-        <phrase id="fldcaption" value="Urutan" />
-      </field>
-      <field id="nomor">
-        <phrase id="fldcaption" value="Nomor" />
-      </field>
-      <field id="pos">
-        <phrase id="fldcaption" value="Pos" />
-      </field>
-      <field id="nominal">
-        <phrase id="fldcaption" value="Nominal" />
-      </field>
-      <field id="jumlahsiswa">
-        <phrase id="fldcaption" value="Jumlah Siswa" />
-      </field>
-      <field id="bulan">
-        <phrase id="fldcaption" value="Bulan" />
-      </field>
-      <field id="jumlah">
-        <phrase id="fldcaption" value="Jumlah" />
-      </field>
-      <field id="total">
-        <phrase id="fldcaption" value="Total" />
-      </field>
-    </table>
     <table id="cf01_home_php">
       <phrase id="tblcaption" value="Beranda" />
     </table>
@@ -724,6 +688,48 @@
       </field>
       <field id="issync">
         <phrase id="fldcaption" value="issync" />
+      </field>
+    </table>
+    <table id="t01_penerimaan">
+      <phrase id="tblcaption" value="Penerimaan" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="departemen">
+        <phrase id="fldcaption" value="Departemen" />
+      </field>
+      <field id="headdetail">
+        <phrase id="fldcaption" value="Head Detail" />
+      </field>
+      <field id="nomorhead">
+        <phrase id="fldcaption" value="Nomor Head" />
+      </field>
+      <field id="subtotalflag">
+        <phrase id="fldcaption" value="Sub Total Flag" />
+      </field>
+      <field id="urutan">
+        <phrase id="fldcaption" value="Urutan" />
+      </field>
+      <field id="nomor">
+        <phrase id="fldcaption" value="Nomor" />
+      </field>
+      <field id="pos">
+        <phrase id="fldcaption" value="Pos" />
+      </field>
+      <field id="nominal">
+        <phrase id="fldcaption" value="Nominal" />
+      </field>
+      <field id="jumlahsiswa">
+        <phrase id="fldcaption" value="Jumlah Siswa" />
+      </field>
+      <field id="bulan">
+        <phrase id="fldcaption" value="Bulan" />
+      </field>
+      <field id="jumlah">
+        <phrase id="fldcaption" value="Jumlah" />
+      </field>
+      <field id="total">
+        <phrase id="fldcaption" value="Total" />
       </field>
     </table>
     <table id="t02_pengeluaran">
@@ -781,6 +787,36 @@
       </field>
       <field id="nama">
         <phrase id="fldcaption" value="Nama" />
+      </field>
+    </table>
+    <table id="t98_log">
+      <phrase id="tblcaption" value="Log" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="no">
+        <phrase id="fldcaption" value="No" />
+      </field>
+      <field id="keterangan">
+        <phrase id="fldcaption" value="Keterangan" />
+      </field>
+      <field id="keterangan2">
+        <phrase id="fldcaption" value="Keterangan 2" />
+      </field>
+      <field id="status">
+        <phrase id="fldcaption" value="Status" />
+      </field>
+      <field id="tanggaljam">
+        <phrase id="fldcaption" value="Tanggal Jam" />
+      </field>
+    </table>
+    <table id="t99_log_status">
+      <phrase id="tblcaption" value="Log Status" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="status">
+        <phrase id="fldcaption" value="Status" />
       </field>
     </table>
   </project>
