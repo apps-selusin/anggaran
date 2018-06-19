@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<ew-language date="2018/6/18" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
+<ew-language date="2018/6/19" version="14.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
   <!-- 
 	*** Important Notes:
 	1. Language ID should follow: https://developers.google.com/recaptcha/docs/language,
@@ -621,20 +621,20 @@
     <menu id="10009">
       <phrase id="menutext" value="Beranda" />
     </menu>
-    <menu id="2">
-      <phrase id="menutext" value="Beranda" />
+    <menu id="10018">
+      <phrase id="menutext" value="Penerimaan" />
+    </menu>
+    <menu id="10019">
+      <phrase id="menutext" value="Penerimaan (Detail)" />
     </menu>
     <menu id="1">
       <phrase id="menutext" value="Penerimaan" />
     </menu>
+    <menu id="2">
+      <phrase id="menutext" value="Beranda" />
+    </menu>
     <menu id="10005">
       <phrase id="menutext" value="Pengeluaran" />
-    </menu>
-    <menu id="10003">
-      <phrase id="menutext" value="departemen" />
-    </menu>
-    <menu id="10004">
-      <phrase id="menutext" value="Pengeluaran (Detail)" />
     </menu>
     <menu id="10017">
       <phrase id="menutext" value="Setup" />
@@ -648,6 +648,12 @@
     <menu id="10008">
       <phrase id="menutext" value="Log Status" />
     </menu>
+    <menu id="10003">
+      <phrase id="menutext" value="departemen" />
+    </menu>
+    <menu id="10004">
+      <phrase id="menutext" value="Pengeluaran (Detail)" />
+    </menu>
     <menu id="10001">
       <phrase id="menutext" value="t 01 penerimaan" />
     </menu>
@@ -655,6 +661,9 @@
       <phrase id="menutext" value="Laporan Data Penerimaan" />
     </menu>
     <table id="cf01_home_php">
+      <phrase id="tblcaption" value="Beranda" />
+    </table>
+    <table id="cf02_home_php">
       <phrase id="tblcaption" value="Beranda" />
     </table>
     <table id="departemen">
@@ -738,8 +747,26 @@
         <phrase id="fldcaption" value="Total" />
       </field>
     </table>
-    <table id="t02_pengeluaran">
-      <phrase id="tblcaption" value="Pengeluaran (Detail)" />
+    <table id="t01_penerimaan_head">
+      <phrase id="tblcaption" value="Penerimaan" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="urutan">
+        <phrase id="fldcaption" value="Urutan" />
+      </field>
+      <field id="nomor">
+        <phrase id="fldcaption" value="Nomor" />
+      </field>
+      <field id="kode">
+        <phrase id="fldcaption" value="Kode" />
+      </field>
+      <field id="nama">
+        <phrase id="fldcaption" value="Nama" />
+      </field>
+    </table>
+    <table id="t02_penerimaan_detail">
+      <phrase id="tblcaption" value="Penerimaan (Detail)" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -786,7 +813,37 @@
         <phrase id="fldcaption" value="Nama" />
       </field>
     </table>
-    <table id="t04_satuan">
+    <table id="t04_pengeluaran_detail">
+      <phrase id="tblcaption" value="Pengeluaran (Detail)" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="urutan">
+        <phrase id="fldcaption" value="Urutan" />
+      </field>
+      <field id="nomor">
+        <phrase id="fldcaption" value="Nomor" />
+      </field>
+      <field id="kode">
+        <phrase id="fldcaption" value="Kode" />
+      </field>
+      <field id="pos">
+        <phrase id="fldcaption" value="Pos" />
+      </field>
+      <field id="nominal">
+        <phrase id="fldcaption" value="Nominal" />
+      </field>
+      <field id="banyaknya">
+        <phrase id="fldcaption" value="Banyaknya" />
+      </field>
+      <field id="satuan">
+        <phrase id="fldcaption" value="Satuan" />
+      </field>
+      <field id="jumlah">
+        <phrase id="fldcaption" value="Jumlah" />
+      </field>
+    </table>
+    <table id="t05_satuan">
       <phrase id="tblcaption" value="Satuan" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
@@ -824,9 +881,6 @@
       <field id="status">
         <phrase id="fldcaption" value="Status" />
       </field>
-    </table>
-    <table id="cf02_home_php">
-      <phrase id="tblcaption" value="Beranda" />
     </table>
   </project>
 </ew-language>

@@ -77,9 +77,9 @@ class ct98_log extends cTable {
 		$this->fields['Status'] = &$this->Status;
 
 		// TanggalJam
-		$this->TanggalJam = new cField('t98_log', 't98_log', 'x_TanggalJam', 'TanggalJam', '`TanggalJam`', ew_CastDateFieldForLike('`TanggalJam`', 1, "DB"), 135, 1, FALSE, '`TanggalJam`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->TanggalJam = new cField('t98_log', 't98_log', 'x_TanggalJam', 'TanggalJam', '`TanggalJam`', ew_CastDateFieldForLike('`TanggalJam`', 9, "DB"), 135, 9, FALSE, '`TanggalJam`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->TanggalJam->Sortable = TRUE; // Allow sort
-		$this->TanggalJam->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_FORMAT"], $Language->Phrase("IncorrectDate"));
+		$this->TanggalJam->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_SEPARATOR"], $Language->Phrase("IncorrectDateYMD"));
 		$this->fields['TanggalJam'] = &$this->TanggalJam;
 	}
 
@@ -203,7 +203,7 @@ class ct98_log extends cTable {
 	var $_SqlOrderBy = "";
 
 	function getSqlOrderBy() { // Order By
-		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "";
+		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "`No` DESC,`TanggalJam` ASC";
 	}
 
 	function SqlOrderBy() { // For backward compatibility
@@ -683,7 +683,7 @@ class ct98_log extends cTable {
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 		// id
@@ -761,7 +761,7 @@ class ct98_log extends cTable {
 		// TanggalJam
 		$this->TanggalJam->EditAttrs["class"] = "form-control";
 		$this->TanggalJam->EditCustomAttributes = "";
-		$this->TanggalJam->EditValue = ew_FormatDateTime($this->TanggalJam->CurrentValue, 8);
+		$this->TanggalJam->EditValue = ew_FormatDateTime($this->TanggalJam->CurrentValue, 9);
 		$this->TanggalJam->PlaceHolder = ew_RemoveHtml($this->TanggalJam->FldCaption());
 
 		// Call Row Rendered event

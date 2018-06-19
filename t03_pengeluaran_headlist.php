@@ -6,7 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql14.php") ?>
 <?php include_once "phpfn14.php" ?>
 <?php include_once "t03_pengeluaran_headinfo.php" ?>
-<?php include_once "t02_pengeluarangridcls.php" ?>
+<?php include_once "t04_pengeluaran_detailgridcls.php" ?>
 <?php include_once "userfn14.php" ?>
 <?php
 
@@ -400,12 +400,12 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 			$sDetailTblVar = $this->getCurrentDetailTable();
 			if ($sDetailTblVar <> "") {
 				$DetailTblVar = explode(",", $sDetailTblVar);
-				if (in_array("t02_pengeluaran", $DetailTblVar)) {
+				if (in_array("t04_pengeluaran_detail", $DetailTblVar)) {
 
-					// Process auto fill for detail table 't02_pengeluaran'
-					if (preg_match('/^ft02_pengeluaran(grid|add|addopt|edit|update|search)$/', @$_POST["form"])) {
-						if (!isset($GLOBALS["t02_pengeluaran_grid"])) $GLOBALS["t02_pengeluaran_grid"] = new ct02_pengeluaran_grid;
-						$GLOBALS["t02_pengeluaran_grid"]->Page_Init();
+					// Process auto fill for detail table 't04_pengeluaran_detail'
+					if (preg_match('/^ft04_pengeluaran_detail(grid|add|addopt|edit|update|search)$/', @$_POST["form"])) {
+						if (!isset($GLOBALS["t04_pengeluaran_detail_grid"])) $GLOBALS["t04_pengeluaran_detail_grid"] = new ct04_pengeluaran_detail_grid;
+						$GLOBALS["t04_pengeluaran_detail_grid"]->Page_Init();
 						$this->Page_Terminate();
 						exit();
 					}
@@ -1052,13 +1052,13 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$item->Visible = TRUE;
 		$item->OnLeft = FALSE;
 
-		// "detail_t02_pengeluaran"
-		$item = &$this->ListOptions->Add("detail_t02_pengeluaran");
+		// "detail_t04_pengeluaran_detail"
+		$item = &$this->ListOptions->Add("detail_t04_pengeluaran_detail");
 		$item->CssClass = "text-nowrap";
 		$item->Visible = TRUE && !$this->ShowMultipleDetails;
 		$item->OnLeft = FALSE;
 		$item->ShowInButtonGroup = FALSE;
-		if (!isset($GLOBALS["t02_pengeluaran_grid"])) $GLOBALS["t02_pengeluaran_grid"] = new ct02_pengeluaran_grid;
+		if (!isset($GLOBALS["t04_pengeluaran_detail_grid"])) $GLOBALS["t04_pengeluaran_detail_grid"] = new ct04_pengeluaran_detail_grid;
 
 		// Multiple details
 		if ($this->ShowMultipleDetails) {
@@ -1071,7 +1071,7 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 
 		// Set up detail pages
 		$pages = new cSubPages();
-		$pages->Add("t02_pengeluaran");
+		$pages->Add("t04_pengeluaran_detail");
 		$this->DetailPages = $pages;
 
 		// List actions
@@ -1221,18 +1221,18 @@ class ct03_pengeluaran_head_list extends ct03_pengeluaran_head {
 		$DetailCopyTblVar = "";
 		$DetailEditTblVar = "";
 
-		// "detail_t02_pengeluaran"
-		$oListOpt = &$this->ListOptions->Items["detail_t02_pengeluaran"];
+		// "detail_t04_pengeluaran_detail"
+		$oListOpt = &$this->ListOptions->Items["detail_t04_pengeluaran_detail"];
 		if (TRUE) {
-			$body = $Language->Phrase("DetailLink") . $Language->TablePhrase("t02_pengeluaran", "TblCaption");
-			$body = "<a class=\"btn btn-default btn-sm ewRowLink ewDetail\" data-action=\"list\" href=\"" . ew_HtmlEncode("t02_pengeluaranlist.php?" . EW_TABLE_SHOW_MASTER . "=t03_pengeluaran_head&fk_Kode=" . urlencode(strval($this->Kode->CurrentValue)) . "") . "\">" . $body . "</a>";
+			$body = $Language->Phrase("DetailLink") . $Language->TablePhrase("t04_pengeluaran_detail", "TblCaption");
+			$body = "<a class=\"btn btn-default btn-sm ewRowLink ewDetail\" data-action=\"list\" href=\"" . ew_HtmlEncode("t04_pengeluaran_detaillist.php?" . EW_TABLE_SHOW_MASTER . "=t03_pengeluaran_head&fk_Kode=" . urlencode(strval($this->Kode->CurrentValue)) . "") . "\">" . $body . "</a>";
 			$links = "";
-			if ($GLOBALS["t02_pengeluaran_grid"]->DetailView) {
+			if ($GLOBALS["t04_pengeluaran_detail_grid"]->DetailView) {
 				$caption = $Language->Phrase("MasterDetailViewLink");
-				$url = $this->GetViewUrl(EW_TABLE_SHOW_DETAIL . "=t02_pengeluaran");
+				$url = $this->GetViewUrl(EW_TABLE_SHOW_DETAIL . "=t04_pengeluaran_detail");
 				$links .= "<li><a class=\"ewRowLink ewDetailView\" data-action=\"view\" data-caption=\"" . ew_HtmlTitle($caption) . "\" href=\"" . ew_HtmlEncode($url) . "\">" . ew_HtmlImageAndText($caption) . "</a></li>";
 				if ($DetailViewTblVar <> "") $DetailViewTblVar .= ",";
-				$DetailViewTblVar .= "t02_pengeluaran";
+				$DetailViewTblVar .= "t04_pengeluaran_detail";
 			}
 			if ($links <> "") {
 				$body .= "<button class=\"dropdown-toggle btn btn-default btn-sm ewDetail\" data-toggle=\"dropdown\"><b class=\"caret\"></b></button>";

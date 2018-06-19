@@ -135,8 +135,8 @@ class ct03_pengeluaran_head extends cTable {
 
 		// Detail url
 		$sDetailUrl = "";
-		if ($this->getCurrentDetailTable() == "t02_pengeluaran") {
-			$sDetailUrl = $GLOBALS["t02_pengeluaran"]->GetListUrl() . "?" . EW_TABLE_SHOW_MASTER . "=" . $this->TableVar;
+		if ($this->getCurrentDetailTable() == "t04_pengeluaran_detail") {
+			$sDetailUrl = $GLOBALS["t04_pengeluaran_detail"]->GetListUrl() . "?" . EW_TABLE_SHOW_MASTER . "=" . $this->TableVar;
 			$sDetailUrl .= "&fk_Kode=" . urlencode($this->Kode->CurrentValue);
 		}
 		if ($sDetailUrl == "") {

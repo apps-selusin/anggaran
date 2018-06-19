@@ -523,7 +523,7 @@ class ct98_log_add extends ct98_log {
 		}
 		if (!$this->TanggalJam->FldIsDetailKey) {
 			$this->TanggalJam->setFormValue($objForm->GetValue("x_TanggalJam"));
-			$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1);
+			$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 9);
 		}
 	}
 
@@ -535,7 +535,7 @@ class ct98_log_add extends ct98_log {
 		$this->Keterangan2->CurrentValue = $this->Keterangan2->FormValue;
 		$this->Status->CurrentValue = $this->Status->FormValue;
 		$this->TanggalJam->CurrentValue = $this->TanggalJam->FormValue;
-		$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1);
+		$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 9);
 	}
 
 	// Load row based on key values
@@ -687,7 +687,7 @@ class ct98_log_add extends ct98_log {
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// No
@@ -762,7 +762,7 @@ class ct98_log_add extends ct98_log {
 			// TanggalJam
 			$this->TanggalJam->EditAttrs["class"] = "form-control";
 			$this->TanggalJam->EditCustomAttributes = "";
-			$this->TanggalJam->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->TanggalJam->CurrentValue, 8));
+			$this->TanggalJam->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->TanggalJam->CurrentValue, 9));
 			$this->TanggalJam->PlaceHolder = ew_RemoveHtml($this->TanggalJam->FldCaption());
 
 			// Add refer script
@@ -811,7 +811,7 @@ class ct98_log_add extends ct98_log {
 		if (!$this->Keterangan->FldIsDetailKey && !is_null($this->Keterangan->FormValue) && $this->Keterangan->FormValue == "") {
 			ew_AddMessage($gsFormError, str_replace("%s", $this->Keterangan->FldCaption(), $this->Keterangan->ReqErrMsg));
 		}
-		if (!ew_CheckDateDef($this->TanggalJam->FormValue)) {
+		if (!ew_CheckDate($this->TanggalJam->FormValue)) {
 			ew_AddMessage($gsFormError, $this->TanggalJam->FldErrMsg());
 		}
 
@@ -851,7 +851,7 @@ class ct98_log_add extends ct98_log {
 		$this->Status->SetDbValueDef($rsnew, $this->Status->CurrentValue, 0, strval($this->Status->CurrentValue) == "");
 
 		// TanggalJam
-		$this->TanggalJam->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 1), NULL, FALSE);
+		$this->TanggalJam->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 9), NULL, FALSE);
 
 		// Call Row Inserting event
 		$rs = ($rsold == NULL) ? NULL : $rsold->fields;
@@ -1036,7 +1036,7 @@ ft98_logadd.Validate = function() {
 			if (elm && !ew_IsHidden(elm) && !ew_HasValue(elm))
 				return this.OnError(elm, "<?php echo ew_JsEncode2(str_replace("%s", $t98_log->Keterangan->FldCaption(), $t98_log->Keterangan->ReqErrMsg)) ?>");
 			elm = this.GetElements("x" + infix + "_TanggalJam");
-			if (elm && !ew_CheckDateDef(elm.value))
+			if (elm && !ew_CheckDate(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t98_log->TanggalJam->FldErrMsg()) ?>");
 
 			// Fire Form_CustomValidate event
@@ -1110,10 +1110,14 @@ $t98_log_add->ShowMessage();
 <?php } ?>
 <?php if ($t98_log->Keterangan2->Visible) { // Keterangan2 ?>
 	<div id="r_Keterangan2" class="form-group">
-		<label id="elh_t98_log_Keterangan2" for="x_Keterangan2" class="<?php echo $t98_log_add->LeftColumnClass ?>"><?php echo $t98_log->Keterangan2->FldCaption() ?></label>
+		<label id="elh_t98_log_Keterangan2" class="<?php echo $t98_log_add->LeftColumnClass ?>"><?php echo $t98_log->Keterangan2->FldCaption() ?></label>
 		<div class="<?php echo $t98_log_add->RightColumnClass ?>"><div<?php echo $t98_log->Keterangan2->CellAttributes() ?>>
 <span id="el_t98_log_Keterangan2">
+<?php ew_AppendClass($t98_log->Keterangan2->EditAttrs["class"], "editor"); ?>
 <textarea data-table="t98_log" data-field="x_Keterangan2" name="x_Keterangan2" id="x_Keterangan2" cols="35" rows="4" placeholder="<?php echo ew_HtmlEncode($t98_log->Keterangan2->getPlaceHolder()) ?>"<?php echo $t98_log->Keterangan2->EditAttributes() ?>><?php echo $t98_log->Keterangan2->EditValue ?></textarea>
+<script type="text/javascript">
+ew_CreateEditor("ft98_logadd", "x_Keterangan2", 35, 4, <?php echo ($t98_log->Keterangan2->ReadOnly || FALSE) ? "true" : "false" ?>);
+</script>
 </span>
 <?php echo $t98_log->Keterangan2->CustomMsg ?></div></div>
 	</div>
@@ -1137,10 +1141,10 @@ $t98_log_add->ShowMessage();
 		<label id="elh_t98_log_TanggalJam" for="x_TanggalJam" class="<?php echo $t98_log_add->LeftColumnClass ?>"><?php echo $t98_log->TanggalJam->FldCaption() ?></label>
 		<div class="<?php echo $t98_log_add->RightColumnClass ?>"><div<?php echo $t98_log->TanggalJam->CellAttributes() ?>>
 <span id="el_t98_log_TanggalJam">
-<input type="text" data-table="t98_log" data-field="x_TanggalJam" data-format="1" name="x_TanggalJam" id="x_TanggalJam" placeholder="<?php echo ew_HtmlEncode($t98_log->TanggalJam->getPlaceHolder()) ?>" value="<?php echo $t98_log->TanggalJam->EditValue ?>"<?php echo $t98_log->TanggalJam->EditAttributes() ?>>
+<input type="text" data-table="t98_log" data-field="x_TanggalJam" data-format="9" name="x_TanggalJam" id="x_TanggalJam" placeholder="<?php echo ew_HtmlEncode($t98_log->TanggalJam->getPlaceHolder()) ?>" value="<?php echo $t98_log->TanggalJam->EditValue ?>"<?php echo $t98_log->TanggalJam->EditAttributes() ?>>
 <?php if (!$t98_log->TanggalJam->ReadOnly && !$t98_log->TanggalJam->Disabled && !isset($t98_log->TanggalJam->EditAttrs["readonly"]) && !isset($t98_log->TanggalJam->EditAttrs["disabled"])) { ?>
 <script type="text/javascript">
-ew_CreateDateTimePicker("ft98_logadd", "x_TanggalJam", {"ignoreReadonly":true,"useCurrent":false,"format":1});
+ew_CreateDateTimePicker("ft98_logadd", "x_TanggalJam", {"ignoreReadonly":true,"useCurrent":false,"format":9});
 </script>
 <?php } ?>
 </span>

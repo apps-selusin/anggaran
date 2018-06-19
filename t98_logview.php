@@ -768,7 +768,7 @@ class ct98_log_view extends ct98_log {
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// id

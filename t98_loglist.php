@@ -969,6 +969,8 @@ class ct98_log_list extends ct98_log {
 			if ($this->getSqlOrderBy() <> "") {
 				$sOrderBy = $this->getSqlOrderBy();
 				$this->setSessionOrderBy($sOrderBy);
+				$this->No->setSort("DESC");
+				$this->TanggalJam->setSort("ASC");
 			}
 		}
 	}
@@ -1565,7 +1567,7 @@ class ct98_log_list extends ct98_log {
 
 		// TanggalJam
 		$this->TanggalJam->ViewValue = $this->TanggalJam->CurrentValue;
-		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 1);
+		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
 			// id
