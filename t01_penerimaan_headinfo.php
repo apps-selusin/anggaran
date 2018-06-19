@@ -776,7 +776,6 @@ class ct01_penerimaan_head extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->Urutan->Exportable) $Doc->ExportCaption($this->Urutan);
 					if ($this->Nomor->Exportable) $Doc->ExportCaption($this->Nomor);
 					if ($this->Kode->Exportable) $Doc->ExportCaption($this->Kode);
@@ -818,7 +817,6 @@ class ct01_penerimaan_head extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->Urutan->Exportable) $Doc->ExportField($this->Urutan);
 						if ($this->Nomor->Exportable) $Doc->ExportField($this->Nomor);
 						if ($this->Kode->Exportable) $Doc->ExportField($this->Kode);

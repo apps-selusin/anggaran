@@ -627,8 +627,8 @@
     <menu id="10019">
       <phrase id="menutext" value="Penerimaan (Detail)" />
     </menu>
-    <menu id="1">
-      <phrase id="menutext" value="Penerimaan" />
+    <menu id="10030">
+      <phrase id="menutext" value="Laporan Penerimaan" />
     </menu>
     <menu id="2">
       <phrase id="menutext" value="Beranda" />
@@ -705,48 +705,6 @@
         <phrase id="fldcaption" value="issync" />
       </field>
     </table>
-    <table id="t01_penerimaan">
-      <phrase id="tblcaption" value="Penerimaan" />
-      <field id="id">
-        <phrase id="fldcaption" value="id" />
-      </field>
-      <field id="departemen">
-        <phrase id="fldcaption" value="Departemen" />
-      </field>
-      <field id="headdetail">
-        <phrase id="fldcaption" value="Head Detail" />
-      </field>
-      <field id="nomorhead">
-        <phrase id="fldcaption" value="Nomor Head" />
-      </field>
-      <field id="subtotalflag">
-        <phrase id="fldcaption" value="Sub Total Flag" />
-      </field>
-      <field id="urutan">
-        <phrase id="fldcaption" value="Urutan" />
-      </field>
-      <field id="nomor">
-        <phrase id="fldcaption" value="Nomor" />
-      </field>
-      <field id="pos">
-        <phrase id="fldcaption" value="Pos" />
-      </field>
-      <field id="nominal">
-        <phrase id="fldcaption" value="Nominal" />
-      </field>
-      <field id="jumlahsiswa">
-        <phrase id="fldcaption" value="Jumlah Siswa" />
-      </field>
-      <field id="bulan">
-        <phrase id="fldcaption" value="Bulan" />
-      </field>
-      <field id="jumlah">
-        <phrase id="fldcaption" value="Jumlah" />
-      </field>
-      <field id="total">
-        <phrase id="fldcaption" value="Total" />
-      </field>
-    </table>
     <table id="t01_penerimaan_head">
       <phrase id="tblcaption" value="Penerimaan" />
       <field id="id">
@@ -786,10 +744,10 @@
         <phrase id="fldcaption" value="Nominal" />
       </field>
       <field id="banyaknya">
-        <phrase id="fldcaption" value="Banyaknya" />
+        <phrase id="fldcaption" value="Jumlah Siswa" />
       </field>
       <field id="satuan">
-        <phrase id="fldcaption" value="Satuan" />
+        <phrase id="fldcaption" value="Bulan" />
       </field>
       <field id="jumlah">
         <phrase id="fldcaption" value="Jumlah" />

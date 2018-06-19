@@ -371,7 +371,7 @@ function show_table($r) {
 						left join t99_log_status b on a.Status = b.id
 					order by
 						no desc,
-						tanggaljam asc";
+						tanggaljam desc";
 				$r = Conn()->Execute($q);
 				show_table($r);
 				?>

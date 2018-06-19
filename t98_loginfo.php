@@ -203,7 +203,7 @@ class ct98_log extends cTable {
 	var $_SqlOrderBy = "";
 
 	function getSqlOrderBy() { // Order By
-		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "`No` DESC,`TanggalJam` ASC";
+		return ($this->_SqlOrderBy <> "") ? $this->_SqlOrderBy : "`No` DESC,`TanggalJam` DESC";
 	}
 
 	function SqlOrderBy() { // For backward compatibility
@@ -791,7 +791,6 @@ class ct98_log extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->No->Exportable) $Doc->ExportCaption($this->No);
 					if ($this->Keterangan->Exportable) $Doc->ExportCaption($this->Keterangan);
 					if ($this->Keterangan2->Exportable) $Doc->ExportCaption($this->Keterangan2);
@@ -835,7 +834,6 @@ class ct98_log extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->No->Exportable) $Doc->ExportField($this->No);
 						if ($this->Keterangan->Exportable) $Doc->ExportField($this->Keterangan);
 						if ($this->Keterangan2->Exportable) $Doc->ExportField($this->Keterangan2);
@@ -1039,6 +1037,9 @@ class ct98_log extends cTable {
 		// To view properties of field class, use:
 		//var_dump($this-><FieldName>);
 
+		if (CurrentPageID() == "add") {
+			$this->TanggalJam->EditValue = date("Y-m-d H:i:s");
+		}
 	}
 
 	// User ID Filtering event

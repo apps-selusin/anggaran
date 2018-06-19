@@ -340,9 +340,6 @@ class ct98_log_view extends ct98_log {
 		// Is modal
 		$this->IsModal = (@$_GET["modal"] == "1" || @$_POST["modal"] == "1");
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->No->SetVisibility();
 		$this->Keterangan->SetVisibility();
 		$this->Keterangan2->SetVisibility();
@@ -771,11 +768,6 @@ class ct98_log_view extends ct98_log {
 		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// No
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
@@ -985,17 +977,6 @@ $t98_log_view->ShowMessage();
 <input type="hidden" name="t" value="t98_log">
 <input type="hidden" name="modal" value="<?php echo intval($t98_log_view->IsModal) ?>">
 <table class="table table-striped table-bordered table-hover table-condensed ewViewTable">
-<?php if ($t98_log->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td class="col-sm-2"><span id="elh_t98_log_id"><?php echo $t98_log->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t98_log->id->CellAttributes() ?>>
-<span id="el_t98_log_id">
-<span<?php echo $t98_log->id->ViewAttributes() ?>>
-<?php echo $t98_log->id->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 	<tr id="r_No">
 		<td class="col-sm-2"><span id="elh_t98_log_No"><?php echo $t98_log->No->FldCaption() ?></span></td>

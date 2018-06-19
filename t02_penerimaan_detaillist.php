@@ -378,9 +378,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -1004,7 +1001,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
 			$this->UpdateSort($this->Nomor, $bCtrl); // Nomor
 			$this->UpdateSort($this->Kode, $bCtrl); // Kode
@@ -1050,7 +1046,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->Urutan->setSort("");
 				$this->Nomor->setSort("");
 				$this->Kode->setSort("");
@@ -1508,8 +1503,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->Urutan->FldIsDetailKey) {
 			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
 		}
@@ -1534,6 +1527,8 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 		if (!$this->Jumlah->FldIsDetailKey) {
 			$this->Jumlah->setFormValue($objForm->GetValue("x_Jumlah"));
 		}
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1747,11 +1742,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 		$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
 		$this->Jumlah->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
@@ -1793,9 +1783,7 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 			$this->Jumlah->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
 			// Urutan
-
 			$this->Urutan->EditAttrs["class"] = "form-control";
 			$this->Urutan->EditCustomAttributes = "";
 			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
@@ -1852,12 +1840,8 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) $this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -1889,12 +1873,6 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 			$this->Jumlah->LinkCustomAttributes = "";
 			$this->Jumlah->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1953,12 +1931,8 @@ class ct02_penerimaan_detail_list extends ct02_penerimaan_detail {
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) $this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -2630,15 +2604,6 @@ $t02_penerimaan_detail_list->RenderListOptions();
 // Render list options (header, left)
 $t02_penerimaan_detail_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t02_penerimaan_detail->id->Visible) { // id ?>
-	<?php if ($t02_penerimaan_detail->SortUrl($t02_penerimaan_detail->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t02_penerimaan_detail->id->HeaderCellClass() ?>"><div id="elh_t02_penerimaan_detail_id" class="t02_penerimaan_detail_id"><div class="ewTableHeaderCaption"><?php echo $t02_penerimaan_detail->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t02_penerimaan_detail->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_penerimaan_detail->SortUrl($t02_penerimaan_detail->id) ?>',2);"><div id="elh_t02_penerimaan_detail_id" class="t02_penerimaan_detail_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_penerimaan_detail->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_penerimaan_detail->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_penerimaan_detail->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php if ($t02_penerimaan_detail->Urutan->Visible) { // Urutan ?>
 	<?php if ($t02_penerimaan_detail->SortUrl($t02_penerimaan_detail->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t02_penerimaan_detail->Urutan->HeaderCellClass() ?>"><div id="elh_t02_penerimaan_detail_Urutan" class="t02_penerimaan_detail_Urutan"><div class="ewTableHeaderCaption"><?php echo $t02_penerimaan_detail->Urutan->FldCaption() ?></div></div></th>
@@ -2826,26 +2791,6 @@ while ($t02_penerimaan_detail_list->RecCnt < $t02_penerimaan_detail_list->StopRe
 // Render list options (body, left)
 $t02_penerimaan_detail_list->ListOptions->Render("body", "left", $t02_penerimaan_detail_list->RowCnt);
 ?>
-	<?php if ($t02_penerimaan_detail->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t02_penerimaan_detail->id->CellAttributes() ?>>
-<?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_penerimaan_detail_list->RowCnt ?>_t02_penerimaan_detail_id" class="form-group t02_penerimaan_detail_id">
-<span<?php echo $t02_penerimaan_detail->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_penerimaan_detail->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->CurrentValue) ?>">
-<?php } ?>
-<?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_penerimaan_detail_list->RowCnt ?>_t02_penerimaan_detail_id" class="t02_penerimaan_detail_id">
-<span<?php echo $t02_penerimaan_detail->id->ViewAttributes() ?>>
-<?php echo $t02_penerimaan_detail->id->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
 	<?php if ($t02_penerimaan_detail->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan"<?php echo $t02_penerimaan_detail->Urutan->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -2867,6 +2812,13 @@ $t02_penerimaan_detail_list->ListOptions->Render("body", "left", $t02_penerimaan
 <?php } ?>
 </td>
 	<?php } ?>
+<?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->CurrentValue) ?>">
+<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT || $t02_penerimaan_detail->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="x<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t02_penerimaan_detail->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor"<?php echo $t02_penerimaan_detail->Nomor->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -3072,11 +3024,6 @@ ft02_penerimaan_detaillist.UpdateOpts(<?php echo $t02_penerimaan_detail_list->Ro
 // Render list options (body, left)
 $t02_penerimaan_detail_list->ListOptions->Render("body", "left", $t02_penerimaan_detail_list->RowIndex);
 ?>
-	<?php if ($t02_penerimaan_detail->id->Visible) { // id ?>
-		<td data-name="id">
-<input type="hidden" data-table="t02_penerimaan_detail" data-field="x_id" name="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" id="o<?php echo $t02_penerimaan_detail_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->id->OldValue) ?>">
-</td>
-	<?php } ?>
 	<?php if ($t02_penerimaan_detail->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <span id="el$rowindex$_t02_penerimaan_detail_Urutan" class="form-group t02_penerimaan_detail_Urutan">

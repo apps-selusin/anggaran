@@ -280,9 +280,6 @@ class ct98_log_delete extends ct98_log {
 	function Page_Init() {
 		global $gsExport, $gsCustomExport, $gsExportFile, $UserProfile, $Language, $Security, $objForm;
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->No->SetVisibility();
 		$this->Keterangan->SetVisibility();
 		$this->Keterangan2->SetVisibility();
@@ -563,11 +560,6 @@ class ct98_log_delete extends ct98_log {
 		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// No
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
@@ -827,9 +819,6 @@ $t98_log_delete->ShowMessage();
 <table class="table ewTable">
 	<thead>
 	<tr class="ewTableHeader">
-<?php if ($t98_log->id->Visible) { // id ?>
-		<th class="<?php echo $t98_log->id->HeaderCellClass() ?>"><span id="elh_t98_log_id" class="t98_log_id"><?php echo $t98_log->id->FldCaption() ?></span></th>
-<?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 		<th class="<?php echo $t98_log->No->HeaderCellClass() ?>"><span id="elh_t98_log_No" class="t98_log_No"><?php echo $t98_log->No->FldCaption() ?></span></th>
 <?php } ?>
@@ -866,14 +855,6 @@ while (!$t98_log_delete->Recordset->EOF) {
 	$t98_log_delete->RenderRow();
 ?>
 	<tr<?php echo $t98_log->RowAttributes() ?>>
-<?php if ($t98_log->id->Visible) { // id ?>
-		<td<?php echo $t98_log->id->CellAttributes() ?>>
-<span id="el<?php echo $t98_log_delete->RowCnt ?>_t98_log_id" class="t98_log_id">
-<span<?php echo $t98_log->id->ViewAttributes() ?>>
-<?php echo $t98_log->id->ListViewValue() ?></span>
-</span>
-</td>
-<?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 		<td<?php echo $t98_log->No->CellAttributes() ?>>
 <span id="el<?php echo $t98_log_delete->RowCnt ?>_t98_log_No" class="t98_log_No">

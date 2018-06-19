@@ -313,9 +313,6 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -1135,8 +1132,6 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 		// Load from form
 		global $objForm;
 		$objForm->FormName = $this->FormName;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->Urutan->FldIsDetailKey) {
 			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
 		}
@@ -1169,6 +1164,8 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Jumlah->setFormValue($objForm->GetValue("x_Jumlah"));
 		}
 		$this->Jumlah->setOldValue($objForm->GetValue("o_Jumlah"));
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1386,11 +1383,6 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 		$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
 		$this->Jumlah->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
@@ -1432,9 +1424,7 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Jumlah->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
 			// Urutan
-
 			$this->Urutan->EditAttrs["class"] = "form-control";
 			$this->Urutan->EditCustomAttributes = "";
 			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
@@ -1498,12 +1488,8 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			}
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -1535,12 +1521,6 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Jumlah->LinkCustomAttributes = "";
 			$this->Jumlah->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1606,12 +1586,8 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			}
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 

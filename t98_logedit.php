@@ -286,9 +286,6 @@ class ct98_log_edit extends ct98_log {
 		// Create form object
 		$objForm = new cFormObj();
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->No->SetVisibility();
 		$this->Keterangan->SetVisibility();
 		$this->Keterangan2->SetVisibility();
@@ -578,8 +575,6 @@ class ct98_log_edit extends ct98_log {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey)
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->No->FldIsDetailKey) {
 			$this->No->setFormValue($objForm->GetValue("x_No"));
 		}
@@ -596,6 +591,8 @@ class ct98_log_edit extends ct98_log {
 			$this->TanggalJam->setFormValue($objForm->GetValue("x_TanggalJam"));
 			$this->TanggalJam->CurrentValue = ew_UnFormatDateTime($this->TanggalJam->CurrentValue, 9);
 		}
+		if (!$this->id->FldIsDetailKey)
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -787,11 +784,6 @@ class ct98_log_edit extends ct98_log {
 		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// No
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
@@ -817,12 +809,6 @@ class ct98_log_edit extends ct98_log {
 			$this->TanggalJam->HrefValue = "";
 			$this->TanggalJam->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// No
 			$this->No->EditAttrs["class"] = "form-control";
@@ -874,12 +860,8 @@ class ct98_log_edit extends ct98_log {
 			$this->TanggalJam->PlaceHolder = ew_RemoveHtml($this->TanggalJam->FldCaption());
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// No
+
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
 
@@ -1214,18 +1196,6 @@ $t98_log_edit->ShowMessage();
 <input type="hidden" name="a_edit" id="a_edit" value="U">
 <input type="hidden" name="modal" value="<?php echo intval($t98_log_edit->IsModal) ?>">
 <div class="ewEditDiv"><!-- page* -->
-<?php if ($t98_log->id->Visible) { // id ?>
-	<div id="r_id" class="form-group">
-		<label id="elh_t98_log_id" class="<?php echo $t98_log_edit->LeftColumnClass ?>"><?php echo $t98_log->id->FldCaption() ?></label>
-		<div class="<?php echo $t98_log_edit->RightColumnClass ?>"><div<?php echo $t98_log->id->CellAttributes() ?>>
-<span id="el_t98_log_id">
-<span<?php echo $t98_log->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t98_log->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t98_log" data-field="x_id" name="x_id" id="x_id" value="<?php echo ew_HtmlEncode($t98_log->id->CurrentValue) ?>">
-<?php echo $t98_log->id->CustomMsg ?></div></div>
-	</div>
-<?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 	<div id="r_No" class="form-group">
 		<label id="elh_t98_log_No" for="x_No" class="<?php echo $t98_log_edit->LeftColumnClass ?>"><?php echo $t98_log->No->FldCaption() ?></label>
@@ -1290,6 +1260,7 @@ ew_CreateDateTimePicker("ft98_logedit", "x_TanggalJam", {"ignoreReadonly":true,"
 	</div>
 <?php } ?>
 </div><!-- /page* -->
+<input type="hidden" data-table="t98_log" data-field="x_id" name="x_id" id="x_id" value="<?php echo ew_HtmlEncode($t98_log->id->CurrentValue) ?>">
 <?php if (!$t98_log_edit->IsModal) { ?>
 <div class="form-group"><!-- buttons .form-group -->
 	<div class="<?php echo $t98_log_edit->OffsetColumnClass ?>"><!-- buttons offset -->

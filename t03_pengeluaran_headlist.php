@@ -2495,13 +2495,13 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 		<td data-name="Urutan"<?php echo $t03_pengeluaran_head->Urutan->CellAttributes() ?>>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2523,13 +2523,13 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 		<td data-name="Nomor"<?php echo $t03_pengeluaran_head->Nomor->CellAttributes() ?>>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->OldValue) ?>">
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2544,13 +2544,13 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 		<td data-name="Kode"<?php echo $t03_pengeluaran_head->Kode->CellAttributes() ?>>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Kode" class="form-group t03_pengeluaran_head_Kode">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Kode" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->OldValue) ?>">
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t03_pengeluaran_head_list->RowCnt ?>_t03_pengeluaran_head_Kode" class="form-group t03_pengeluaran_head_Kode">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t03_pengeluaran_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2627,7 +2627,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 	<?php if ($t03_pengeluaran_head->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <span id="el$rowindex$_t03_pengeluaran_head_Urutan" class="form-group t03_pengeluaran_head_Urutan">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Urutan->EditValue ?>"<?php echo $t03_pengeluaran_head->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Urutan" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Urutan->OldValue) ?>">
 </td>
@@ -2635,7 +2635,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 	<?php if ($t03_pengeluaran_head->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor">
 <span id="el$rowindex$_t03_pengeluaran_head_Nomor" class="form-group t03_pengeluaran_head_Nomor">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Nomor->EditValue ?>"<?php echo $t03_pengeluaran_head->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Nomor" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Nomor->OldValue) ?>">
 </td>
@@ -2643,7 +2643,7 @@ $t03_pengeluaran_head_list->ListOptions->Render("body", "left", $t03_pengeluaran
 	<?php if ($t03_pengeluaran_head->Kode->Visible) { // Kode ?>
 		<td data-name="Kode">
 <span id="el$rowindex$_t03_pengeluaran_head_Kode" class="form-group t03_pengeluaran_head_Kode">
-<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t03_pengeluaran_head" data-field="x_Kode" name="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="x<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t03_pengeluaran_head->Kode->EditValue ?>"<?php echo $t03_pengeluaran_head->Kode->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t03_pengeluaran_head" data-field="x_Kode" name="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" id="o<?php echo $t03_pengeluaran_head_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t03_pengeluaran_head->Kode->OldValue) ?>">
 </td>

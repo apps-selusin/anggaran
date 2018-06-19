@@ -341,9 +341,6 @@ class ct01_penerimaan_head_view extends ct01_penerimaan_head {
 		// Is modal
 		$this->IsModal = (@$_GET["modal"] == "1" || @$_POST["modal"] == "1");
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -776,11 +773,6 @@ class ct01_penerimaan_head_view extends ct01_penerimaan_head {
 		$this->Nama->ViewValue = $this->Nama->CurrentValue;
 		$this->Nama->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
@@ -1012,17 +1004,6 @@ $t01_penerimaan_head_view->ShowMessage();
 <input type="hidden" name="t" value="t01_penerimaan_head">
 <input type="hidden" name="modal" value="<?php echo intval($t01_penerimaan_head_view->IsModal) ?>">
 <table class="table table-striped table-bordered table-hover table-condensed ewViewTable">
-<?php if ($t01_penerimaan_head->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td class="col-sm-2"><span id="elh_t01_penerimaan_head_id"><?php echo $t01_penerimaan_head->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t01_penerimaan_head->id->CellAttributes() ?>>
-<span id="el_t01_penerimaan_head_id">
-<span<?php echo $t01_penerimaan_head->id->ViewAttributes() ?>>
-<?php echo $t01_penerimaan_head->id->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
 <?php if ($t01_penerimaan_head->Urutan->Visible) { // Urutan ?>
 	<tr id="r_Urutan">
 		<td class="col-sm-2"><span id="elh_t01_penerimaan_head_Urutan"><?php echo $t01_penerimaan_head->Urutan->FldCaption() ?></span></td>

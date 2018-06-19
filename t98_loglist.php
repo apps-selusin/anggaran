@@ -371,9 +371,6 @@ class ct98_log_list extends ct98_log {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->No->SetVisibility();
 		$this->Keterangan->SetVisibility();
 		$this->Keterangan2->SetVisibility();
@@ -952,7 +949,6 @@ class ct98_log_list extends ct98_log {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->No, $bCtrl); // No
 			$this->UpdateSort($this->Keterangan, $bCtrl); // Keterangan
 			$this->UpdateSort($this->Keterangan2, $bCtrl); // Keterangan2
@@ -970,7 +966,7 @@ class ct98_log_list extends ct98_log {
 				$sOrderBy = $this->getSqlOrderBy();
 				$this->setSessionOrderBy($sOrderBy);
 				$this->No->setSort("DESC");
-				$this->TanggalJam->setSort("ASC");
+				$this->TanggalJam->setSort("DESC");
 			}
 		}
 	}
@@ -992,7 +988,6 @@ class ct98_log_list extends ct98_log {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->No->setSort("");
 				$this->Keterangan->setSort("");
 				$this->Keterangan2->setSort("");
@@ -1570,11 +1565,6 @@ class ct98_log_list extends ct98_log {
 		$this->TanggalJam->ViewValue = ew_FormatDateTime($this->TanggalJam->ViewValue, 9);
 		$this->TanggalJam->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// No
 			$this->No->LinkCustomAttributes = "";
 			$this->No->HrefValue = "";
@@ -1900,15 +1890,6 @@ $t98_log_list->RenderListOptions();
 // Render list options (header, left)
 $t98_log_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t98_log->id->Visible) { // id ?>
-	<?php if ($t98_log->SortUrl($t98_log->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t98_log->id->HeaderCellClass() ?>"><div id="elh_t98_log_id" class="t98_log_id"><div class="ewTableHeaderCaption"><?php echo $t98_log->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t98_log->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t98_log->SortUrl($t98_log->id) ?>',2);"><div id="elh_t98_log_id" class="t98_log_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t98_log->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t98_log->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t98_log->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php if ($t98_log->No->Visible) { // No ?>
 	<?php if ($t98_log->SortUrl($t98_log->No) == "") { ?>
 		<th data-name="No" class="<?php echo $t98_log->No->HeaderCellClass() ?>"><div id="elh_t98_log_No" class="t98_log_No"><div class="ewTableHeaderCaption"><?php echo $t98_log->No->FldCaption() ?></div></div></th>
@@ -2019,14 +2000,6 @@ while ($t98_log_list->RecCnt < $t98_log_list->StopRec) {
 // Render list options (body, left)
 $t98_log_list->ListOptions->Render("body", "left", $t98_log_list->RowCnt);
 ?>
-	<?php if ($t98_log->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t98_log->id->CellAttributes() ?>>
-<span id="el<?php echo $t98_log_list->RowCnt ?>_t98_log_id" class="t98_log_id">
-<span<?php echo $t98_log->id->ViewAttributes() ?>>
-<?php echo $t98_log->id->ListViewValue() ?></span>
-</span>
-</td>
-	<?php } ?>
 	<?php if ($t98_log->No->Visible) { // No ?>
 		<td data-name="No"<?php echo $t98_log->No->CellAttributes() ?>>
 <span id="el<?php echo $t98_log_list->RowCnt ?>_t98_log_No" class="t98_log_No">

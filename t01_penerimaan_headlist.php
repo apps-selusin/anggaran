@@ -375,9 +375,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		if ($this->IsAdd() || $this->IsCopy() || $this->IsGridAdd())
-			$this->id->Visible = FALSE;
 		$this->Urutan->SetVisibility();
 		$this->Nomor->SetVisibility();
 		$this->Kode->SetVisibility();
@@ -980,7 +977,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = @$_GET["order"];
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->Urutan, $bCtrl); // Urutan
 			$this->UpdateSort($this->Nomor, $bCtrl); // Nomor
 			$this->UpdateSort($this->Kode, $bCtrl); // Kode
@@ -1014,7 +1010,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->Urutan->setSort("");
 				$this->Nomor->setSort("");
 				$this->Kode->setSort("");
@@ -1545,8 +1540,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->Urutan->FldIsDetailKey) {
 			$this->Urutan->setFormValue($objForm->GetValue("x_Urutan"));
 		}
@@ -1559,6 +1552,8 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 		if (!$this->Nama->FldIsDetailKey) {
 			$this->Nama->setFormValue($objForm->GetValue("x_Nama"));
 		}
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1728,11 +1723,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 		$this->Nama->ViewValue = $this->Nama->CurrentValue;
 		$this->Nama->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// Urutan
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
@@ -1754,9 +1744,7 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 			$this->Nama->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
 			// Urutan
-
 			$this->Urutan->EditAttrs["class"] = "form-control";
 			$this->Urutan->EditCustomAttributes = "";
 			$this->Urutan->EditValue = ew_HtmlEncode($this->Urutan->CurrentValue);
@@ -1781,12 +1769,8 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 			$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -1802,12 +1786,6 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 			$this->Nama->LinkCustomAttributes = "";
 			$this->Nama->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// Urutan
 			$this->Urutan->EditAttrs["class"] = "form-control";
@@ -1834,12 +1812,8 @@ class ct01_penerimaan_head_list extends ct01_penerimaan_head {
 			$this->Nama->PlaceHolder = ew_RemoveHtml($this->Nama->FldCaption());
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// Urutan
+
 			$this->Urutan->LinkCustomAttributes = "";
 			$this->Urutan->HrefValue = "";
 
@@ -2366,15 +2340,6 @@ $t01_penerimaan_head_list->RenderListOptions();
 // Render list options (header, left)
 $t01_penerimaan_head_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t01_penerimaan_head->id->Visible) { // id ?>
-	<?php if ($t01_penerimaan_head->SortUrl($t01_penerimaan_head->id) == "") { ?>
-		<th data-name="id" class="<?php echo $t01_penerimaan_head->id->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_head_id" class="t01_penerimaan_head_id"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan_head->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id" class="<?php echo $t01_penerimaan_head->id->HeaderCellClass() ?>"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t01_penerimaan_head->SortUrl($t01_penerimaan_head->id) ?>',2);"><div id="elh_t01_penerimaan_head_id" class="t01_penerimaan_head_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t01_penerimaan_head->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t01_penerimaan_head->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t01_penerimaan_head->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-		</div></div></th>
-	<?php } ?>
-<?php } ?>
 <?php if ($t01_penerimaan_head->Urutan->Visible) { // Urutan ?>
 	<?php if ($t01_penerimaan_head->SortUrl($t01_penerimaan_head->Urutan) == "") { ?>
 		<th data-name="Urutan" class="<?php echo $t01_penerimaan_head->Urutan->HeaderCellClass() ?>"><div id="elh_t01_penerimaan_head_Urutan" class="t01_penerimaan_head_Urutan"><div class="ewTableHeaderCaption"><?php echo $t01_penerimaan_head->Urutan->FldCaption() ?></div></div></th>
@@ -2526,37 +2491,17 @@ while ($t01_penerimaan_head_list->RecCnt < $t01_penerimaan_head_list->StopRec) {
 // Render list options (body, left)
 $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_head_list->RowCnt);
 ?>
-	<?php if ($t01_penerimaan_head->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t01_penerimaan_head->id->CellAttributes() ?>>
-<?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->OldValue) ?>">
-<?php } ?>
-<?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_id" class="form-group t01_penerimaan_head_id">
-<span<?php echo $t01_penerimaan_head->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t01_penerimaan_head->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->CurrentValue) ?>">
-<?php } ?>
-<?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_id" class="t01_penerimaan_head_id">
-<span<?php echo $t01_penerimaan_head->id->ViewAttributes() ?>>
-<?php echo $t01_penerimaan_head->id->ListViewValue() ?></span>
-</span>
-<?php } ?>
-</td>
-	<?php } ?>
 	<?php if ($t01_penerimaan_head->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan"<?php echo $t01_penerimaan_head->Urutan->CellAttributes() ?>>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Urutan" class="form-group t01_penerimaan_head_Urutan">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Urutan" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->OldValue) ?>">
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Urutan" class="form-group t01_penerimaan_head_Urutan">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2567,17 +2512,24 @@ $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_h
 <?php } ?>
 </td>
 	<?php } ?>
+<?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->CurrentValue) ?>">
+<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_EDIT || $t01_penerimaan_head->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t01_penerimaan_head->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor"<?php echo $t01_penerimaan_head->Nomor->CellAttributes() ?>>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Nomor" class="form-group t01_penerimaan_head_Nomor">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Nomor" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->OldValue) ?>">
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Nomor" class="form-group t01_penerimaan_head_Nomor">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2592,13 +2544,13 @@ $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_h
 		<td data-name="Kode"<?php echo $t01_penerimaan_head->Kode->CellAttributes() ?>>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Kode" class="form-group t01_penerimaan_head_Kode">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Kode" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->OldValue) ?>">
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t01_penerimaan_head_list->RowCnt ?>_t01_penerimaan_head_Kode" class="form-group t01_penerimaan_head_Kode">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t01_penerimaan_head->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -2672,15 +2624,10 @@ ft01_penerimaan_headlist.UpdateOpts(<?php echo $t01_penerimaan_head_list->RowInd
 // Render list options (body, left)
 $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_head_list->RowIndex);
 ?>
-	<?php if ($t01_penerimaan_head->id->Visible) { // id ?>
-		<td data-name="id">
-<input type="hidden" data-table="t01_penerimaan_head" data-field="x_id" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->id->OldValue) ?>">
-</td>
-	<?php } ?>
 	<?php if ($t01_penerimaan_head->Urutan->Visible) { // Urutan ?>
 		<td data-name="Urutan">
 <span id="el$rowindex$_t01_penerimaan_head_Urutan" class="form-group t01_penerimaan_head_Urutan">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Urutan" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" size="2" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Urutan->EditValue ?>"<?php echo $t01_penerimaan_head->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Urutan" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Urutan->OldValue) ?>">
 </td>
@@ -2688,7 +2635,7 @@ $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_h
 	<?php if ($t01_penerimaan_head->Nomor->Visible) { // Nomor ?>
 		<td data-name="Nomor">
 <span id="el$rowindex$_t01_penerimaan_head_Nomor" class="form-group t01_penerimaan_head_Nomor">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Nomor" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" size="2" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Nomor->EditValue ?>"<?php echo $t01_penerimaan_head->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Nomor" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Nomor->OldValue) ?>">
 </td>
@@ -2696,7 +2643,7 @@ $t01_penerimaan_head_list->ListOptions->Render("body", "left", $t01_penerimaan_h
 	<?php if ($t01_penerimaan_head->Kode->Visible) { // Kode ?>
 		<td data-name="Kode">
 <span id="el$rowindex$_t01_penerimaan_head_Kode" class="form-group t01_penerimaan_head_Kode">
-<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
+<input type="text" data-table="t01_penerimaan_head" data-field="x_Kode" name="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="x<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->getPlaceHolder()) ?>" value="<?php echo $t01_penerimaan_head->Kode->EditValue ?>"<?php echo $t01_penerimaan_head->Kode->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t01_penerimaan_head" data-field="x_Kode" name="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" id="o<?php echo $t01_penerimaan_head_list->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t01_penerimaan_head->Kode->OldValue) ?>">
 </td>
