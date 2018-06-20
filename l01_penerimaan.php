@@ -122,7 +122,10 @@ while (!$rs->EOF) {
 	//$a[12][$i] = $rs->fields["p_absen"] + $rs->fields["p_aspen"] + $rs->fields["p_bpjs"];
 	$a[13][$i] = $rs->fields["total"];*/
 	
-	$mnama_file = "KTR HRN ".tgl_indo_header($rs->fields["end"]);
+	$mkodehead = $rs->fields["kode"];
+	$mnamahead = $rs->fields["nama"];
+	
+	// $mnama_file = "KTR HRN ".tgl_indo_header($rs->fields["end"]);
 	
 	$i++;
 	if ($i % 3 == 0) {
