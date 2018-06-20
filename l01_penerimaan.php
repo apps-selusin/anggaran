@@ -336,7 +336,7 @@ $objWriter->save('php://output');*/
 
 $objWriter = PHPExcel_IOFactory::createWriter($excelku, 'Excel2007');
 $mnama_file = "xx"; $objWriter->save($mnama_file.'.xlsx');
-header("Location: C:\\".$mnama_file.".xlsx");
+header("Location: ".$mnama_file.".xlsx");
 
 exit;
 
