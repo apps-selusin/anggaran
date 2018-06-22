@@ -119,6 +119,7 @@ $query = "select * from t01_penerimaan_head order by urutan";
 $rs = $conn->Execute($query);
 
 $baris++;
+$mgtotal = 0;
 
 while (!$rs->EOF) {
 	
@@ -155,50 +156,37 @@ while (!$rs->EOF) {
 	}
 	
 	if ($mjml_rec == 0) { // tidak ada data di tabel detail
-		
 	}
 	else {
-		
 		if ($mjml_rec == 1) { // detail hanya 1 record
-		
 			$query = "select * from t02_penerimaan_detail where kode = '".$mkodehead."' order by urutan";
 			$rsdtl = $conn->Execute($query);
-			
 			$SI->setCellValue("E".$baris, $rsdtl->fields["Nominal"]);
 			$SI->setCellValue("F".$baris, $rsdtl->fields["Banyaknya"]);
 			$SI->setCellValue("G".$baris, $rsdtl->fields["Satuan"]);
 			$SI->setCellValue("H".$baris, $rsdtl->fields["Jumlah"]);
-			
+			$SI->setCellValue("I".$baris, $rsdtl->fields["Jumlah"]);
+			$mgtotal += $rsdtl->fields["Jumlah"];
 			$baris++;
-			
 		}
 		else {
-			
 			$query = "select * from t02_penerimaan_detail where kode = '".$mkodehead."' order by urutan";
 			$rsdtl = $conn->Execute($query);
-			
 			$baris++;
-			
+			$mtotal = 0;
 			while (!$rsdtl->EOF) {
-				
 				$SI->setCellValue("D".$baris, $rsdtl->fields["Pos"]);
 				$SI->setCellValue("E".$baris, $rsdtl->fields["Nominal"]);
 				$SI->setCellValue("F".$baris, $rsdtl->fields["Banyaknya"]);
 				$SI->setCellValue("G".$baris, $rsdtl->fields["Satuan"]);
 				$SI->setCellValue("H".$baris, $rsdtl->fields["Jumlah"]);
-				
+				$mtotal += $rsdtl->fields["Jumlah"];
+				$mgtotal += $rsdtl->fields["Jumlah"];
 				$baris++;
-				
 				$rsdtl->MoveNext();
 			}
-			
-			// $SI->getcell("B".$baris)->setValueExplicit($mnomorhead, PHPExcel_Cell_DataType::TYPE_STRING);
-			// $SI->setCellValue("C".$baris, $mnamahead);
-			
+			$SI->setCellValue("I".$baris, $mtotal);
 			$baris++;
-			// $rs->MoveNext();
-			
-			// $mnama_file = "KTR HRN ".tgl_indo_header($rs->fields["end"]);
 			
 			$i++;
 			
@@ -400,11 +388,11 @@ while (!$rs->EOF) {
 	
 }
 
+$SI->setCellValue("I".$baris, $mgtotal);
 $rs->Close();
 
 //Memberi nama sheet
 $excelku->getActiveSheet()->setTitle('Laporan Penerimaan');
-
 $excelku->setActiveSheetIndex(0);
 
 /*// untuk excel 2007 atau yang berekstensi .xlsx
