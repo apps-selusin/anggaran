@@ -52,6 +52,7 @@ $excelku->getActiveSheet()->setShowGridlines(false);
 $excelku->getActiveSheet()->getDefaultRowDimension()->setRowHeight(15);
 $excelku->getActiveSheet()->getColumnDimension('C')->setWidth( 3);
 $excelku->getActiveSheet()->getColumnDimension('D')->setWidth(25);
+$excelku->getActiveSheet()->getColumnDimension('E')->setWidth(12);
 
 // Set lebar kolom
 /*

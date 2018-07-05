@@ -1369,18 +1369,25 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 
 		// Nominal
 		$this->Nominal->ViewValue = $this->Nominal->CurrentValue;
+		$this->Nominal->ViewValue = ew_FormatNumber($this->Nominal->ViewValue, 0, -2, -2, -2);
+		$this->Nominal->CellCssStyle .= "text-align: right;";
 		$this->Nominal->ViewCustomAttributes = "";
 
 		// Banyaknya
 		$this->Banyaknya->ViewValue = $this->Banyaknya->CurrentValue;
+		$this->Banyaknya->ViewValue = ew_FormatNumber($this->Banyaknya->ViewValue, 0, -2, -2, -2);
+		$this->Banyaknya->CellCssStyle .= "text-align: right;";
 		$this->Banyaknya->ViewCustomAttributes = "";
 
 		// Satuan
 		$this->Satuan->ViewValue = $this->Satuan->CurrentValue;
+		$this->Satuan->CellCssStyle .= "text-align: right;";
 		$this->Satuan->ViewCustomAttributes = "";
 
 		// Jumlah
 		$this->Jumlah->ViewValue = $this->Jumlah->CurrentValue;
+		$this->Jumlah->ViewValue = ew_FormatNumber($this->Jumlah->ViewValue, 0, -2, -2, -2);
+		$this->Jumlah->CellCssStyle .= "text-align: right;";
 		$this->Jumlah->ViewCustomAttributes = "";
 
 			// Urutan
@@ -1461,7 +1468,7 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->CurrentValue);
 			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
 			if (strval($this->Nominal->EditValue) <> "" && is_numeric($this->Nominal->EditValue)) {
-			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -1, -2, 0);
+			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -2, -2, -2);
 			$this->Nominal->OldValue = $this->Nominal->EditValue;
 			}
 
@@ -1483,7 +1490,7 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->CurrentValue);
 			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) {
-			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
+			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -2, -2, -2);
 			$this->Jumlah->OldValue = $this->Jumlah->EditValue;
 			}
 
@@ -1559,7 +1566,7 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Nominal->EditValue = ew_HtmlEncode($this->Nominal->CurrentValue);
 			$this->Nominal->PlaceHolder = ew_RemoveHtml($this->Nominal->FldCaption());
 			if (strval($this->Nominal->EditValue) <> "" && is_numeric($this->Nominal->EditValue)) {
-			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -1, -2, 0);
+			$this->Nominal->EditValue = ew_FormatNumber($this->Nominal->EditValue, -2, -2, -2, -2);
 			$this->Nominal->OldValue = $this->Nominal->EditValue;
 			}
 
@@ -1581,7 +1588,7 @@ class ct02_penerimaan_detail_grid extends ct02_penerimaan_detail {
 			$this->Jumlah->EditValue = ew_HtmlEncode($this->Jumlah->CurrentValue);
 			$this->Jumlah->PlaceHolder = ew_RemoveHtml($this->Jumlah->FldCaption());
 			if (strval($this->Jumlah->EditValue) <> "" && is_numeric($this->Jumlah->EditValue)) {
-			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -1, -2, 0);
+			$this->Jumlah->EditValue = ew_FormatNumber($this->Jumlah->EditValue, -2, -2, -2, -2);
 			$this->Jumlah->OldValue = $this->Jumlah->EditValue;
 			}
 

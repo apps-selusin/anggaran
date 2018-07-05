@@ -346,13 +346,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Urutan"<?php echo $t02_penerimaan_detail->Urutan->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Urutan" class="form-group t02_penerimaan_detail_Urutan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Urutan" class="form-group t02_penerimaan_detail_Urutan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -381,13 +381,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Nomor"<?php echo $t02_penerimaan_detail->Nomor->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Nomor" class="form-group t02_penerimaan_detail_Nomor">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Nomor" class="form-group t02_penerimaan_detail_Nomor">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -416,7 +416,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 <input type="hidden" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Kode" class="form-group t02_penerimaan_detail_Kode">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Kode" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->OldValue) ?>">
@@ -430,7 +430,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 <input type="hidden" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Kode" class="form-group t02_penerimaan_detail_Kode">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php } ?>
@@ -481,13 +481,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Nominal"<?php echo $t02_penerimaan_detail->Nominal->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Nominal" class="form-group t02_penerimaan_detail_Nominal">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Nominal" class="form-group t02_penerimaan_detail_Nominal">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -509,13 +509,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Banyaknya"<?php echo $t02_penerimaan_detail->Banyaknya->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Banyaknya" class="form-group t02_penerimaan_detail_Banyaknya">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="2" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Banyaknya" class="form-group t02_penerimaan_detail_Banyaknya">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="2" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -537,13 +537,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Satuan"<?php echo $t02_penerimaan_detail->Satuan->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Satuan" class="form-group t02_penerimaan_detail_Satuan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Satuan" class="form-group t02_penerimaan_detail_Satuan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -565,13 +565,13 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Jumlah"<?php echo $t02_penerimaan_detail->Jumlah->CellAttributes() ?>>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Jumlah" class="form-group t02_penerimaan_detail_Jumlah">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="o<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->OldValue) ?>">
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t02_penerimaan_detail_grid->RowCnt ?>_t02_penerimaan_detail_Jumlah" class="form-group t02_penerimaan_detail_Jumlah">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t02_penerimaan_detail->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -635,7 +635,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Urutan">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Urutan" class="form-group t02_penerimaan_detail_Urutan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Urutan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Urutan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Urutan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Urutan->EditValue ?>"<?php echo $t02_penerimaan_detail->Urutan->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Urutan" class="form-group t02_penerimaan_detail_Urutan">
@@ -651,7 +651,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Nomor">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Nomor" class="form-group t02_penerimaan_detail_Nomor">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="30" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nomor" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nomor" size="1" maxlength="25" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nomor->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nomor->EditValue ?>"<?php echo $t02_penerimaan_detail->Nomor->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Nomor" class="form-group t02_penerimaan_detail_Nomor">
@@ -674,7 +674,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 <input type="hidden" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" value="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->CurrentValue) ?>">
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Kode" class="form-group t02_penerimaan_detail_Kode">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="30" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Kode" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Kode" size="5" maxlength="15" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Kode->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Kode->EditValue ?>"<?php echo $t02_penerimaan_detail->Kode->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php } else { ?>
@@ -707,7 +707,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Nominal">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Nominal" class="form-group t02_penerimaan_detail_Nominal">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Nominal" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Nominal" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Nominal->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Nominal->EditValue ?>"<?php echo $t02_penerimaan_detail->Nominal->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Nominal" class="form-group t02_penerimaan_detail_Nominal">
@@ -723,7 +723,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Banyaknya">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Banyaknya" class="form-group t02_penerimaan_detail_Banyaknya">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Banyaknya" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Banyaknya" size="2" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Banyaknya->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Banyaknya->EditValue ?>"<?php echo $t02_penerimaan_detail->Banyaknya->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Banyaknya" class="form-group t02_penerimaan_detail_Banyaknya">
@@ -739,7 +739,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Satuan">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Satuan" class="form-group t02_penerimaan_detail_Satuan">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Satuan" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Satuan" size="1" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Satuan->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Satuan->EditValue ?>"<?php echo $t02_penerimaan_detail->Satuan->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Satuan" class="form-group t02_penerimaan_detail_Satuan">
@@ -755,7 +755,7 @@ $t02_penerimaan_detail_grid->ListOptions->Render("body", "left", $t02_penerimaan
 		<td data-name="Jumlah">
 <?php if ($t02_penerimaan_detail->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Jumlah" class="form-group t02_penerimaan_detail_Jumlah">
-<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="30" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
+<input type="text" data-table="t02_penerimaan_detail" data-field="x_Jumlah" name="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" id="x<?php echo $t02_penerimaan_detail_grid->RowIndex ?>_Jumlah" size="10" placeholder="<?php echo ew_HtmlEncode($t02_penerimaan_detail->Jumlah->getPlaceHolder()) ?>" value="<?php echo $t02_penerimaan_detail->Jumlah->EditValue ?>"<?php echo $t02_penerimaan_detail->Jumlah->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t02_penerimaan_detail_Jumlah" class="form-group t02_penerimaan_detail_Jumlah">

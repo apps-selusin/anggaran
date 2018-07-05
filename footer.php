@@ -90,9 +90,9 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt14.js");
 
 // Write your global startup script here
 // document.write("page loaded");
-// Table 't02_pengeluaran' Field 'Nominal'
+// Table 't02_penerimaan_detail' Field 'Nominal'
 
-$('[data-table=t02_pengeluaran][data-field=x_Nominal]').on(
+$('[data-table=t02_penerimaan_detail][data-field=x_Nominal]').on(
 	{ // keys = event types, values = handler functions
 		"change keyup": function(e) {
 			var $row = $(this).fields();
@@ -106,8 +106,38 @@ $('[data-table=t02_pengeluaran][data-field=x_Nominal]').on(
 	}
 );
 
-// Table 't02_pengeluaran' Field 'Banyaknya'
-$('[data-table=t02_pengeluaran][data-field=x_Banyaknya]').on(
+// Table 't02_penerimaan_detail' Field 'Banyaknya'
+$('[data-table=t02_penerimaan_detail][data-field=x_Banyaknya]').on(
+	{ // keys = event types, values = handler functions
+		"change keyup": function(e) {
+			var $row = $(this).fields();
+			var banyaknya = parseFloat($row["Banyaknya"].val());
+			var nominal_asli = $row["Nominal"].val();
+			var nominal_clean = nominal_asli.replace(/,/g, '');
+			var nominal = parseFloat(nominal_clean);
+			var jumlah = banyaknya * nominal;
+			$row["Jumlah"].val(jumlah);
+		}
+	}
+);
+
+// Table 't04_pengeluaran_detail' Field 'Nominal'
+$('[data-table=t04_pengeluaran_detail][data-field=x_Nominal]').on(
+	{ // keys = event types, values = handler functions
+		"change keyup": function(e) {
+			var $row = $(this).fields();
+			var banyaknya = parseFloat($row["Banyaknya"].val());
+			var nominal_asli = $row["Nominal"].val();
+			var nominal_clean = nominal_asli.replace(/,/g, '');
+			var nominal = parseFloat(nominal_clean);
+			var jumlah = banyaknya * nominal;
+			$row["Jumlah"].val(jumlah);
+		}
+	}
+);
+
+// Table 't04_pengeluaran_detail' Field 'Banyaknya'
+$('[data-table=t04_pengeluaran_detail][data-field=x_Banyaknya]').on(
 	{ // keys = event types, values = handler functions
 		"change keyup": function(e) {
 			var $row = $(this).fields();
