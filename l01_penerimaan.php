@@ -52,7 +52,9 @@ $excelku->getActiveSheet()->setShowGridlines(false);
 $excelku->getActiveSheet()->getDefaultRowDimension()->setRowHeight(15);
 $excelku->getActiveSheet()->getColumnDimension('C')->setWidth( 3);
 $excelku->getActiveSheet()->getColumnDimension('D')->setWidth(25);
-$excelku->getActiveSheet()->getColumnDimension('E')->setWidth(12);
+$excelku->getActiveSheet()->getColumnDimension('E')->setWidth(15);
+$excelku->getActiveSheet()->getColumnDimension('H')->setWidth(18);
+$excelku->getActiveSheet()->getColumnDimension('I')->setWidth(18);
 
 // Set lebar kolom
 /*
@@ -106,13 +108,14 @@ $i      = 0;
 
 /* header */
 // $baris = 2;
-$SI->setCellValue("B".$baris, "NO.");
-$excelku->getActiveSheet()->mergeCells('C'.$baris.':D'.$baris); $SI->setCellValue("C".$baris, "POS PENERIMAAN");
-$SI->setCellValue("E".$baris, "NOMINAL");
-$SI->setCellValue("F".$baris, "JUMLAH SISWA");
-$SI->setCellValue("G".$baris, "BULAN");
-$SI->setCellValue("H".$baris, "JUMLAH");
-$SI->setCellValue("I".$baris, "TOTAL");
+
+$SI->setCellValue("B".$baris, "NO."); $excelku->getActiveSheet()->getStyle('B'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$excelku->getActiveSheet()->mergeCells('C'.$baris.':D'.$baris); $SI->setCellValue("C".$baris, "POS PENERIMAAN"); $excelku->getActiveSheet()->getStyle('C'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("E".$baris, "NOMINAL"); $excelku->getActiveSheet()->getStyle('E'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("F".$baris, "JUMLAH SISWA"); $excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("G".$baris, "BULAN"); $excelku->getActiveSheet()->getStyle('G'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("H".$baris, "JUMLAH"); $excelku->getActiveSheet()->getStyle('H'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("I".$baris, "TOTAL"); $excelku->getActiveSheet()->getStyle('I'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 /* format kolom */
 
@@ -162,10 +165,13 @@ while (!$rs->EOF) {
 		if ($mjml_rec == 1) { // detail hanya 1 record
 			$query = "select * from t02_penerimaan_detail where kode = '".$mkodehead."' order by urutan";
 			$rsdtl = $conn->Execute($query);
+			$excelku->getActiveSheet()->getStyle('E'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 			$SI->setCellValue("E".$baris, $rsdtl->fields["Nominal"]);
 			$SI->setCellValue("F".$baris, $rsdtl->fields["Banyaknya"]);
 			$SI->setCellValue("G".$baris, $rsdtl->fields["Satuan"]);
+			$excelku->getActiveSheet()->getStyle('H'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 			$SI->setCellValue("H".$baris, $rsdtl->fields["Jumlah"]);
+			$excelku->getActiveSheet()->getStyle('I'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 			$SI->setCellValue("I".$baris, $rsdtl->fields["Jumlah"]);
 			$mgtotal += $rsdtl->fields["Jumlah"];
 			$baris++;
@@ -177,15 +183,18 @@ while (!$rs->EOF) {
 			$mtotal = 0;
 			while (!$rsdtl->EOF) {
 				$SI->setCellValue("D".$baris, $rsdtl->fields["Pos"]);
+				$excelku->getActiveSheet()->getStyle('E'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 				$SI->setCellValue("E".$baris, $rsdtl->fields["Nominal"]);
 				$SI->setCellValue("F".$baris, $rsdtl->fields["Banyaknya"]);
 				$SI->setCellValue("G".$baris, $rsdtl->fields["Satuan"]);
+				$excelku->getActiveSheet()->getStyle('H'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 				$SI->setCellValue("H".$baris, $rsdtl->fields["Jumlah"]);
 				$mtotal += $rsdtl->fields["Jumlah"];
 				$mgtotal += $rsdtl->fields["Jumlah"];
 				$baris++;
 				$rsdtl->MoveNext();
 			}
+			$excelku->getActiveSheet()->getStyle('I'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 			$SI->setCellValue("I".$baris, $mtotal);
 			$baris++;
 			
@@ -388,7 +397,7 @@ while (!$rs->EOF) {
 	$rs->MoveNext();
 	
 }
-
+$excelku->getActiveSheet()->getStyle('I'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 $SI->setCellValue("I".$baris, $mgtotal);
 $rs->Close();
 
