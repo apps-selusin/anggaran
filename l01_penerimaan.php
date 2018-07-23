@@ -112,7 +112,12 @@ $i      = 0;
 $SI->setCellValue("B".$baris, "NO."); $excelku->getActiveSheet()->getStyle('B'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 $excelku->getActiveSheet()->mergeCells('C'.$baris.':D'.$baris); $SI->setCellValue("C".$baris, "POS PENERIMAAN"); $excelku->getActiveSheet()->getStyle('C'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 $SI->setCellValue("E".$baris, "NOMINAL"); $excelku->getActiveSheet()->getStyle('E'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$SI->setCellValue("F".$baris, "JUMLAH SISWA"); $excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+$SI->setCellValue("F".$baris, "JUMLAH\nSISWA");
+$excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$excelku->getActiveSheet()->getRowDimension($baris)->setRowHeight(30);
+$excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setWrapText(true);
+
 $SI->setCellValue("G".$baris, "BULAN"); $excelku->getActiveSheet()->getStyle('G'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 $SI->setCellValue("H".$baris, "JUMLAH"); $excelku->getActiveSheet()->getStyle('H'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 $SI->setCellValue("I".$baris, "TOTAL"); $excelku->getActiveSheet()->getStyle('I'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
