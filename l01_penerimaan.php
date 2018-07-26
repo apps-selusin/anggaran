@@ -103,24 +103,39 @@ $outline = array(
 	),
 );
 
+$kotak = array(
+	'borders' => array(
+		'outline' => array(
+			'style' => PHPExcel_Style_Border::BORDER_THIN,
+			//'color' => array('argb' => 'FFFF0000'),
+		),
+	),
+);
+
+$kotak2 = array(
+	'borders' => array(
+		'inline' => array(
+			'style' => PHPExcel_Style_Border::BORDER_THIN,
+			//'color' => array('argb' => 'FFFF0000'),
+		),
+	),
+);
+
 $baris  = 3; //Ini untuk dimulai baris datanya, karena di baris 3 itu digunakan untuk header tabel
 $i      = 0;
 
 /* header */
 // $baris = 2;
 
-$SI->setCellValue("B".$baris, "NO."); $excelku->getActiveSheet()->getStyle('B'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$excelku->getActiveSheet()->mergeCells('C'.$baris.':D'.$baris); $SI->setCellValue("C".$baris, "POS PENERIMAAN"); $excelku->getActiveSheet()->getStyle('C'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$SI->setCellValue("E".$baris, "NOMINAL"); $excelku->getActiveSheet()->getStyle('E'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-
-$SI->setCellValue("F".$baris, "JUMLAH\nSISWA");
-$excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("B".$baris, "NO."); $excelku->getActiveSheet()->getStyle('B'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('B'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$excelku->getActiveSheet()->mergeCells('C'.$baris.':D'.$baris); $SI->setCellValue("C".$baris, "POS PENERIMAAN"); $excelku->getActiveSheet()->getStyle('C'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('C'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->setCellValue("E".$baris, "NOMINAL"); $excelku->getActiveSheet()->getStyle('E'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('E'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->setCellValue("F".$baris, "JUMLAH\nSISWA"); $excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
 $excelku->getActiveSheet()->getRowDimension($baris)->setRowHeight(30);
 $excelku->getActiveSheet()->getStyle('F'.$baris)->getAlignment()->setWrapText(true);
-
-$SI->setCellValue("G".$baris, "BULAN"); $excelku->getActiveSheet()->getStyle('G'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$SI->setCellValue("H".$baris, "JUMLAH"); $excelku->getActiveSheet()->getStyle('H'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$SI->setCellValue("I".$baris, "TOTAL"); $excelku->getActiveSheet()->getStyle('I'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+$SI->setCellValue("G".$baris, "BULAN"); $excelku->getActiveSheet()->getStyle('G'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('G'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->setCellValue("H".$baris, "JUMLAH"); $excelku->getActiveSheet()->getStyle('H'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('H'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$SI->setCellValue("I".$baris, "TOTAL"); $excelku->getActiveSheet()->getStyle('I'.$baris)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER); $excelku->getActiveSheet()->getStyle('I'.$baris)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
 
 /* format kolom */
 
@@ -404,6 +419,10 @@ while (!$rs->EOF) {
 }
 $excelku->getActiveSheet()->getStyle('I'.$baris)->getNumberFormat()->setFormatCode('_("Rp"* #,##0_);_("Rp"* \(#,##0\);_("Rp"* "-"??_);_(@_)');
 $SI->setCellValue("I".$baris, $mgtotal);
+
+// $excelku->getActiveSheet()->getStyle('A3:I'.$baris)->getBorders()->getAllBorders()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+$excelku->getActiveSheet()->getStyle("b3:i".$baris)->applyFromArray($kotak);
+$excelku->getActiveSheet()->getStyle("b3:i".$baris)->applyFromArray($kotak2);
 $rs->Close();
 
 //Memberi nama sheet
